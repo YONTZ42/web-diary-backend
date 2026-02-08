@@ -8,6 +8,7 @@ from botocore.signers import CloudFrontSigner
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
+from typing import Optional
 
 def _rsa_signer(message: bytes) -> bytes:
     if settings.CLOUDFRONT_PRIVATE_KEY is None:
@@ -21,7 +22,7 @@ def _rsa_signer(message: bytes) -> bytes:
             private_key = serialization.load_pem_private_key(f.read(), password=None)
     return private_key.sign(message, padding.PKCS1v15(), hashes.SHA1())
 
-def generate_cf_signed_url(s3_key: str, expires_seconds: int | None = None) -> str:
+def generate_cf_signed_url(s3_key: str, expires_seconds: Optional[int] = None) -> str:
     expires = expires_seconds or settings.CLOUDFRONT_URL_EXPIRES_SECONDS
     url = f"https://{settings.CLOUDFRONT_DOMAIN}/{s3_key.lstrip('/')}"
     signer = CloudFrontSigner(settings.CLOUDFRONT_PUBLIC_KEY_ID, _rsa_signer)

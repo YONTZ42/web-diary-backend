@@ -21,16 +21,19 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+DEBUG = True
+DEBUG_ENV = True
 # 環境変数の読み込み (ローカル環境のみ)
-#env = environ.Env()
-##environ.Env.read_env(BASE_DIR / ".env.local")
-
-# 1. 環境変数の設定
-env = environ.Env(
-    DEBUG=(bool, False),  # デフォルトは本番(False)
-    ALLOWED_HOSTS=(list, []),
-    DATABASE_URL=(str, f'sqlite:///{os.path.join(Path(__file__).resolve().parent.parent, "db.sqlite3")}'),
-)
+if DEBUG:
+    env = environ.Env()
+    environ.Env.read_env(BASE_DIR / ".env.local")
+else:
+    # 1. 環境変数の設定
+    env = environ.Env(
+        DEBUG=(bool, False),  # デフォルトは本番(False)
+        ALLOWED_HOSTS=(list, []),
+        DATABASE_URL=(str, f'sqlite:///{os.path.join(Path(__file__).resolve().parent.parent, "db.sqlite3")}'),
+    )
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -38,7 +41,7 @@ env = environ.Env(
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+#DEBUG = env('DEBUG')
 
 # App Runnerのデフォルトドメインや自分のドメインを環境変数から読み込む
 # ALLOWED_HOSTS = ['*'] は本番ではNG
