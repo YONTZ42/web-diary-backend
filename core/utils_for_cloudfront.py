@@ -10,8 +10,15 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 
 def _rsa_signer(message: bytes) -> bytes:
-    with open(settings.CLOUDFRONT_PRIVATE_KEY_PATH, "rb") as f:
-        private_key = serialization.load_pem_private_key(f.read(), password=None)
+    if settings.CLOUDFRONT_PRIVATE_KEY:
+        private_key_pem = settings.CLOUDFRONT_PRIVATE_KEY.encode('utf-8')
+        private_key = serialization.load_pem_private_key(
+            private_key_pem,
+            password=None
+        )
+    else:
+        with open(settings.CLOUDFRONT_PRIVATE_KEY_PATH, "rb") as f:
+            private_key = serialization.load_pem_private_key(f.read(), password=None)
     return private_key.sign(message, padding.PKCS1v15(), hashes.SHA1())
 
 def generate_cf_signed_url(s3_key: str, expires_seconds: int | None = None) -> str:

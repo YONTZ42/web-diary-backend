@@ -193,6 +193,7 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'  # 最新の署名形式を使用
 #CloudFront Settings
 CLOUDFRONT_DOMAIN = env("CLOUDFRONT_DOMAIN")  # 例: dxxxxxxx.cloudfront.net
 CLOUDFRONT_PUBLIC_KEY_ID = env("CLOUDFRONT_PUBLIC_KEY_ID")  # Public key ID
+CLOUDFRONT_PRIVATE_KEY = env("CLOUDFRONT_PRIVATE_KEY").replace('\\n', '\n')  # PEM形式の秘密鍵（改行コードを復元）
 CLOUDFRONT_PRIVATE_KEY_PATH = env("CLOUDFRONT_PRIVATE_KEY_PATH")  # pemへのパス
 CLOUDFRONT_URL_EXPIRES_SECONDS = int(env("CLOUDFRONT_URL_EXPIRES_SECONDS", default=3600))  # 署名付きURLの有効期限（秒）
 
