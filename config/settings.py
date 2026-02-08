@@ -22,16 +22,16 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 環境変数の読み込み (ローカル環境のみ)
-env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env.local")
+#env = environ.Env()
+#environ.Env.read_env(BASE_DIR / ".env.local")
 
 # 1. 環境変数の設定
-"""
+
 env = environ.Env(
     DEBUG=(bool, False),  # デフォルトは本番(False)
     ALLOWED_HOSTS=(list, []),
     DATABASE_URL=(str, f'sqlite:///{os.path.join(Path(__file__).resolve().parent.parent, "db.sqlite3")}'),
-)"""
+)
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
