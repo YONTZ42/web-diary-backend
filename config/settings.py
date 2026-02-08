@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # 環境変数の読み込み (ローカル環境のみ)
 #env = environ.Env()
-#environ.Env.read_env(BASE_DIR / ".env.local")
+##environ.Env.read_env(BASE_DIR / ".env.local")
 
 # 1. 環境変数の設定
 env = environ.Env(
