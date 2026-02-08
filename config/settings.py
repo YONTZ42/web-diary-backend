@@ -26,7 +26,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #environ.Env.read_env(BASE_DIR / ".env.local")
 
 # 1. 環境変数の設定
-
 env = environ.Env(
     DEBUG=(bool, False),  # デフォルトは本番(False)
     ALLOWED_HOSTS=(list, []),
