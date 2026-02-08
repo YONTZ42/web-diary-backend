@@ -13,8 +13,10 @@ djangorestframework==3.16.1
 djangorestframework-camel-case==1.4.2
 djangorestframework_simplejwt==5.5.1
 environ==1.0
+gunicorn==23.0.0
 idna==3.11
 jmespath==1.1.0
+packaging==26.0
 pillow==11.3.0
 psycopg2-binary==2.9.11
 pycparser==2.23
