@@ -10,7 +10,7 @@ from cryptography.hazmat.primitives.asymmetric import padding
 from cryptography.hazmat.primitives import hashes
 
 def _rsa_signer(message: bytes) -> bytes:
-    if settings.CLOUDFRONT_PRIVATE_KEY:
+    if settings.CLOUDFRONT_PRIVATE_KEY is None:
         private_key_pem = settings.CLOUDFRONT_PRIVATE_KEY.encode('utf-8')
         private_key = serialization.load_pem_private_key(
             private_key_pem,
