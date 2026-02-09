@@ -10,6 +10,10 @@ ENV PYTHONUNBUFFERED 1
 
 # 依存関係をコピーしてインストール
 COPY requirements.txt /app/
+# 静的ファイルを配置するディレクトリを先に作っておく（権限エラー回避）
+RUN mkdir -p /app/staticfiles
+# 静的ファイルを集める（--noinputで対話をスキップ）
+RUN python manage.py collectstatic --noinput
 RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 # ローカルのプロジェクトファイルをすべてコピー
