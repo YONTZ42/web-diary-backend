@@ -22,7 +22,6 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 DEBUG = False
-
 # 環境変数の読み込み (ローカル環境のみ)
 if DEBUG:
     env = environ.Env()
