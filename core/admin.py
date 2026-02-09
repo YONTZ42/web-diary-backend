@@ -5,26 +5,52 @@ from django.utils.safestring import mark_safe
 from django.core.files.storage import default_storage
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import Schedule, User, Sticker, Page, Notebook, NotebookPage, UploadSession, FriendRequest, Friendship
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 
-# ---------------------------------------------------------
-# User Admin (Previous Code)
-# ---------------------------------------------------------
+# 1. ユーザー作成用の専用フォーム（パスワードハッシュ化のため必須）
+class MyUserCreationForm(UserCreationForm):
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ("email", "display_name") # 作成時に最低限必要な項目
+
+# 2. ユーザー編集用の専用フォーム
+class MyUserChangeForm(UserChangeForm):
+    class Meta:
+        model = User
+        fields = '__all__'
+
+@admin.register(User)
 class UserAdmin(BaseUserAdmin):
-    ordering = ['email']
-    list_display = ['email', 'display_name', 'is_staff', 'is_active']
-    search_fields = ['email', 'display_name']
+    # 使用するフォームの指定
+    add_form = MyUserCreationForm
+    form = MyUserChangeForm
+
+    # 管理画面の一覧に表示する項目
+    list_display = ('email', 'display_name', 'is_staff', 'is_active', 'date_joined')
+    # 検索対象
+    search_fields = ('email', 'display_name')
+    # 並び替え（settings.py の LANGUAGE_CODE='ja' に合わせて最適化）
+    ordering = ('email',)
+
+    # ユーザー編集画面のレイアウト
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        ('Personal info', {'fields': ('display_name', 'avatar')}),
-        ('Stripe', {'fields': ('stripe_customer_id', 'subscription_status', 'plan')}),
-        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
-        ('Important dates', {'fields': ('last_login', 'date_joined')}),
-    )
-    add_fieldsets = (
-        (None, {'classes': ('wide',), 'fields': ('email', 'password')}),
+        ('個人情報', {'fields': ('display_name', 'avatar')}),
+        ('Stripe連携', {'fields': ('stripe_customer_id', 'subscription_status', 'plan')}),
+        ('権限', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+        ('重要事項', {'fields': ('last_login', 'date_joined')}),
     )
 
-admin.site.register(User, UserAdmin)
+    # ユーザー追加（新規作成）画面のレイアウト
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': ('email', 'display_name', 'password', 'confirm_password'), 
+        }),
+    )
+
+    # email をユーザー名として扱うための設定
+    filter_horizontal = ('groups', 'user_permissions')
 
 # ---------------------------------------------------------
 # Sticker Admin (Previous Code)

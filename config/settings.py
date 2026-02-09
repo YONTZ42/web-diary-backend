@@ -101,7 +101,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASE_custom = env.bool('DATABASE_custom', default=False)
+DATABASE_custom = env.bool('DATABASE_custom', default=True)
+if DEBUG==False:
+    DATABASE_custom=True
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 if DATABASE_custom:
