@@ -20,7 +20,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 RUN mkdir -p /app/staticfiles
-RUN python manage.py collectstatic --noinput
 
 
 # ★ App Runnerが通信に使用する8080ポートを開放
