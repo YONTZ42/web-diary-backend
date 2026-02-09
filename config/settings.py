@@ -66,6 +66,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # ★これを追加
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -137,16 +138,16 @@ if not DEBUG:
 # Next.js (localhost:3000) からのアクセスを許可
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://192.168.3.4:3000",
-    "https://your-production-domain.com",
+    "http://memocho.link:3000",
     "https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com",
-
+    "https://api.memocho.link",
+    "https://memocho.link",
 ]
 
 # 必要に応じて Credentials (Cookieなど) を許可
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = ['https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com']
+CSRF_TRUSTED_ORIGINS = ['https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com', 'https://api.memocho.link','https://memocho.link']
 
 
 # --- 3. DRF Settings ---
@@ -247,9 +248,10 @@ USE_TZ = True
 # 静的ファイル (CSS/JS/Admin用画像など)
 # ローカル開発中はS3を使わずローカルで済ませるのが一般的ですが、
 # 本番同様S3にするなら以下を設定します。
-STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
-#STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
-
+# 1. 静的ファイルのURLパス
+STATIC_URL = '/static/'
+# 2. collectstaticでファイルが集まる場所（コンテナ内のパス）
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # メディアファイル (ユーザーアップロード画像)
 # 今回の設計（方式A）では「Presigned URLで直接アップロード」するため、
 # DjangoのFileField経由のアップロードは基本的に使いません。
