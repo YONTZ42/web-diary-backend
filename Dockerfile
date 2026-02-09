@@ -5,19 +5,23 @@ FROM python:3.9
 WORKDIR /app
 
 # 環境変数の設定 (Pythonがログをすぐ出力するように)
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=config.settings
 
 # 依存関係をコピーしてインストール
 COPY requirements.txt /app/
 # 静的ファイルを配置するディレクトリを先に作っておく（権限エラー回避）
-RUN mkdir -p /app/staticfiles
 # 静的ファイルを集める（--noinputで対話をスキップ）
-RUN python manage.py collectstatic --noinput
-RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install --no-cache-dir -r requirements.txt
 
 # ローカルのプロジェクトファイルをすべてコピー
 COPY . /app/
+
+RUN mkdir -p /app/staticfiles
+RUN python manage.py collectstatic --noinput
+
 
 # ★ App Runnerが通信に使用する8080ポートを開放
 EXPOSE 8080
