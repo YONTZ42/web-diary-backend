@@ -21,7 +21,7 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = True
+DEBUG = False
 
 # 環境変数の読み込み (ローカル環境のみ)
 if DEBUG:
