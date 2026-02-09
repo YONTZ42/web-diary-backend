@@ -1,23 +1,28 @@
 version: "3.9"
 
 services:
-  web:
-    build: .
-    ports:
-      - "8080:8080"
+  db:
+    image: postgres:17
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
     environment:
-      # Neonが出してくる接続文字列をそのまま入れるのが安全
-      # 例: postgres://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
 
-      # Django起動に必要
-      SECRET_KEY: "${SECRET_KEY}"
-      CREATE_SUPERUSER: "${CREATE_SUPERUSER}"
-      DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL}"
-      DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD}"
-      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+  web:
+      build: .
+      ports:
+        - "8080:8080"
+      depends_on:
+        - db
+      environment:
+        DATABASE_custom: "False"  # ローカルではコンテナのDBを使うよう強制
+        SECRET_KEY: "${SECRET_KEY}"
+        ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+        # DB接続情報（HOSTを'db'に合わせる）
+        DATABASE_URL: "postgres://postgres:postgres@db:5432/postgres"
+      command: sh -c "./start.sh"
 
-      # （任意）gunicorn worker数
-      WEB_CONCURRENCY: "2"
-
-
-    command: sh -c "./start.sh"

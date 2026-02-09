@@ -159,6 +159,7 @@ else:
 # Next.js (localhost:3000) からのアクセスを許可
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://127.0.0.1:3080",
     "http://192.168.3.4:3000",
     "https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com",
     "https://api.memocho.link",
