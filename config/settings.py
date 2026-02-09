@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #DATABASE_custom=True -> DATABASE_URLを使って接続
 
 env = environ.Env(
-    DEBUG=(bool, True),
+    DEBUG=(bool, False),
 )
 
 # ローカルで "python manage.py runserver" する時だけ .env を読む（本番は読まない）
@@ -47,9 +47,12 @@ SECRET_KEY = env('SECRET_KEY', default="dummy-key")
 
 # App Runnerのデフォルトドメインや自分のドメインを環境変数から読み込む
 # ALLOWED_HOSTS = ['*'] は本番ではNG
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1'])
-
+#ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1','192.168.3.4'])
+raw_allowed_hosts = env('ALLOWED_HOSTS', default='localhost,127.0.0.1')
+ALLOWED_HOSTS = [h.strip().replace('"', '').replace("'", "") for h in raw_allowed_hosts.split(',')]
+#ALLOWED_HOSTS=['*']
 # Application definition
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -67,10 +70,10 @@ INSTALLED_APPS = [
 
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # ★これを追加
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -105,8 +108,16 @@ if DATABASE_custom:
     # 3. データベース設定 (Neon対応)
     # env.db() は DATABASE_URL = postgres://user:pass@host/db を自動解析します
     DATABASES = {
-        'default': env.db('DATABASE_URL')
+        'default': env.db('DATABASE_URL') 
     }
+    """
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
+    """
 else:
     DATABASES = {
         'default': {
@@ -146,20 +157,30 @@ else:
 # Next.js (localhost:3000) からのアクセスを許可
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "http://memocho.link:3000",
+    "http://192.168.3.4:3000",
     "https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com",
     "https://api.memocho.link",
     "https://memocho.link",
 ]
-
 # 必要に応じて Credentials (Cookieなど) を許可
 CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',  # ★ これが重要
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+CORS_ALLOW_ALL_ORIGINS = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
     "http://localhost:8080",
-    "http://127.0.0.1:8080",    
+    "http://127.0.0.1:8080",
+    "http://192.168.3.4:8080",
     'https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com', 
     'https://api.memocho.link',
     'https://memocho.link']
@@ -278,5 +299,9 @@ STORAGES = {
     },
     "staticfiles": {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    "OPTIONS": {
+            "querystring_auth": False,  # ★ここをFalseに！
+            "file_overwrite": False,
+        },
     },
 }

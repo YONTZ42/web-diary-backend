@@ -8,13 +8,16 @@ services:
     environment:
       # Neonが出してくる接続文字列をそのまま入れるのが安全
       # 例: postgres://USER:PASSWORD@HOST.neon.tech/DBNAME?sslmode=require
-      DATABASE_URL: "${DATABASE_URL}"
 
       # Django起動に必要
       SECRET_KEY: "${SECRET_KEY}"
-      ALLOWED_HOSTS: "localhost,127.0.0.1"
+      CREATE_SUPERUSER: "${CREATE_SUPERUSER}"
+      DJANGO_SUPERUSER_EMAIL: "${DJANGO_SUPERUSER_EMAIL}"
+      DJANGO_SUPERUSER_PASSWORD: "${DJANGO_SUPERUSER_PASSWORD}"
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
 
       # （任意）gunicorn worker数
       WEB_CONCURRENCY: "2"
+
 
     command: sh -c "./start.sh"

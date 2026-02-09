@@ -1,6 +1,6 @@
 from rest_framework import viewsets, views, status, generics
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.decorators import action
 from django.conf import settings
 from .models import Schedule, User, Sticker, Page, Notebook, NotebookPage,UploadSession
@@ -200,8 +200,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 # --- 5. Notebook API ---
 class NotebookViewSet(viewsets.ModelViewSet):
     serializer_class = NotebookSerializer
-    permission_classes = [IsAuthenticated]
-
+    #permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny] # ★一時的に全員許可
     def get_queryset(self):
         return Notebook.objects.filter(owner=self.request.user).order_by('-updated_at')
 
