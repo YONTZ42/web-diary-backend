@@ -21,22 +21,21 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = False
+#DATABASE_custom=True -> DATABASE_URLを使って接続
+
+env = environ.Env(
+    DEBUG=(bool, True),
+)
+
+# ローカルで "python manage.py runserver" する時だけ .env を読む（本番は読まない）
+if os.path.exists(BASE_DIR / ".env"):
+    environ.Env.read_env(BASE_DIR / ".env")
+
+# 1) 環境の判定（ここが分岐の軸）
+APP_ENV = env.str("APP_ENV", default="local")  # local / docker / apprunner / prod など好きに
+DEBUG = env.bool("DEBUG", default=(APP_ENV == "local"))
 
 
-env = environ.Env()
-
-# 環境変数の読み込み (ローカル環境のみ)
-if DEBUG:
-    env = environ.Env()
-    environ.Env.read_env(BASE_DIR / ".env.local")
-else:
-    # 1. 環境変数の設定
-    env = environ.Env(
-        DEBUG=(bool, False),  # デフォルトは本番(False)
-        ALLOWED_HOSTS=(list, []),
-        DATABASE_URL=(str, f'sqlite:///{os.path.join(Path(__file__).resolve().parent.parent, "db.sqlite3")}'),
-    )
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
@@ -99,9 +98,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+DATABASE_custom = env.bool('DATABASE_custom', default=False)
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-if not DEBUG:
+if DATABASE_custom:
     # 3. データベース設定 (Neon対応)
     # env.db() は DATABASE_URL = postgres://user:pass@host/db を自動解析します
     DATABASES = {
@@ -135,6 +135,11 @@ if not DEBUG:
     # App Runnerでは管理画面のCSSなどが消えやすいため、WhiteNoiseの利用も検討してください
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+else:
+    STATIC_URL = '/static/'
+    # 2. collectstaticでファイルが集まる場所（コンテナ内のパス）
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 
 
 # --- 2. CORS (Cross Origin Resource Sharing) ---
@@ -150,7 +155,14 @@ CORS_ALLOWED_ORIGINS = [
 # 必要に応じて Credentials (Cookieなど) を許可
 CORS_ALLOW_CREDENTIALS = True
 
-CSRF_TRUSTED_ORIGINS = ['https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com', 'https://api.memocho.link','https://memocho.link']
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",    
+    'https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com', 
+    'https://api.memocho.link',
+    'https://memocho.link']
 
 
 # --- 3. DRF Settings ---
@@ -197,7 +209,8 @@ AWS_S3_OBJECT_PARAMETERS = {
 }
 AWS_DEFAULT_ACL = None
 # 署名付きURLを強制する設定
-AWS_QUERYSTRING_AUTH = True
+AWS_QUERYSTRING_AUTH = False
+AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_EXPIRE = 3600  # URLの有効期限（秒）
 AWS_S3_SIGNATURE_VERSION = 's3v4'  # 最新の署名形式を使用
 #CloudFront Settings
@@ -247,19 +260,6 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-
-# 静的ファイル (CSS/JS/Admin用画像など)
-# ローカル開発中はS3を使わずローカルで済ませるのが一般的ですが、
-# 本番同様S3にするなら以下を設定します。
-# 1. 静的ファイルのURLパス
-STATIC_URL = '/static/'
-# 2. collectstaticでファイルが集まる場所（コンテナ内のパス）
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-# メディアファイル (ユーザーアップロード画像)
-# 今回の設計（方式A）では「Presigned URLで直接アップロード」するため、
-# DjangoのFileField経由のアップロードは基本的に使いません。
-# しかし、Django管理画面からのアップロードや、ImageFieldを使う場合に備えて設定しておきます。
-#MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
 
 
 # Default primary key field type
