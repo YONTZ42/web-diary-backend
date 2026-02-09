@@ -21,8 +21,8 @@ from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DEBUG = True
-DEBUG_ENV = True
+DEBUG = False
+
 # 環境変数の読み込み (ローカル環境のみ)
 if DEBUG:
     env = environ.Env()
@@ -139,11 +139,15 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://192.168.3.4:3000",
     "https://your-production-domain.com",
-]
+    "https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com",
 
+]
 
 # 必要に応じて Credentials (Cookieなど) を許可
 CORS_ALLOW_CREDENTIALS = True
+
+CSRF_TRUSTED_ORIGINS = ['https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com']
+
 
 # --- 3. DRF Settings ---
 REST_FRAMEWORK = {
