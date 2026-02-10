@@ -238,7 +238,7 @@ SPECTACULAR_SETTINGS = {
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID',default="dummy")
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default="dummy")
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default="dummy")
-AWS_S3_REGION_NAME = env('AWS_S3_REGION', default='ap-northeast-1', default="dummy")
+AWS_S3_REGION_NAME = env('AWS_S3_REGION', default='ap-northeast-1')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 CLOUDFRONT_DOMAIN = env("CLOUDFRONT_DOMAIN", default="dummy")  # 例: dxxxxxxx.cloudfront.net
 CLOUDFRONT_PUBLIC_KEY_ID = env("CLOUDFRONT_PUBLIC_KEY_ID", default="dummy")  # Public key ID
