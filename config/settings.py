@@ -240,6 +240,14 @@ AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = env('AWS_S3_REGION', default='ap-northeast-1')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+CLOUDFRONT_DOMAIN = env("CLOUDFRONT_DOMAIN")  # 例: dxxxxxxx.cloudfront.net
+CLOUDFRONT_PUBLIC_KEY_ID = env("CLOUDFRONT_PUBLIC_KEY_ID")  # Public key ID
+# 第一引数に環境変数名、defaultにNoneを指定
+raw_key = env("CLOUDFRONT_PRIVATE_KEY", default=None)
+# キーが存在する場合のみ改行コードの置換処理を行う
+CLOUDFRONT_PRIVATE_KEY = raw_key.replace('\\n', '\n') if raw_key else None
+CLOUDFRONT_URL_EXPIRES_SECONDS = int(env("CLOUDFRONT_URL_EXPIRES_SECONDS", default=3600))  # 署名付きURLの有効期限（秒）
+
 # S3のオブジェクトパラメータ設定
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400', # キャッシュ有効期限
@@ -257,13 +265,8 @@ AWS_S3_FILE_OVERWRITE = False
 AWS_QUERYSTRING_EXPIRE = 3600  # URLの有効期限（秒）
 AWS_S3_SIGNATURE_VERSION = 's3v4'  # 最新の署名形式を使用
 #CloudFront Settings
-CLOUDFRONT_DOMAIN = env("CLOUDFRONT_DOMAIN")  # 例: dxxxxxxx.cloudfront.net
-CLOUDFRONT_PUBLIC_KEY_ID = env("CLOUDFRONT_PUBLIC_KEY_ID")  # Public key ID
-# 第一引数に環境変数名、defaultにNoneを指定
-raw_key = env("CLOUDFRONT_PRIVATE_KEY", default=None)
-# キーが存在する場合のみ改行コードの置換処理を行う
-CLOUDFRONT_PRIVATE_KEY = raw_key.replace('\\n', '\n') if raw_key else None
-CLOUDFRONT_URL_EXPIRES_SECONDS = int(env("CLOUDFRONT_URL_EXPIRES_SECONDS", default=3600))  # 署名付きURLの有効期限（秒）
+
+
 
 
 
