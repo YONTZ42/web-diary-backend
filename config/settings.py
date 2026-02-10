@@ -252,7 +252,8 @@ CLOUDFRONT_URL_EXPIRES_SECONDS = int(env("CLOUDFRONT_URL_EXPIRES_SECONDS", defau
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400', # キャッシュ有効期限
 }
-#
+##
+
 #DEFAULT_FILE_STORAGE = os.getenv('DEFAULT_FILE_STORAGE', 'django.core.files.storage.FileSystemStorage')
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
