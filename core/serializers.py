@@ -76,4 +76,5 @@ class NotebookSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.ListField(child=serializers.IntegerField()))
     def get_page_ids(self, obj):
         # NotebookPage中間テーブルを使って順序通りにIDを取得
-        return list(obj.notebookpage_set.order_by('position').values_list('page_id', flat=True))
+        return list(obj.notebookpage_set.filter(
+            page__deleted_at__isnull=True).order_by('position').values_list('page_id', flat=True))

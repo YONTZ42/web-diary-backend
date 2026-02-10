@@ -7,8 +7,8 @@ mkdir -p /app/staticfiles
 echo "[start] migrate..."
 python manage.py migrate --noinput
 
-echo "[start] collectstatic..."
-python manage.py collectstatic --noinput || true
+#echo "[start] collectstatic..."
+#python manage.py collectstatic --noinput || true
 
 # ---- Create superuser (email-based custom User) ----
 # Required envs:

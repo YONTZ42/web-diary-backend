@@ -134,6 +134,11 @@ class PageViewSet(viewsets.ModelViewSet):
     serializer_class = PageSerializer
     permission_classes = [IsAuthenticated]
     
+    def perform_destroy(self, instance):
+        # 物理削除ではなく、論理削除を行う
+        instance.deleted_at = timezone.now()
+        instance.save()
+
     def get_queryset(self):
         # 1. 基本のクエリセット（自分のページ）
         if self.request.user.is_authenticated:
@@ -142,6 +147,8 @@ class PageViewSet(viewsets.ModelViewSet):
             # デモ用（全件）
             queryset = Page.objects.all()
         
+        queryset = queryset.filter(deleted_at__isnull=True)
+
         # 2. クエリパラメータによるフィルタリング
         # ?year=2024
         year = self.request.query_params.get('year')
@@ -217,8 +224,8 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 class NotebookViewSet(viewsets.ModelViewSet):
     queryset = Notebook.objects.all()
     serializer_class = NotebookSerializer
-    #permission_classes = [IsAuthenticated]
-    permission_classes = [AllowAny] # ★一時的に全員許可
+    permission_classes = [IsAuthenticated]
+    #permission_classes = [AllowAny] # ★一時的に全員許可
     def get_queryset(self):
         return Notebook.objects.filter(owner=self.request.user).order_by('-updated_at')
 
@@ -234,7 +241,8 @@ class NotebookViewSet(viewsets.ModelViewSet):
         # NotebookPageを通してPageを取得し、Pageの日付でソート
         # select_related でクエリを最適化
         pages = Page.objects.filter(
-            notebookpage__notebook=notebook
+            notebookpage__notebook=notebook,
+            deleted_at__isnull=True  # ★追加: 論理削除されたページを除外
         ).order_by('date')  # 日付の新しい順
         
         # PageSerializerを使ってシリアライズ
