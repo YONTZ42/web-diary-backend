@@ -17,7 +17,6 @@ from datetime import timedelta
 
 
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -273,7 +272,18 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'  # 最新の署名形式を使用
 
 # --- 5. Custom User Model ---
 AUTH_USER_MODEL = 'core.User'
-
+SIMPLE_JWT = {
+    # アクセストークンの有効期限（ここを延ばす）
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # 1日など
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7), # リフレッシュは長めに
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    # ...その他の設定
+}
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
