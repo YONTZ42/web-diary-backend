@@ -11,6 +11,23 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'display_name', 'avatar', 'stripe_customer_id', 'subscription_status', 'plan')
         read_only_fields = ('id', 'stripe_customer_id', 'subscription_status')
 
+# --- User Registration ---
+class UserRegistrationSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
+    
+    class Meta:
+        model = User
+        fields = ('email', 'password', 'display_name') # 必要に応じて avatar なども追加
+
+    def create(self, validated_data):
+        # UserManagerのcreate_userメソッドを使ってユーザーを作成（パスワードハッシュ化含む）
+        user = User.objects.create_user(
+            email=validated_data['email'],
+            password=validated_data['password'],
+            display_name=validated_data.get('display_name', '')
+        )
+        return user
+
 # --- Upload (Presigned URL) ---
 class UploadIssueSerializer(serializers.Serializer):
     """アップロード開始要求（クライアント→サーバー）"""

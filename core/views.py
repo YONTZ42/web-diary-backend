@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from django.conf import settings
 from .models import Schedule, User, Sticker, Page, Notebook, NotebookPage,UploadSession
 from .serializers import (
-    ScheduleSerializer, UserSerializer, StickerSerializer, PageSerializer, NotebookSerializer,
+    ScheduleSerializer, UserRegistrationSerializer, UserSerializer, StickerSerializer, PageSerializer, NotebookSerializer,
     UploadIssueSerializer, UploadConfirmSerializer
 )
 
@@ -22,6 +22,13 @@ class MeView(generics.RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
+
+# --- Auth API ---
+class UserRegistrationView(generics.CreateAPIView):
+    """ユーザー新規登録"""
+    serializer_class = UserRegistrationSerializer
+    permission_classes = [AllowAny] # 誰でもアクセス可能
+
 
 # --- 2. Upload API (S3 Presigned URL) ---
 class UploadView(views.APIView):
@@ -101,6 +108,7 @@ class UploadView(views.APIView):
         session.status = 'confirmed'
         session.save()
         return Response({'status': 'confirmed'})
+
 
 # --- 3. Sticker API ---
 class StickerViewSet(viewsets.ModelViewSet):

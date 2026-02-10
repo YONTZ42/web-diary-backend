@@ -15,6 +15,7 @@ python manage.py collectstatic --noinput || true
 #   CREATE_SUPERUSER=1
 #   DJANGO_SUPERUSER_EMAIL
 #   DJANGO_SUPERUSER_PASSWORD
+echo "[start] checking CREATE_SUPERUSER env: '$CREATE_SUPERUSER'"
 if [ "${CREATE_SUPERUSER:-0}" = "1" ]; then
   echo "[start] ensure superuser..."
   python manage.py shell -c "

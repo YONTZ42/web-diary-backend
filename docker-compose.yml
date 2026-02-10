@@ -22,7 +22,11 @@ services:
         DATABASE_custom: "False"  # ローカルではコンテナのDBを使うよう強制
         SECRET_KEY: "${SECRET_KEY}"
         ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+        CREATE_SUPERUSER: "${CREATE_SUPERUSER}"
         # DB接続情報（HOSTを'db'に合わせる）
         DATABASE_URL: "postgres://postgres:postgres@db:5432/postgres"
       command: sh -c "./start.sh"
 
+
+volumes:
+  postgres_data:
