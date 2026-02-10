@@ -105,7 +105,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -133,7 +132,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '201':
           content:
@@ -156,7 +154,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -190,7 +187,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -223,7 +219,6 @@ paths:
               $ref: '#/components/schemas/PatchedNotebook'
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -245,7 +240,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '204':
           description: No response body
@@ -264,7 +258,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
