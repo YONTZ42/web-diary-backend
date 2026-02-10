@@ -66,6 +66,7 @@ INSTALLED_APPS = [
     'core',
     'storages',
     'djangorestframework_camel_case',  # ★これを追加
+    'drf_spectacular',  # ★これを追加
 ]
 
 
@@ -209,10 +210,28 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
         'rest_framework.parsers.JSONParser',
     ),
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+
 
     # フロントエンドが camelCase なので、入出力で変換するライブラリを入れると便利ですが
     # 今回はモデル定義に集中するため省略します。
 }
+
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'API Documentation',
+    'DESCRIPTION': 'APIの詳細説明',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+
+    # ここが本題（schema上のプロパティ名をcamelCaseへ）
+    'CAMELIZE_NAMES': False,
+    'POSTPROCESSING_HOOKS': [
+        'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
+        'drf_spectacular.hooks.postprocess_schema_enums',
+    ],
+}
+
 
 
 # --- 4. AWS S3 Settings (Boto3用) ---

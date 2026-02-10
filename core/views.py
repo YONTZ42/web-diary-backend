@@ -8,6 +8,7 @@ from .serializers import (
     ScheduleSerializer, UserRegistrationSerializer, UserSerializer, StickerSerializer, PageSerializer, NotebookSerializer,
     UploadIssueSerializer, UploadConfirmSerializer
 )
+from drf_spectacular.utils import extend_schema
 
 from django.utils import timezone
 import boto3
@@ -33,7 +34,11 @@ class UserRegistrationView(generics.CreateAPIView):
 # --- 2. Upload API (S3 Presigned URL) ---
 class UploadView(views.APIView):
     permission_classes = [IsAuthenticated]
-
+    @extend_schema(
+        request=UploadIssueSerializer,
+        responses={200: UploadConfirmSerializer},
+        description="S3アップロード用のURL発行または完了確認を行います。"
+    )
     def post(self, request, action=None, **kwargs):
         """
         POST /api/uploads/issue/   -> URL発行
@@ -112,6 +117,7 @@ class UploadView(views.APIView):
 
 # --- 3. Sticker API ---
 class StickerViewSet(viewsets.ModelViewSet):
+    queryset = Sticker.objects.all()
     serializer_class = StickerSerializer
     permission_classes = [IsAuthenticated]
 
@@ -124,6 +130,7 @@ class StickerViewSet(viewsets.ModelViewSet):
 
 # --- 4. Page API ---
 class PageViewSet(viewsets.ModelViewSet):
+    queryset = Page.objects.all()
     serializer_class = PageSerializer
     permission_classes = [IsAuthenticated]
     
@@ -181,6 +188,7 @@ class PageViewSet(viewsets.ModelViewSet):
 # --- Schedule API ---
 
 class ScheduleViewSet(viewsets.ModelViewSet):
+    queryset = Schedule.objects.all()
     serializer_class = ScheduleSerializer
     permission_classes = [IsAuthenticated] # または AllowAny
 
@@ -207,6 +215,7 @@ class ScheduleViewSet(viewsets.ModelViewSet):
 
 # --- 5. Notebook API ---
 class NotebookViewSet(viewsets.ModelViewSet):
+    queryset = Notebook.objects.all()
     serializer_class = NotebookSerializer
     #permission_classes = [IsAuthenticated]
     permission_classes = [AllowAny] # ★一時的に全員許可
