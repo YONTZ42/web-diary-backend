@@ -22,14 +22,16 @@ from datetime import timedelta
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 #DATABASE_custom=True -> DATABASE_URLを使って接続
-
+##
 env = environ.Env(
     DEBUG=(bool, False),
 )
 
+#
 # ローカルで "python manage.py runserver" する時だけ .env を読む（本番は読まない）
 if os.path.exists(BASE_DIR / ".env"):
     environ.Env.read_env(BASE_DIR / ".env")
+    pass
 
 # 1) 環境の判定（ここが分岐の軸）
 APP_ENV = env.str("APP_ENV", default="local")  # local / docker / apprunner / prod など好きに

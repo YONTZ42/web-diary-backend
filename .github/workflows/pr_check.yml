@@ -37,6 +37,8 @@ jobs:
           pip install drf-spectacular djangorestframework-camel-case
 
  
+
+
       # 2. (将来的に) ここにテストコマンドを追加
       # - name: Run Tests
       #   run: python manage.py test
@@ -49,6 +51,8 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
           SECRET_KEY: "ci-test-key"
           APP_ENV: "local"
+
+
 
       # 2) mainブランチにある最新schema.ymlを取得（比較元）
       - name: Fetch base schema from main
@@ -63,3 +67,4 @@ jobs:
             tufin/oasdiff:latest \
             --fail-on=breaking \
             /work/schema_base.yml /work/schema_pr.yml
+
