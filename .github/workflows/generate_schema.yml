@@ -49,10 +49,10 @@ jobs:
       - name: Generate TS Types
         run: |
           # 出力先をプロジェクト内の適切な場所に
-          npx openapi-typescript schema.yml --output ./types/api-types.ts
+          npx openapi-typescript schema_base.yml --output ./types/api-types.ts
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "docs: auto-generate schema and types [skip ci]"
-          file_pattern: 'schema.yml ./types/api-types.ts'
+          file_pattern: 'schema_base.yml ./types/api-types.ts'
