@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env(
     DEBUG=(bool, False),
 )
-
+#
 # ローカルで "python manage.py runserver" する時だけ .env を読む（本番は読まない）
 if os.path.exists(BASE_DIR / ".env"):
     environ.Env.read_env(BASE_DIR / ".env")
