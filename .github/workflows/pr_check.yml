@@ -63,3 +63,4 @@ jobs:
             tufin/oasdiff:latest \
             --fail-on=breaking \
             /work/schema_base.yml /work/schema_pr.yml
+
