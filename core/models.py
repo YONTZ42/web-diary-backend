@@ -72,6 +72,7 @@ class User(AbstractUser, BaseModel):
     class Meta:
         db_table = 'users'
 
+
 class UploadSession(BaseModel):
     """
     S3 Presigned URL アップロード管理用

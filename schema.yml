@@ -105,7 +105,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -133,7 +132,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '201':
           content:
@@ -156,7 +154,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -190,7 +187,6 @@ paths:
         required: true
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -223,7 +219,6 @@ paths:
               $ref: '#/components/schemas/PatchedNotebook'
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -245,7 +240,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '204':
           description: No response body
@@ -264,7 +258,6 @@ paths:
       - notebooks
       security:
       - jwtAuth: []
-      - {}
       responses:
         '200':
           content:
@@ -796,6 +789,87 @@ paths:
           description: ''
 components:
   schemas:
+    AssetRef:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        key:
+          type: string
+          description: localならblobURI/uuid, remoteならS3 key/URL
+        mime:
+          type: string
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+        sha256:
+          type: string
+          nullable: true
+        size:
+          type: integer
+          nullable: true
+        filename:
+          type: string
+          nullable: true
+        variants:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AssetRefLite'
+          description: thumb, medium などのバリエーション
+        source:
+          type: object
+          additionalProperties: {}
+      required:
+      - key
+      - kind
+      - mime
+    AssetRefLite:
+      type: object
+      properties:
+        kind:
+          $ref: '#/components/schemas/KindEnum'
+        key:
+          type: string
+          description: localならblobURI/uuid, remoteならS3 key/URL
+        mime:
+          type: string
+        width:
+          type: integer
+          nullable: true
+        height:
+          type: integer
+          nullable: true
+        sha256:
+          type: string
+          nullable: true
+      required:
+      - key
+      - kind
+      - mime
+    ExcalidrawSceneData:
+      type: object
+      properties:
+        elements:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          description: Excalidrawの図形要素（Rectangle, Arrow, Text等）の配列
+        appState:
+          type: object
+          additionalProperties: {}
+          description: 画面表示に関する設定（theme, scrollX, scrollY, zoom等）
+    KindEnum:
+      enum:
+      - local
+      - remote
+      type: string
+      description: |-
+        * `local` - local
+        * `remote` - remote
     Notebook:
       type: object
       properties:
@@ -803,10 +877,15 @@ components:
           type: string
           format: uuid
           readOnly: true
+        cover:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
         pageIds:
           type: array
           items:
-            type: integer
+            type: string
+            format: uuid
           readOnly: true
         schemaVersion:
           type: integer
@@ -829,8 +908,6 @@ components:
           maxLength: 255
         description:
           type: string
-        cover:
-          nullable: true
         tags: {}
         viewSettings: {}
         visibility:
@@ -860,6 +937,25 @@ components:
           type: string
           format: uuid
           readOnly: true
+        assets:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AssetRef'
+        preview:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
+        export:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        sceneData:
+          $ref: '#/components/schemas/ExcalidrawSceneData'
+        usedStickerIds:
+          type: array
+          items:
+            type: string
+            format: uuid
         schemaVersion:
           type: integer
           maximum: 2147483647
@@ -887,13 +983,6 @@ components:
         note:
           type: string
         tags: {}
-        sceneData: {}
-        assets: {}
-        usedStickerIds: {}
-        preview:
-          nullable: true
-        export:
-          nullable: true
         layoutMode:
           type: string
           maxLength: 20
@@ -903,6 +992,7 @@ components:
           format: uuid
           readOnly: true
       required:
+      - assets
       - createdAt
       - date
       - id
@@ -925,10 +1015,15 @@ components:
           type: string
           format: uuid
           readOnly: true
+        cover:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
         pageIds:
           type: array
           items:
-            type: integer
+            type: string
+            format: uuid
           readOnly: true
         schemaVersion:
           type: integer
@@ -951,8 +1046,6 @@ components:
           maxLength: 255
         description:
           type: string
-        cover:
-          nullable: true
         tags: {}
         viewSettings: {}
         visibility:
@@ -974,6 +1067,25 @@ components:
           type: string
           format: uuid
           readOnly: true
+        assets:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AssetRef'
+        preview:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
+        export:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        sceneData:
+          $ref: '#/components/schemas/ExcalidrawSceneData'
+        usedStickerIds:
+          type: array
+          items:
+            type: string
+            format: uuid
         schemaVersion:
           type: integer
           maximum: 2147483647
@@ -1001,13 +1113,6 @@ components:
         note:
           type: string
         tags: {}
-        sceneData: {}
-        assets: {}
-        usedStickerIds: {}
-        preview:
-          nullable: true
-        export:
-          nullable: true
         layoutMode:
           type: string
           maxLength: 20
@@ -1023,6 +1128,16 @@ components:
           type: string
           format: uuid
           readOnly: true
+        assets:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AssetRef'
+        preview:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
+        sceneData:
+          $ref: '#/components/schemas/ExcalidrawSceneData'
         schemaVersion:
           type: integer
           maximum: 2147483647
@@ -1049,11 +1164,7 @@ components:
         title:
           type: string
           maxLength: 255
-        sceneData: {}
-        assets: {}
         eventsData: {}
-        preview:
-          nullable: true
         owner:
           type: string
           format: uuid
@@ -1065,6 +1176,19 @@ components:
           type: string
           format: uuid
           readOnly: true
+        png:
+          $ref: '#/components/schemas/AssetRef'
+        thumb:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
+        style:
+          $ref: '#/components/schemas/StickerStyle'
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグの配列
         schemaVersion:
           type: integer
           maximum: 2147483647
@@ -1084,7 +1208,6 @@ components:
         name:
           type: string
           maxLength: 255
-        tags: {}
         favorite:
           type: boolean
         lastUsedAt:
@@ -1096,9 +1219,6 @@ components:
           readOnly: true
         isSystem:
           type: boolean
-        png: {}
-        thumb:
-          nullable: true
         width:
           type: integer
           maximum: 2147483647
@@ -1107,7 +1227,6 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
-        style: {}
         cropSource:
           nullable: true
         owner:
@@ -1147,6 +1266,16 @@ components:
           type: string
           format: uuid
           readOnly: true
+        assets:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/AssetRef'
+        preview:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
+        sceneData:
+          $ref: '#/components/schemas/ExcalidrawSceneData'
         schemaVersion:
           type: integer
           maximum: 2147483647
@@ -1173,16 +1302,13 @@ components:
         title:
           type: string
           maxLength: 255
-        sceneData: {}
-        assets: {}
         eventsData: {}
-        preview:
-          nullable: true
         owner:
           type: string
           format: uuid
           readOnly: true
       required:
+      - assets
       - createdAt
       - id
       - owner
@@ -1205,6 +1331,19 @@ components:
           type: string
           format: uuid
           readOnly: true
+        png:
+          $ref: '#/components/schemas/AssetRef'
+        thumb:
+          allOf:
+          - $ref: '#/components/schemas/AssetRef'
+          nullable: true
+        style:
+          $ref: '#/components/schemas/StickerStyle'
+        tags:
+          type: array
+          items:
+            type: string
+          description: タグの配列
         schemaVersion:
           type: integer
           maximum: 2147483647
@@ -1224,7 +1363,6 @@ components:
         name:
           type: string
           maxLength: 255
-        tags: {}
         favorite:
           type: boolean
         lastUsedAt:
@@ -1236,9 +1374,6 @@ components:
           readOnly: true
         isSystem:
           type: boolean
-        png: {}
-        thumb:
-          nullable: true
         width:
           type: integer
           maximum: 2147483647
@@ -1247,7 +1382,6 @@ components:
           type: integer
           maximum: 2147483647
           minimum: 0
-        style: {}
         cropSource:
           nullable: true
         owner:
@@ -1263,6 +1397,18 @@ components:
       - updatedAt
       - usageCount
       - width
+    StickerStyle:
+      type: object
+      properties:
+        outline:
+          type: object
+          additionalProperties: {}
+        shadow:
+          type: object
+          additionalProperties: {}
+      required:
+      - outline
+      - shadow
     TokenObtainPair:
       type: object
       properties:
