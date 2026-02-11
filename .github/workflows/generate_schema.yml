@@ -38,7 +38,7 @@ jobs:
 
       - name: Generate Schema
         run: |
-          python manage.py spectacular --file schema.yml
+          python manage.py spectacular --file schema_base.yml
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
           SECRET_KEY: "ci-test-key"
