@@ -48,3 +48,4 @@ jobs:
       # 2. (将来的に) ここにテストコマンドを追加
       # - name: Run Tests
       #   run: python manage.py test
+      
