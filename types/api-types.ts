@@ -245,10 +245,54 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AssetRef: {
+            kind: components["schemas"]["KindEnum"];
+            /** @description localならblobURI/uuid, remoteならS3 key/URL */
+            key: string;
+            mime: string;
+            width?: number | null;
+            height?: number | null;
+            sha256?: string | null;
+            size?: number | null;
+            filename?: string | null;
+            /** @description thumb, medium などのバリエーション */
+            variants?: {
+                [key: string]: components["schemas"]["AssetRefLite"];
+            };
+            source?: {
+                [key: string]: unknown;
+            };
+        };
+        AssetRefLite: {
+            kind: components["schemas"]["KindEnum"];
+            /** @description localならblobURI/uuid, remoteならS3 key/URL */
+            key: string;
+            mime: string;
+            width?: number | null;
+            height?: number | null;
+            sha256?: string | null;
+        };
+        ExcalidrawSceneData: {
+            /** @description Excalidrawの図形要素（Rectangle, Arrow, Text等）の配列 */
+            elements?: {
+                [key: string]: unknown;
+            }[];
+            /** @description 画面表示に関する設定（theme, scrollX, scrollY, zoom等） */
+            appState?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * @description * `local` - local
+         *     * `remote` - remote
+         * @enum {string}
+         */
+        KindEnum: "local" | "remote";
         Notebook: {
             /** Format: uuid */
             readonly id: string;
-            readonly pageIds: number[];
+            cover?: components["schemas"]["AssetRef"] | null;
+            readonly pageIds: string[];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt: string;
@@ -258,7 +302,6 @@ export interface components {
             deletedAt?: string | null;
             title: string;
             description?: string;
-            cover?: unknown;
             tags?: unknown;
             viewSettings?: unknown;
             visibility?: components["schemas"]["VisibilityEnum"];
@@ -269,6 +312,15 @@ export interface components {
         Page: {
             /** Format: uuid */
             readonly id: string;
+            assets: {
+                [key: string]: components["schemas"]["AssetRef"];
+            };
+            preview?: components["schemas"]["AssetRef"] | null;
+            export?: {
+                [key: string]: unknown;
+            } | null;
+            sceneData?: components["schemas"]["ExcalidrawSceneData"];
+            usedStickerIds?: string[];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt: string;
@@ -282,11 +334,6 @@ export interface components {
             title?: string;
             note?: string;
             tags?: unknown;
-            sceneData?: unknown;
-            assets?: unknown;
-            usedStickerIds?: unknown;
-            preview?: unknown;
-            export?: unknown;
             layoutMode?: string;
             layoutSettings?: unknown;
             /** Format: uuid */
@@ -302,7 +349,8 @@ export interface components {
         PatchedNotebook: {
             /** Format: uuid */
             readonly id?: string;
-            readonly pageIds?: number[];
+            cover?: components["schemas"]["AssetRef"] | null;
+            readonly pageIds?: string[];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt?: string;
@@ -312,7 +360,6 @@ export interface components {
             deletedAt?: string | null;
             title?: string;
             description?: string;
-            cover?: unknown;
             tags?: unknown;
             viewSettings?: unknown;
             visibility?: components["schemas"]["VisibilityEnum"];
@@ -323,6 +370,15 @@ export interface components {
         PatchedPage: {
             /** Format: uuid */
             readonly id?: string;
+            assets?: {
+                [key: string]: components["schemas"]["AssetRef"];
+            };
+            preview?: components["schemas"]["AssetRef"] | null;
+            export?: {
+                [key: string]: unknown;
+            } | null;
+            sceneData?: components["schemas"]["ExcalidrawSceneData"];
+            usedStickerIds?: string[];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt?: string;
@@ -336,11 +392,6 @@ export interface components {
             title?: string;
             note?: string;
             tags?: unknown;
-            sceneData?: unknown;
-            assets?: unknown;
-            usedStickerIds?: unknown;
-            preview?: unknown;
-            export?: unknown;
             layoutMode?: string;
             layoutSettings?: unknown;
             /** Format: uuid */
@@ -349,6 +400,11 @@ export interface components {
         PatchedSchedule: {
             /** Format: uuid */
             readonly id?: string;
+            assets?: {
+                [key: string]: components["schemas"]["AssetRef"];
+            };
+            preview?: components["schemas"]["AssetRef"] | null;
+            sceneData?: components["schemas"]["ExcalidrawSceneData"];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt?: string;
@@ -361,16 +417,18 @@ export interface components {
             /** Format: date */
             startDate?: string;
             title?: string;
-            sceneData?: unknown;
-            assets?: unknown;
             eventsData?: unknown;
-            preview?: unknown;
             /** Format: uuid */
             readonly owner?: string;
         };
         PatchedSticker: {
             /** Format: uuid */
             readonly id?: string;
+            png?: components["schemas"]["AssetRef"];
+            thumb?: components["schemas"]["AssetRef"] | null;
+            style?: components["schemas"]["StickerStyle"];
+            /** @description タグの配列 */
+            tags?: string[];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt?: string;
@@ -379,17 +437,13 @@ export interface components {
             /** Format: date-time */
             deletedAt?: string | null;
             name?: string;
-            tags?: unknown;
             favorite?: boolean;
             /** Format: date-time */
             lastUsedAt?: string | null;
             readonly usageCount?: number;
             isSystem?: boolean;
-            png?: unknown;
-            thumb?: unknown;
             width?: number;
             height?: number;
-            style?: unknown;
             cropSource?: unknown;
             /** Format: uuid */
             readonly owner?: string;
@@ -408,6 +462,11 @@ export interface components {
         Schedule: {
             /** Format: uuid */
             readonly id: string;
+            assets: {
+                [key: string]: components["schemas"]["AssetRef"];
+            };
+            preview?: components["schemas"]["AssetRef"] | null;
+            sceneData?: components["schemas"]["ExcalidrawSceneData"];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt: string;
@@ -420,10 +479,7 @@ export interface components {
             /** Format: date */
             startDate: string;
             title?: string;
-            sceneData?: unknown;
-            assets?: unknown;
             eventsData?: unknown;
-            preview?: unknown;
             /** Format: uuid */
             readonly owner: string;
         };
@@ -437,6 +493,11 @@ export interface components {
         Sticker: {
             /** Format: uuid */
             readonly id: string;
+            png: components["schemas"]["AssetRef"];
+            thumb?: components["schemas"]["AssetRef"] | null;
+            style?: components["schemas"]["StickerStyle"];
+            /** @description タグの配列 */
+            tags?: string[];
             schemaVersion?: number;
             /** Format: date-time */
             readonly createdAt: string;
@@ -445,20 +506,24 @@ export interface components {
             /** Format: date-time */
             deletedAt?: string | null;
             name?: string;
-            tags?: unknown;
             favorite?: boolean;
             /** Format: date-time */
             lastUsedAt?: string | null;
             readonly usageCount: number;
             isSystem?: boolean;
-            png: unknown;
-            thumb?: unknown;
             width: number;
             height: number;
-            style?: unknown;
             cropSource?: unknown;
             /** Format: uuid */
             readonly owner: string;
+        };
+        StickerStyle: {
+            outline: {
+                [key: string]: unknown;
+            };
+            shadow: {
+                [key: string]: unknown;
+            };
         };
         TokenObtainPair: {
             email: string;
