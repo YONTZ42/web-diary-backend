@@ -4,11 +4,10 @@ on:
   push:
     branches: [ main ]
 
-# ★OIDC認証（鍵なしログイン）に必須の権限設定
+# ★OIDCに必須：一時的なトークンを発行する権限
 permissions:
   id-token: write
   contents: read
-
 
 jobs:
   deploy:
@@ -17,31 +16,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # 1. AWSへのログイン（OIDCを使用）
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          # GitHub Secretsに登録したIAMロールのARNを使用
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ap-northeast-1
 
-      # 2. Amazon ECRへのログイン
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-
-      # 3. DockerイメージのビルドとPush
-      - name: Build, tag, and push image to Amazon ECR
+      - name: Build, tag, and push image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: web-diary/backend-django
-          IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
-      # 4. App Runnerへデプロイの実行（mainブランチの時のみ）
       - name: Deploy to App Runner
         if: github.ref == 'refs/heads/main'
         run: |
