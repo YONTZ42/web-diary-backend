@@ -23,6 +23,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ap-northeast-1
+          role-session-name: gha-apprunner
+
 
 
       - name: Login to Amazon ECR
