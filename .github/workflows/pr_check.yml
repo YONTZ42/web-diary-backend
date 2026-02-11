@@ -36,16 +36,30 @@ jobs:
           pip install -r requirements.txt
           pip install drf-spectacular djangorestframework-camel-case
 
-      # 1. スキーマが正常に生成できるかチェック（壊れてたらここで落ちる）
-      - name: Check Schema Generation
+ 
+      # 2. (将来的に) ここにテストコマンドを追加
+      # - name: Run Tests
+      #   run: python manage.py test
+
+      # 1) PR側のschema生成
+      - name: Generate PR Schema
         run: |
-          python manage.py spectacular --file schema_test.yml
+          python manage.py spectacular --file schema_pr.yml
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
           SECRET_KEY: "ci-test-key"
           APP_ENV: "local"
 
-      # 2. (将来的に) ここにテストコマンドを追加
-      # - name: Run Tests
-      #   run: python manage.py test
-      
+      # 2) mainブランチにある最新schema.ymlを取得（比較元）
+      - name: Fetch base schema from main
+        run: |
+          git fetch origin main --depth=1
+          git show origin/main:schema.yml > schema_base.yml
+
+      # 3) oasdiffでbreaking change検知（breakingがあればここで落ちる）
+      - name: Detect breaking changes (OpenAPI)
+        run: |
+          docker run --rm -v "${{ github.workspace }}:/work" \
+            tufin/oasdiff:latest \
+            --fail-on=breaking \
+            /work/schema_base.yml /work/schema_pr.yml
