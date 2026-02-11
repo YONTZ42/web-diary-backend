@@ -5,6 +5,7 @@ on:
     branches: [ main ]
 
 # ★OIDCに必須：一時的なトークンを発行する権限
+
 permissions:
   id-token: write
   contents: read
