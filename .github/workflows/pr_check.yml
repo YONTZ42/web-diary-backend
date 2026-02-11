@@ -37,6 +37,8 @@ jobs:
           pip install drf-spectacular djangorestframework-camel-case
 
  
+
+ 
       # 2. (将来的に) ここにテストコマンドを追加
       # - name: Run Tests
       #   run: python manage.py test
