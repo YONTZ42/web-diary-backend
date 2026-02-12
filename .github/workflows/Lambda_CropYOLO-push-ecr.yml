@@ -3,6 +3,10 @@ name: build-and-push-ecr
 on:
   push:
     branches: ["main"]
+    paths:
+      - "Lambda_CropYOLO/lambda_function.py"
+      - "Lambda_CropYOLO/requirements.txt"
+      - ".github/workflows/Lambda_CropYOLO-push-ecr.yml"
   workflow_dispatch:
 
 permissions:
