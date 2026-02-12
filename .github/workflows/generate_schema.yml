@@ -11,7 +11,9 @@ on:
 jobs:
   generate-type:
     runs-on: ubuntu-
-    default: ./DjangoAPI
+    default:
+      run:
+        working-directory: ./DjangoAPI
     services:
       db:
         image: postgres:17
