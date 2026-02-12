@@ -3,6 +3,11 @@ name: Deploy to App Runner
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'DjangoAPI/**/*.py' # Python関連が変わった時だけ実行
+      - ".github/workflows/generate_schema.yml"
+
+
 
 # ★OIDCに必須：一時的なトークンを発行する権限
 

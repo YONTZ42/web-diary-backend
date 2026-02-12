@@ -4,8 +4,8 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "lambda-CropObject/**"
-      - ".github/workflows/push-CropObject-lambda-ecr.yml"
+      - "Lambda_CropObject/**"
+      - ".github/workflows/Lambda_CropObject-push-ecr.yml"
   workflow_dispatch:
 
 permissions:
@@ -44,10 +44,10 @@ jobs:
       - name: Build and push (with GHA cache)
         uses: docker/build-push-action@v6
         with:
-          context: ./lambda-CropObject
+          context: ./Lambda_CropObject
           push: true
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/web-diary/lambda_CropObject:latest
-            ${{ steps.login-ecr.outputs.registry }}/web-diary/lambda_CropObject:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/web-diary/Lambda_CropObject:latest
+            ${{ steps.login-ecr.outputs.registry }}/web-diary/Lambda_CropObject:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
