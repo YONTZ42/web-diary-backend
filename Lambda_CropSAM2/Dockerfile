@@ -24,7 +24,6 @@ RUN pip install --no-cache-dir "git+https://github.com/facebookresearch/segment-
 # 4. 依存関係の競合（NumPy 2.0 問題）を回避
 # OpenCV 4.10以降はNumPy 2.0を要求し、ビルドエラー（GCCの古さ）を引き起こすため固定
 RUN pip install --no-cache-dir \
-    "numpy<2.0.0" \
     "opencv-python-headless<4.10" \
     "pillow" \
     "requests" \
