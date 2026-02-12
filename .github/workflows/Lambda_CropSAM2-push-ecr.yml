@@ -4,6 +4,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
+      - "Lambda_CropSAM2/lambda_function.py"
       - ".github/workflows/Lambda_CropSAM2-push-ecr.yml"
   workflow_dispatch:
 
@@ -52,3 +53,4 @@ jobs:
           cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
           # ビルドしたイメージ自体にキャッシュ情報を埋め込む
           cache-to: type=inline
+        
