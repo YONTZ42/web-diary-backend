@@ -37,11 +37,15 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+
       - name: Build and push (with GHA cache)
         uses: docker/build-push-action@v6
         with:
           context: ${{ env.CONTEXT_DIR }}
           push: true
+          platforms: linux/amd64
+          provenance: false
+
           tags: |
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
