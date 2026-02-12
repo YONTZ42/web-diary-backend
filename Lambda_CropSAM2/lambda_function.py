@@ -9,6 +9,7 @@ from PIL import Image
 from sam2.build_sam import build_sam2
 from sam2.sam2_image_predictor import SAM2ImagePredictor
 
+
 # 環境変数（S3バケット名などはLambda側で設定）
 S3_BUCKET = os.environ.get("OUTPUT_BUCKET")
 MODEL_PATH = "/var/task/models/sam2_hiera_small.pt"
