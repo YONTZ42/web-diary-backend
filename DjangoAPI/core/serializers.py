@@ -11,7 +11,7 @@ from drf_spectacular.types import OpenApiTypes
 class AssetRefLiteSerializer(serializers.Serializer):
     kind = serializers.ChoiceField(choices=['local', 'remote'])
     key = serializers.CharField(help_text="localならblobURI/uuid, remoteならS3 key/URL")
-    mime = serializers.CharField()
+    mime = serializers.CharField(required=False, allow_null=True)
     width = serializers.IntegerField(required=False, allow_null=True)
     height = serializers.IntegerField(required=False, allow_null=True)
     sha256 = serializers.CharField(required=False, allow_null=True)
