@@ -20,7 +20,7 @@ ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
 #ENV NUMBA_DISABLE_JIT=1
 # ここで使うモデルをあらかじめダウンロード（例：u2net）
-RUN curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx -o /var/task/models/u2net.onnx
+RUN curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx -o /var/task/models/u2net.onnx
 
 # アプリケーションコード
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}/
