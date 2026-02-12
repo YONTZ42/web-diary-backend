@@ -10,8 +10,8 @@ on:
 
 jobs:
   generate-type:
-    runs-on: ubuntu-
-    default:
+    runs-on: ubuntu-latest
+    defaults:
       run:
         working-directory: ./DjangoAPI
     services:
