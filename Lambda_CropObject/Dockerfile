@@ -18,7 +18,7 @@ RUN mkdir -p /var/task/models
 ENV U2NET_HOME=/var/task/models
 ENV NUMBA_CACHE_DIR=/tmp
 ENV MPLCONFIGDIR=/tmp
-ENV NUMBA_DISABLE_JIT=1
+#ENV NUMBA_DISABLE_JIT=1
 # ここで使うモデルをあらかじめダウンロード（例：u2net）
 RUN curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx -o /var/task/models/u2net.onnx
 
