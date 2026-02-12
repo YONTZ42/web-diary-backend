@@ -1,0 +1,8 @@
+# 基盤
+boto3>=1.34.0
+requests>=2.32.0
+Pillow>=10.4.0
+
+# YOLO本体 (最新版を取得)
+ultralytics
+

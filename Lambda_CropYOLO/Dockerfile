@@ -14,7 +14,8 @@ RUN pip install --upgrade pip
 
 # 2) OpenCV Headless を最初に入れる
 # これを先に入れることで、ultralyticsが依存で重いGUI版を入れるのを防ぎます
-RUN pip install opencv-python-headless
+RUN pip install numpy==1.26.4
+RUN pip install opencv-python-headless==4.10.0.84 -no-deps
 
 # 3) PyTorch (CPU版)
 RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
