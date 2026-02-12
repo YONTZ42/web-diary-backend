@@ -799,6 +799,7 @@ components:
           description: localならblobURI/uuid, remoteならS3 key/URL
         mime:
           type: string
+          nullable: true
         width:
           type: integer
           nullable: true
@@ -825,7 +826,6 @@ components:
       required:
       - key
       - kind
-      - mime
     AssetRefLite:
       type: object
       properties:
@@ -836,6 +836,7 @@ components:
           description: localならblobURI/uuid, remoteならS3 key/URL
         mime:
           type: string
+          nullable: true
         width:
           type: integer
           nullable: true
@@ -848,7 +849,6 @@ components:
       required:
       - key
       - kind
-      - mime
     ExcalidrawSceneData:
       type: object
       properties:
