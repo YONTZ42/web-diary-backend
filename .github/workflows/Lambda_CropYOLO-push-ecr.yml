@@ -15,7 +15,7 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPOSITORY: crop-yolo-lambda
+  ECR_REPOSITORY: web-diary/crop-yolo-lambda
   CONTEXT_DIR: ./Lambda_CropYOLO
 jobs:
   build:
