@@ -1,8 +1,6 @@
-FROM public.ecr.aws/lambda/python:3.11
+FROM public.ecr.aws/lambda/python:3.10
 
 
-# numpy がソースビルドになるのでビルドツールを入れる（確実に通すため）
-RUN yum -y install gcc gcc-c++ make && yum clean all
 
 # 依存（rembgはonnxruntime等を引く）
 COPY requirements.txt .
