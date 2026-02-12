@@ -1,5 +1,3 @@
 boto3==1.34.*
 requests==2.32.*
 pillow==10.*
-rembg==2.0.72
-numpy==2.2.0
