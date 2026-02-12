@@ -7,7 +7,7 @@ from urllib.parse import urlparse, unquote
 
 import boto3
 import requests
-from rembg import remove
+
 
 s3 = boto3.client("s3")
 
@@ -74,6 +74,7 @@ def _presigned_get_url(bucket: str, key: str) -> str:
     )
 
 def lambda_handler(event, context):
+    from rembg import remove
     try:
         payload = _parse_payload(event)
         image_url = payload.get("image_url")
