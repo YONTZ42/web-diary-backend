@@ -1,0 +1,53 @@
+name: Build & Push rembg-lambda (cached)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "Lambda_CropSAM2/**"
+      - ".github/workflows/Lambda_CropSAM2-push-ecr.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-northeast-1
+      ECR_REPOSITORY: web-diary/crop-sam2-lambda   # ← ECRのリポジトリ名（小文字）
+      CONTEXT_DIR: ./Lambda_CropSAM2         # ← Docker build の context path
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-ecr-lambda
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+
+      - name: Build and push (with GHA cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.CONTEXT_DIR }}
+          push: true
+          platforms: linux/amd64
+          provenance: false
+
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
