@@ -10,3 +10,4 @@ opencv-python-headless==4.10.0.84
 
 # Ultralytics（YOLOv8）
 ultralytics==8.2.0
+scipy==1.14.1

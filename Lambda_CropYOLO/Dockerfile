@@ -1,7 +1,8 @@
 FROM public.ecr.aws/lambda/python:3.11
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
+    PIP_NO_CACHE_DIR=1 \
+    PIP_ONLY_BINARY=:all:
 
 RUN yum -y update && \
     yum -y install libgomp && \
