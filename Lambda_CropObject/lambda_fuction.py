@@ -4,6 +4,7 @@ import base64
 import hashlib
 from urllib.parse import urlparse, unquote
 
+
 import boto3
 import requests
 from rembg import remove
