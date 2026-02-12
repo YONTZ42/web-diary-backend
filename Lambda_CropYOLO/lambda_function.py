@@ -26,6 +26,7 @@ s3 = boto3.client("s3")
 model = YOLO(MODEL_NAME)
 
 
+
 def _download_image(url: str, timeout=15) -> Image.Image:
     r = requests.get(url, timeout=timeout)
     r.raise_for_status()

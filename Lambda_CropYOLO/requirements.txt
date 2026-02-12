@@ -4,7 +4,7 @@ Pillow==10.4.0
 
 
 # Ultralytics YOLO (YOLO26対応)
-ultralytics==26.0.0
+ultralytics==8.0.0
 
 # OpenCVは headless 推奨
 opencv-python-headless==4.10.0.84
