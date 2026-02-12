@@ -3,6 +3,7 @@ FROM public.ecr.aws/lambda/python:3.10
 # 1. 必要なパッケージをまとめてインストール（NumPyを1.26.4に固定）
 RUN python -m pip install -U pip setuptools wheel && \
     python -m pip install --no-cache-dir \
+    "numba<0.60" \
     "numpy==1.26.4" \
     "onnxruntime==1.16.3" \
     "rembg==2.0.60"
@@ -15,6 +16,8 @@ RUN python -m pip install --no-cache-dir -r requirements.txt
 # Lambda実行時にネットから落とさないようにし、読み取り専用エラーを回避
 RUN mkdir -p /var/task/models
 ENV U2NET_HOME=/var/task/models
+ENV NUMBA_CACHE_DIR=/tmp
+ENV MPLCONFIGDIR=/tmp
 # ここで使うモデルをあらかじめダウンロード（例：u2net）
 RUN curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/u2net.onnx -o /var/task/models/u2net.onnx
 
