@@ -249,7 +249,7 @@ export interface components {
             kind: components["schemas"]["KindEnum"];
             /** @description localならblobURI/uuid, remoteならS3 key/URL */
             key: string;
-            mime: string;
+            mime?: string | null;
             width?: number | null;
             height?: number | null;
             sha256?: string | null;
@@ -267,7 +267,7 @@ export interface components {
             kind: components["schemas"]["KindEnum"];
             /** @description localならblobURI/uuid, remoteならS3 key/URL */
             key: string;
-            mime: string;
+            mime?: string | null;
             width?: number | null;
             height?: number | null;
             sha256?: string | null;
