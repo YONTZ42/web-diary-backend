@@ -2,38 +2,48 @@ name: build-and-push-ecr
 
 on:
   push:
-    branches: [ "main" ]
-    paths:
-      - "Lambda_CropYOLO/lambda_function.py"
-      - ".github/workflows/Lambda_CropYOLO-push-ecr.yml"
+    branches: ["main"]
+  workflow_dispatch:
+
 permissions:
   id-token: write
   contents: read
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPOSITORY: crop-yolo-lambda
-  IMAGE_TAG: latest
-
+  ECR_REPOSITORY: yolo26-seg-lambda
+  CONTEXT_DIR: ./Lambda_CropYOLO
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Configure AWS credentials (OIDC)
+      # OIDCでAWS認証（長期キー不要）
+      - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
+      - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push image to ECR
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker build -t $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} .
-          docker push $ECR_REGISTRY/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+      # buildx + GitHub Actions cache
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ここが本体：ビルド & プッシュ
+      - name: Build and Push
+        uses: docker/build-push-action@v6
+        with:
+          context: CONTEXT_DIR
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
