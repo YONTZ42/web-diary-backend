@@ -1,5 +1,5 @@
 # 手順1で作ったベースイメージを参照する
-FROM 563224521754.dkr.ecr.ap-northeast-1.amazonaws.com/web-diary/sam2-base:latest
+FROM 563224521754.dkr.ecr.ap-northeast-1.amazonaws.com/web-diary/crop-sam2-lambda:latest
 
 # コードをコピーするだけ（一瞬で終わります）
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}
