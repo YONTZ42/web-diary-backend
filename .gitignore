@@ -10,6 +10,8 @@ staticfiles/
 
 # --- Environment Variables (絶対公開禁止！) ---
 .env*
+*.env*
+*.env
 .venv
 env/
 venv/
