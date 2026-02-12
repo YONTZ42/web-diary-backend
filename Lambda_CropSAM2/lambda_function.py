@@ -23,6 +23,14 @@ s3 = boto3.client("s3")
 
 def lambda_handler(event, context):
     try:
+        
+        greeting = event.get("greeting", None)
+        if isinstance(greeting, str) and greeting.strip():
+            return {
+                "statusCode": 200,
+                "body": json.dumps({"message": "Hello, Stkcker Geek!", "received": greeting})
+            }
+        
         # 1. パラメータ取得
         image_url = event.get("image_url")
         if not image_url:
