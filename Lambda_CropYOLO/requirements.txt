@@ -1,13 +1,15 @@
 boto3==1.34.162
 requests==2.32.3
 Pillow==10.4.0
-
-# ビルド事故回避（numpy2系に上がらないように固定）
 numpy==1.26.4
-
-# OpenCVは4.13系が numpy>=2 を要求するので固定
-opencv-python-headless==4.10.0.84
-
-# Ultralytics（YOLOv8）
-ultralytics==8.2.0
 scipy==1.14.1
+
+opencv-python-headless==4.10.0.84
+PyYAML==6.0.3
+tqdm==4.67.3
+psutil==7.2.2
+py-cpuinfo==9.0.0
+thop==0.1.1.post2209072238
+
+# 余計な重さを避けたいなら、pandas/seaborn/matplotlibは一旦外してOK（推論だけなら不要なことが多い）
+# 必要なら後で足す
