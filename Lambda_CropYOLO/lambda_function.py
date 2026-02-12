@@ -21,6 +21,7 @@ PRESIGN_EXPIRES = int(os.environ.get("PRESIGN_EXPIRES", "3600"))
 # yolo26n-seg.pt / yolo26s-seg.pt ... など（デフォルトは軽量nano）
 MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
 
+
 # ---- Clients / Model (cold startでロード) ----
 s3 = boto3.client("s3")
 model = YOLO(MODEL_NAME)
