@@ -39,7 +39,7 @@ jobs:
       - name: Build and Push
         uses: docker/build-push-action@v6
         with:
-          context: CONTEXT_DIR
+          context: ${{ env.CONTEXT_DIR }}
           push: true
           provenance: false
           tags: |
