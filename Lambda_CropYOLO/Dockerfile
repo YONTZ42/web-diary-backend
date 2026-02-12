@@ -16,7 +16,8 @@ RUN yum -y update && \
 # まずtorchをCPUで入れる（LambdaでGPUは基本使わない前提）
 # PyTorch公式CPU wheel index
 RUN pip install --upgrade pip && \
-    pip install --index-url https://download.pytorch.org/whl/cpu \
+    pip install numpy==1.26.4 && \
+    pip install --extra-index-url https://download.pytorch.org/whl/cpu \
       torch==2.5.1 torchvision==0.20.1
 
 # requirements

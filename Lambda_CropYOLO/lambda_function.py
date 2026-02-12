@@ -17,6 +17,7 @@ S3_BUCKET = os.environ["S3_BUCKET"]
 S3_PREFIX = os.environ.get("S3_PREFIX", "cutouts/")
 PRESIGN_EXPIRES = int(os.environ.get("PRESIGN_EXPIRES", "3600"))
 
+
 # yolo26n-seg.pt / yolo26s-seg.pt ... など（デフォルトは軽量nano）
 MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
 
