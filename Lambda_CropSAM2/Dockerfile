@@ -1,11 +1,11 @@
 
-FROM public.ecr.aws/lambda/python:3.11
+FROM public.ecr.aws/lambda/python:3.11 AS builder
 
 # OS パッケージのインストール
 RUN yum update -y && yum install -y \
     gcc gcc-c++ cmake git mesa-libGL \
-    && yum clean all
-
+    && yum clean all && rm -rf /var/cache/yum  
+    # キャッシュを完全に消去
 # 1. pip 自体のアップグレード
 RUN python -m pip install --upgrade pip
 
@@ -32,11 +32,10 @@ RUN pip install --no-cache-dir \
     "pyyaml"
 
 
-
 # 5. モデル重みのダウンロード
 RUN mkdir -p /var/task/models && \
-    curl -L https://dl.fbaipublicfiles.com/segment_anything_2/072424/sam2_hiera_tiny.pt \
-    -o /var/task/models/sam2_hiera_tiny.pt
+    curl -L https://dl.fbaipublicfiles.com/segment_anything_2/072424/sam2_hiera_small.pt \
+    -o /var/task/models/sam2_hiera_small.pt
 
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}
 

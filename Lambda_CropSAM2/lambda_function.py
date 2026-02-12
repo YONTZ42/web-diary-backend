@@ -12,7 +12,7 @@ from sam2.sam2_image_predictor import SAM2ImagePredictor
 
 # 環境変数（S3バケット名などはLambda側で設定）
 S3_BUCKET = os.environ.get("OUTPUT_BUCKET")
-MODEL_PATH = "/var/task/models/sam2_hiera_small.pt"
+MODEL_PATH = "sam2_hiera_small.pt"
 MODEL_CONFIG = "sam2_hiera_s.yaml" # ライブラリ内蔵のconfig名
 
 # モデルのグローバルロード（コールドスタート対策）
