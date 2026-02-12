@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --only-binary=:all: -r requirements.txt
 
 # ultralyticsは依存を引かせない（opencv-pythonを防ぐ）
-RUN pip install ultralytics==8.2.0 --no-deps
+RUN pip install ultralytics --no-deps
 
 # torch/torchvision（CPU）もここで固定（requirementsに入れない）
 RUN pip install --index-url https://download.pytorch.org/whl/cpu \
