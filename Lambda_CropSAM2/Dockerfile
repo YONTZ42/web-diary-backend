@@ -1,41 +1,36 @@
-# AWS Lambda Python 3.11 ベースイメージ
 FROM public.ecr.aws/lambda/python:3.11
 
-# OS パッケージのインストール（OpenCV や SAM2 のビルドに必要）
+# OS パッケージのインストール
 RUN yum update -y && yum install -y \
-    gcc \
-    gcc-c++ \
-    cmake \
-    git \
-    mesa-libGL \
+    gcc gcc-c++ cmake git mesa-libGL \
     && yum clean all
 
-# 1. 依存関係のインストール
-# SAM2 は torch 2.3.1+ を推奨。CPU版を指定してインストール
+# 1. pip 自体のアップグレード
+RUN python -m pip install --upgrade pip
+
+# 2. PyTorch (CPU) のインストール
 RUN pip install --no-cache-dir \
-    "numpy<2.0.0" \
-    "torch>=2.3.1" \
-    "torchvision>=0.18.1" \
+    "torch>=2.3.1+cpu" "torchvision>=0.18.1+cpu" \
     --index-url https://download.pytorch.org/whl/cpu
 
-# 2. SAM2 本体のインストール
+# 3. SAM2 本体のインストール
 RUN pip install --no-cache-dir git+https://github.com/facebookresearch/segment-anything-2.git
 
-# 3. その他の必要ライブラリ
+# 4. 依存関係の地獄を回避するための厳格なインストール
+# numpy < 2.0.0 を維持するため、opencv は 4.9.x 以前に固定します
 RUN pip install --no-cache-dir \
-    opencv-python-headless \
-    pillow \
-    requests \
-    boto3
+    "numpy<2.0.0" \
+    "opencv-python-headless<4.10" \
+    "pillow" \
+    "requests" \
+    "boto3" \
+    "pyyaml"
 
-# 4. モデル重みのダウンロード
-# 今回は比較的軽量で高精度な sam2_hiera_small.pt を使用
+# 5. モデル重みのダウンロード
 RUN mkdir -p /var/task/models && \
     curl -L https://dl.fbaipublicfiles.com/segment_anything_2/072424/sam2_hiera_small.pt \
     -o /var/task/models/sam2_hiera_small.pt
 
-# 5. アプリケーションコードのコピー
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}
 
-# 起動コマンド
 CMD ["lambda_function.lambda_handler"]
