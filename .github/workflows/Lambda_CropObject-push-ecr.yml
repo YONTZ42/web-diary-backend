@@ -16,6 +16,10 @@ permissions:
 jobs:
   push:
     runs-on: ubuntu-latest
+    env:
+      AWS_REGION: ap-northeast-1
+      ECR_REPOSITORY: web-diary/rembg-lambda   # ← ECRのリポジトリ名（小文字）
+      CONTEXT_DIR: ./Lambda_CropObject         # ← Docker build の context path
     steps:
       - uses: actions/checkout@v4
 
@@ -23,14 +27,12 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
-          aws-region: ap-northeast-1
+          aws-region: ${{ env.AWS_REGION }}
           role-session-name: gha-ecr-lambda
 
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-
-
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -38,10 +40,10 @@ jobs:
       - name: Build and push (with GHA cache)
         uses: docker/build-push-action@v6
         with:
-          context: ./Lambda_CropObject
+          context: ${{ env.CONTEXT_DIR }}
           push: true
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/web-diary/web-diary/rembg-lambda:latest
-            ${{ steps.login-ecr.outputs.registry }}/web-diary/web-diary/rembg-lambda:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
