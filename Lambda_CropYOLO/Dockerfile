@@ -1,43 +1,37 @@
 FROM public.ecr.aws/lambda/python:3.11
 
+# 環境変数の設定
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_ONLY_BINARY=:all:
+    PIP_NO_CACHE_DIR=1
 
-RUN yum -y update && yum -y install libgomp && yum clean all
+# OSの依存ライブラリ (libgompはOpenMPの並列処理に必須)
+RUN yum -y update && \
+    yum -y install libgomp && \
+    yum clean all
 
-# 1) まず numpy を固定（ここが超重要：sdist回避）
-RUN pip install --upgrade pip && \
-    pip install numpy==1.26.4
+# 1) pipを最新にする
+RUN pip install --upgrade pip
 
-# 2) torch/torchvision（CPU wheel）
-RUN pip install --index-url https://download.pytorch.org/whl/cpu \
-      torch==2.5.1 torchvision==0.20.1
+# 2) OpenCV Headless を最初に入れる
+# これを先に入れることで、ultralyticsが依存で重いGUI版を入れるのを防ぎます
+RUN pip install opencv-python-headless
 
-# 3) opencv headless を先に入れる（cv2はこれに寄せる）
-RUN pip install opencv-python-headless==4.10.0.84
+# 3) PyTorch (CPU版)
+RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
-# 4) ultralytics は deps を引かせない（opencv-python を引かせないため）
-RUN pip install ultralytics==8.0.0 --no-deps
-
-# 5) ultralytics が必要とする周辺 deps を明示固定（ビルド安定用）
-RUN pip install \
-      PyYAML==6.0.2 \
-      tqdm==4.66.5 \
-      psutil==6.0.0 \
-      scipy==1.14.1 \
-      matplotlib==3.9.2 \
-      requests==2.32.3 \
-      Pillow==10.4.0 \
-      boto3==1.34.162
-
-# 6) 残り（アプリ依存）
+# 4) その他の依存関係を一括インストール
+# --no-deps は使わず、正常に構成させます
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-# 7) (推奨) モデル重みをビルド時に取得して同梱（MODEL_NAME がデフォならこれでOK）
-#    ※ネットワーク制限がある実行環境対策
-RUN python -c "from ultralytics import YOLO; YOLO('yolo26n-seg.pt')"
+# 5) IPython を明示的に追加 (ultralyticsの一部機能で必須)
+RUN pip install ipython
 
+# 6) モデルの事前ダウンロード (ビルド時に同梱)
+# 最新の YOLO11 または YOLO26 を指定
+RUN python -c "from ultralytics import YOLO; YOLO('yolo11n-seg.pt')"
+
+# 7) アプリケーションコード
 COPY lambda_function.py ${LAMBDA_TASK_ROOT}/
+
 CMD ["lambda_function.lambda_handler"]
