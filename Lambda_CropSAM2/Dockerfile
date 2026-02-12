@@ -9,15 +9,17 @@ RUN yum update -y && yum install -y \
 RUN python -m pip install --upgrade pip
 
 # 2. PyTorch (CPU) のインストール
+# "+cpu" を使う場合は必ず "==" を使用します
 RUN pip install --no-cache-dir \
-    "torch>=2.3.1+cpu" "torchvision>=0.18.1+cpu" \
+    "torch==2.3.1+cpu" \
+    "torchvision==0.18.1+cpu" \
     --index-url https://download.pytorch.org/whl/cpu
 
 # 3. SAM2 本体のインストール
-RUN pip install --no-cache-dir git+https://github.com/facebookresearch/segment-anything-2.git
+RUN pip install --no-cache-dir "sam-2==1.0"
 
-# 4. 依存関係の地獄を回避するための厳格なインストール
-# numpy < 2.0.0 を維持するため、opencv は 4.9.x 以前に固定します
+# 4. 依存関係の競合（NumPy 2.0 問題）を回避
+# OpenCV 4.10以降はNumPy 2.0を要求し、ビルドエラー（GCCの古さ）を引き起こすため固定
 RUN pip install --no-cache-dir \
     "numpy<2.0.0" \
     "opencv-python-headless<4.10" \
