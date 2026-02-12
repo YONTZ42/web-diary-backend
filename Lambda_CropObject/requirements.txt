@@ -1,0 +1,5 @@
+boto3==1.34.*
+requests==2.32.*
+rembg==2.0.*
+onnxruntime==1.18.*
+pillow==10.*

@@ -1,0 +1,52 @@
+name: Build & Push rembg-lambda (cached)
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - "lambda-CropObject/**"
+      - ".github/workflows/push-CropObject-lambda-ecr.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ap-northeast-1
+          role-session-name: gha-ecr-lambda
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Ensure ECR repository exists
+        env:
+          ECR_REPOSITORY: web-diary/rembg-lambda
+          AWS_REGION: ap-northeast-1
+        run: |
+          aws ecr describe-repositories --repository-names "$ECR_REPOSITORY" --region "$AWS_REGION" >/dev/null 2>&1 \
+          || aws ecr create-repository --repository-name "$ECR_REPOSITORY" --region "$AWS_REGION" >/dev/null
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push (with GHA cache)
+        uses: docker/build-push-action@v6
+        with:
+          context: ./lambda-CropObject
+          push: true
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/web-diary/lambda_CropObject:latest
+            ${{ steps.login-ecr.outputs.registry }}/web-diary/lambda_CropObject:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
