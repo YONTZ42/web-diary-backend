@@ -8,7 +8,8 @@ from urllib.parse import urlparse, unquote
 import boto3
 import requests
 
-
+os.environ['NUMBA_CACHE_DIR'] = '/tmp'
+os.environ['MPLCONFIGDIR'] = '/tmp'
 s3 = boto3.client("s3")
 
 OUTPUT_BUCKET = os.environ["OUTPUT_BUCKET"]                # 出力先バケット
