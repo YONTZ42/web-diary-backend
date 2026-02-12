@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]
     paths:
-      - "Lambda_CropSAM2/**"
       - ".github/workflows/Lambda_CropSAM2-push-ecr.yml"
   workflow_dispatch:
 
