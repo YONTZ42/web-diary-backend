@@ -1,4 +1,4 @@
-FROM public.ecr.aws/lambda/python:3.13
+FROM public.ecr.aws/lambda/python:3.11
 
 # 依存（rembgはonnxruntime等を引く）
 COPY requirements.txt .
