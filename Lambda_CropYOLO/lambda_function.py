@@ -23,6 +23,7 @@ MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
 
 
 
+
 # ---- Clients / Model (cold startでロード) ----
 s3 = boto3.client("s3")
 model = YOLO(MODEL_NAME)
