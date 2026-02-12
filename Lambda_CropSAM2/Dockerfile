@@ -1,41 +1,41 @@
-# syntax=docker/dockerfile:1
+# AWS Lambda Python 3.11 ベースイメージ
 FROM public.ecr.aws/lambda/python:3.11
 
-# --- 安定運用のための設定 ---
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    # CPU運用: SAM2のCUDA拡張はビルドしない（安定性優先）
-    SAM2_BUILD_CUDA=0 \
-    # モデル配置先
-    SAM2_MODEL_DIR=/opt/sam2_checkpoints
+# OS パッケージのインストール（OpenCV や SAM2 のビルドに必要）
+RUN yum update -y && yum install -y \
+    gcc \
+    gcc-c++ \
+    cmake \
+    git \
+    mesa-libGL \
+    && yum clean all
 
-# OS packages（git不要: sam2はPyPIから入れる。wget/curl等だけ）
-RUN yum -y update && \
-    yum -y install wget && \
-    yum clean all
+# 1. 依存関係のインストール
+# SAM2 は torch 2.3.1+ を推奨。CPU版を指定してインストール
+RUN pip install --no-cache-dir \
+    "numpy<2.0.0" \
+    "torch>=2.3.1" \
+    "torchvision>=0.18.1" \
+    --index-url https://download.pytorch.org/whl/cpu
 
-# --- PyTorch (CPU) ---
-# SAM2推奨: torch>=2.5.1, torchvision>=0.20.1 :contentReference[oaicite:1]{index=1}
-RUN python -m pip install --upgrade pip && \
-    python -m pip install \
-      --index-url https://download.pytorch.org/whl/cpu \
-      torch==2.5.1 torchvision==0.20.1
+# 2. SAM2 本体のインストール
+RUN pip install --no-cache-dir git+https://github.com/facebookresearch/segment-anything-2.git
 
-# --- Python dependencies ---
-COPY requirements.txt .
-RUN python -m pip install -r requirements.txt
+# 3. その他の必要ライブラリ
+RUN pip install --no-cache-dir \
+    opencv-python-headless \
+    pillow \
+    requests \
+    boto3
 
-# --- SAM2 checkpoint (軽量: SAM 2.1 hiera tiny) をビルド時にダウンロード ---
-# 公式配布: dl.fbaipublicfiles.com の sam2.1_hiera_tiny.pt :contentReference[oaicite:2]{index=2}
-RUN mkdir -p "${SAM2_MODEL_DIR}" && \
-    wget -q -O "${SAM2_MODEL_DIR}/sam2.1_hiera_tiny.pt" \
-      "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_tiny.pt" || \
-    wget -q -O "${SAM2_MODEL_DIR}/sam2.1_hiera_tiny.pt" \
-      "https://dl.fbaipublicfiles.com/segment_anything_2/072824/sam2_hiera_tiny.pt"
+# 4. モデル重みのダウンロード
+# 今回は比較的軽量で高精度な sam2_hiera_small.pt を使用
+RUN mkdir -p /var/task/models && \
+    curl -L https://dl.fbaipublicfiles.com/segment_anything_2/072424/sam2_hiera_small.pt \
+    -o /var/task/models/sam2_hiera_small.pt
 
-# Lambda handler
-COPY lambda_function.py ${LAMBDA_TASK_ROOT}/lambda_function.py
+# 5. アプリケーションコードのコピー
+COPY lambda_function.py ${LAMBDA_TASK_ROOT}
 
-# 既定ハンドラ
+# 起動コマンド
 CMD ["lambda_function.lambda_handler"]

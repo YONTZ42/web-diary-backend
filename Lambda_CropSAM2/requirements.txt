@@ -1,9 +1,0 @@
-# SAM2 (PyPI: 1.1.0, 2024-12-21) :contentReference[oaicite:4]{index=4}
-sam2==1.1.0
-
-# 画像I/O
-pillow==10.4.0
-requests==2.32.3
-
-# SAM2周辺で参照されがち（cv2依存を避けたい場合は消してもOK）
-opencv-python-headless==4.10.0.84
