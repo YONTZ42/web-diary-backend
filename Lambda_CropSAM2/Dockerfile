@@ -8,12 +8,14 @@ RUN yum update -y && yum install -y \
 # 1. pip 自体のアップグレード
 RUN python -m pip install --upgrade pip
 
+RUN pip install --no-cache-dir "numpy<2.0.0"
+
 # 2. PyTorch (CPU) のインストール
 # "+cpu" を使う場合は必ず "==" を使用します
 RUN pip install --no-cache-dir \
     "torch==2.3.1+cpu" \
     "torchvision==0.18.1+cpu" \
-    --index-url https://download.pytorch.org/whl/cpu
+    --extra-index-url https://download.pytorch.org/whl/cpu
 
 # 3. SAM2 本体のインストール
 RUN pip install --no-cache-dir "sam-2==1.0"
