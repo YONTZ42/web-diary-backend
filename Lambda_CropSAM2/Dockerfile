@@ -31,6 +31,7 @@ RUN pip install --no-cache-dir \
     "boto3" \
     "pyyaml"
 
+    
 # 5. モデル重みのダウンロード
 RUN mkdir -p /var/task/models && \
     curl -L https://dl.fbaipublicfiles.com/segment_anything_2/072424/sam2_hiera_small.pt \
