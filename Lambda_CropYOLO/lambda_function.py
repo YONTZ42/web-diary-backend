@@ -20,6 +20,7 @@ YOLO_CONFIG_DIR= os.environ.get("YOLO_CONFIG_DIR", "/temp/Ultralytics/")  # モ�
 
 # yolo26n-seg.pt / yolo26s-seg.pt ... など（デフォルトは軽量nano）
 MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
+MODEL_PATH = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", "/var/task"), MODEL_NAME)
 
 
 
@@ -27,7 +28,7 @@ MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
 
 # ---- Clients / Model (cold startでロード) ----
 s3 = boto3.client("s3")
-model = YOLO(MODEL_NAME)
+model = YOLO(MODEL_PATH)
 
 
 
