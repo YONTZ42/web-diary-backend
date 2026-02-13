@@ -17,11 +17,5 @@ RUN pip install ultralytics --no-deps
 RUN pip install --extra-index-url https://download.pytorch.org/whl/cpu \
       torch==2.5.1 torchvision==0.20.1
 
-      
+
 RUN python -c "import ultralytics; print('ultralytics ok', ultralytics.__version__)"
-
-# （任意）インポート検証
-RUN python -c "import cv2; import ultralytics; print('cv2 ok', cv2.__version__); print('ultralytics ok', ultralytics.__version__)"
-
-# モデル同梱（必要なら）
-RUN python -c "from ultralytics import YOLO; YOLO('yolo26n-seg.pt')"
