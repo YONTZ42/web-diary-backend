@@ -22,6 +22,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+        lfs: true
+        
 
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -41,6 +44,12 @@ jobs:
         id: reqhash
         run: |
           echo "hash=$(sha256sum Lambda_CropYOLO/requirements.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+
+      - name: Verify model file exists
+        run: |
+          ls -la Lambda_CropYOLO/models || true
+          test -f Lambda_CropYOLO/models/yolo26n-seg.pt && echo "OK model exists" || (echo "NG model missing" && exit 1)
 
       # ---- Build & Push BASE (requirements hash tag) ----
       - name: Build & Push BASE image
