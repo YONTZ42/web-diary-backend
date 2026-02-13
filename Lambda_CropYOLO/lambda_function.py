@@ -72,14 +72,6 @@ def _make_rgba_cutout(img_rgb: Image.Image, mask_2d: np.ndarray) -> Image.Image:
 
 
 def lambda_handler(event, context):
-    """
-    event:
-      {
-        "image_url": "https://....jpg",
-        "key": "optional/path/output.png",   # optional
-        "return": "presigned" | "s3"         # optional (default presigned)
-      }
-    """
     try:
         image_url = event["image_url"]
         out_key = event.get("key")
@@ -88,29 +80,47 @@ def lambda_handler(event, context):
         if not out_key:
             out_key = f"{S3_PREFIX}{uuid.uuid4().hex}.png"
 
-        # 1) download
         img = _download_image(image_url)
 
-        # 2) infer
-        # imgsz: 小さくすると高速/精度↓。必要なら env で調整してもOK
-        results = model.predict(img, verbose=False)
+        # 推論パラメータ（まずは検出しやすく）
+        conf = float(event.get("conf", 0.25))
+        imgsz = int(event.get("imgsz", 640))
+
+        results = model.predict(img, verbose=False, conf=conf, imgsz=imgsz)
         r0 = results[0]
 
-        # 3) choose instance
+        # ---- debug ----
+        boxes_n = 0 if r0.boxes is None else len(r0.boxes)
+        masks_n = 0 if r0.masks is None else len(r0.masks)
+        print(json.dumps({
+            "model": MODEL_NAME,
+            "image_url": image_url,
+            "boxes": boxes_n,
+            "masks": masks_n,
+            "conf": conf,
+            "imgsz": imgsz,
+        }, ensure_ascii=False))
+
+        # 0件なら「検出なし」で返す（エラー扱いにしない）
+        if boxes_n == 0 or masks_n == 0:
+            return {
+                "statusCode": 422,
+                "headers": {"content-type": "application/json"},
+                "body": json.dumps({
+                    "error": "No segmentation detected",
+                    "model": MODEL_NAME,
+                    "boxes": boxes_n,
+                    "masks": masks_n,
+                }, ensure_ascii=False)
+            }
+
         idx = _pick_most_salient_instance(r0)
+        mask = r0.masks.data[idx].cpu().numpy()
 
-        # 4) mask -> numpy
-        # masks.data is torch; convert to numpy
-        mask = r0.masks.data[idx].cpu().numpy()  # (H,W) float/bool
-
-        # 5) create cutout
         cutout = _make_rgba_cutout(img, mask)
-
-        # 6) save to /tmp
         tmp_path = f"/tmp/{uuid.uuid4().hex}.png"
         cutout.save(tmp_path, format="PNG", optimize=True)
 
-        # 7) upload to s3
         with open(tmp_path, "rb") as f:
             s3.put_object(
                 Bucket=S3_BUCKET,
@@ -120,7 +130,6 @@ def lambda_handler(event, context):
                 CacheControl="public, max-age=31536000, immutable",
             )
 
-        # 8) return url
         if return_mode == "s3":
             url = f"s3://{S3_BUCKET}/{out_key}"
         else:
@@ -133,10 +142,7 @@ def lambda_handler(event, context):
         return {
             "statusCode": 200,
             "headers": {"content-type": "application/json"},
-            "body": json.dumps(
-                {"bucket": S3_BUCKET, "key": out_key, "url": url},
-                ensure_ascii=False
-            ),
+            "body": json.dumps({"bucket": S3_BUCKET, "key": out_key, "url": url}, ensure_ascii=False),
         }
 
     except Exception as e:

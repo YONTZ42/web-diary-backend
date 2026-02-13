@@ -13,8 +13,8 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPO_BASE: crop-yolo-lambda/base
-  ECR_REPO_APP: crop-yolo-lambda
+  ECR_REPO_BASE: web-diary/crop-yolo-lambda/base
+  ECR_REPO_APP: web-diary/crop-yolo-lambda
 
 jobs:
   build:
