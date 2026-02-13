@@ -1,0 +1,25 @@
+services:
+  crop-yolo:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: crop-yolo-lambda:local
+    ports:
+      - "9000:8080"
+    environment:
+      # 必須（あなたのlambda_function.pyが参照）
+      S3_BUCKET: documentary-bucket
+      S3_PREFIX: cutouts/
+      PRESIGN_EXPIRES: "3600"
+
+      # 任意
+      MODEL_NAME: yolo26n-seg.pt
+      YOLO_CONFIG_DIR: /tmp/Ultralytics
+
+      # AWS SDKが拾うリージョン
+      AWS_REGION: ap-northeast-1
+      AWS_DEFAULT_REGION: ap-northeast-1
+
+    # ローカルAWS資格情報を使いたい場合（S3にPutするならほぼ必要）
+    volumes:
+      - ~/.aws:/root/.aws:ro

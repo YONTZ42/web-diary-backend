@@ -1,157 +1,157 @@
+
+import base64
+import json
 import os
 import io
-import json
-import uuid
-import time
-from urllib.parse import urlparse
-
 import boto3
-import requests
-from PIL import Image
 import numpy as np
+from PIL import Image
 
+# ultralytics
 from ultralytics import YOLO
 
+s3 = boto3.client("s3")
+
 # ---- Env ----
-S3_BUCKET = os.environ["S3_BUCKET"]
 S3_PREFIX = os.environ.get("S3_PREFIX", "cutouts/")
 PRESIGN_EXPIRES = int(os.environ.get("PRESIGN_EXPIRES", "3600"))
-YOLO_CONFIG_DIR= os.environ.get("YOLO_CONFIG_DIR", "/temp/Ultralytics/")  # モデル配置ディレクトリ
+YOLO_CONFIG_DIR= os.environ.get("YOLO_CONFIG_DIR", "/temp/Ultralytics")  # モデル配置ディレクトリ
 
 # yolo26n-seg.pt / yolo26s-seg.pt ... など（デフォルトは軽量nano）
 MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
 MODEL_PATH = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", "/var/task"), MODEL_NAME)
-
-
-
-
-
-# ---- Clients / Model (cold startでロード) ----
-s3 = boto3.client("s3")
 model = YOLO(MODEL_PATH)
+DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")
 
 
-
-
-def _download_image(url: str, timeout=15) -> Image.Image:
-    r = requests.get(url, timeout=timeout)
-    r.raise_for_status()
-    img = Image.open(io.BytesIO(r.content)).convert("RGB")
-    return img
-
-
-def _pick_most_salient_instance(result) -> int:
+def _read_request_bytes(event) -> tuple[bytes, str | None]:
     """
-    「最も目立つ」= (mask area) * (confidence) が最大のインスタンスを選ぶ
+    Lambda Proxy eventから画像bytesを取り出す。
+    - 生バイナリ（proxyで isBase64Encoded=true の body）
+    - もしくは application/json で { "imageBase64": "...", "s3Key": "...", "bucket": "..." } 形式
     """
-    if result.masks is None or result.boxes is None:
-        raise ValueError("No masks/boxes found")
+    headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
+    content_type = headers.get("content-type", "")
 
-    masks = result.masks.data  # torch.Tensor [N, H, W]
-    conf = result.boxes.conf   # torch.Tensor [N]
+    body = event.get("body") or ""
+    is_b64 = bool(event.get("isBase64Encoded"))
 
-    # mask area
-    areas = masks.sum(dim=(1, 2)).float()  # [N]
-    scores = areas * conf.float()
-    idx = int(scores.argmax().item())
-    return idx
+    # JSONで来た場合
+    if "application/json" in content_type:
+        payload = json.loads(body)
+        image_b64 = payload.get("imageBase64")
+        if not image_b64:
+            raise ValueError("Missing imageBase64 in JSON body")
+        return base64.b64decode(image_b64), payload.get("s3Key")
+
+    # バイナリで来た場合（Lambda proxyはbodyをbase64にして渡してくることが多い）
+    if is_b64:
+        return base64.b64decode(body), (headers.get("x-s3-key") or None)
+
+    # isBase64Encoded=false で生文字列が来たケース（ほぼ無いが保険）
+    return body.encode("utf-8"), (headers.get("x-s3-key") or None)
 
 
-def _make_rgba_cutout(img_rgb: Image.Image, mask_2d: np.ndarray) -> Image.Image:
-    # mask_2d: (H,W) float(0..1) or uint8(0..255)
+def _segment_to_rgba_png(image_bytes: bytes) -> bytes:
+    """
+    YOLO segmentationでマスクを作り、背景透過PNG(bytes)を返す。
+    ここでは「最も面積が大きいマスク」を採用（複数なら合成も可能）。
+    """
+    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    w, h = img.size
+    np_img = np.array(img)
 
-    if mask_2d.dtype != np.uint8:
-        mask_u8 = (mask_2d > 0.5).astype(np.uint8) * 255
-    else:
-        mask_u8 = mask_2d
+    # 推論（CPU想定）
+    results = model(np_img, verbose=False)
+    r0 = results[0]
 
-    # ✅ 重要：マスクを元画像サイズに合わせる
-    alpha = Image.fromarray(mask_u8, mode="L")
-    if alpha.size != img_rgb.size:
-        alpha = alpha.resize(img_rgb.size, resample=Image.NEAREST)
+    if r0.masks is None or r0.boxes is None or len(r0.boxes) == 0:
+        # 何も検出できない場合：そのまま不透明で返すか、全透明で返すか選べる
+        # ここでは「そのまま(不透明)」で返す
+        rgba = img.convert("RGBA")
+        out = io.BytesIO()
+        rgba.save(out, format="PNG")
+        return out.getvalue()
 
-    rgba = img_rgb.convert("RGBA")
-    rgba.putalpha(alpha)
-    return rgba
+    # mask: (n, mask_h, mask_w) float tensor -> numpy
+    masks = r0.masks.data.cpu().numpy()  # shape: (N, mh, mw)
+    # スコア
+    scores = r0.boxes.conf.cpu().numpy()  # (N,)
+
+    # マスクを元画像サイズにリサイズして、最大面積（or スコア最大）を選ぶ
+    best_idx = int(np.argmax(scores))
+    best_mask = masks[best_idx]
+
+    mask_img = Image.fromarray((best_mask * 255).astype(np.uint8), mode="L")
+    mask_img = mask_img.resize((w, h), resample=Image.BILINEAR)
+
+    # しきい値で2値化（必要なら）
+    alpha = np.array(mask_img)
+    print("Mask alpha stats:", alpha.min(), alpha.max(), alpha.mean())
+    alpha = (alpha > 128).astype(np.uint8) * 255
+    
+
+    rgba = Image.fromarray(np.dstack([np_img, alpha]), mode="RGBA")
+
+    out = io.BytesIO()
+    rgba.save(out, format="PNG")
+    return out.getvalue()
+
+
+def _put_to_s3(png_bytes: bytes, bucket: str, key: str) -> str:
+    s3.put_object(
+        Bucket=bucket,
+        Key=key,
+        Body=png_bytes,
+        ContentType="image/png",
+        CacheControl="public, max-age=31536000",
+    )
+    # 返すURLは2択：
+    # 1) 署名付きURL（安全・確実）
+    url = s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket, "Key": key},
+        ExpiresIn=3600,
+    )
+    return url
 
 
 def lambda_handler(event, context):
     try:
-        image_url = event["image_url"]
-        out_key = event.get("key")
-        return_mode = event.get("return", "presigned")
+        img_bytes, s3_key = _read_request_bytes(event)
 
-        if not out_key:
-            out_key = f"{S3_PREFIX}{uuid.uuid4().hex}.png"
+        # JSONでbucketが来る可能性も考慮
+        headers = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
+        bucket = headers.get("x-s3-bucket") or DEFAULT_BUCKET
 
-        img = _download_image(image_url)
+        out_png = _segment_to_rgba_png(img_bytes)
 
-        # 推論パラメータ（まずは検出しやすく）
-        conf = float(event.get("conf", 0.25))
-        imgsz = int(event.get("imgsz", 640))
+        s3_url = None
+        if s3_key:
+            if not bucket:
+                raise ValueError("s3Key was provided but BUCKET_NAME or x-s3-bucket is missing")
+            s3_url = _put_to_s3(out_png, bucket, s3_key)
 
-        results = model.predict(img, verbose=False, conf=conf, imgsz=imgsz)
-        r0 = results[0]
-
-        # ---- debug ----
-        boxes_n = 0 if r0.boxes is None else len(r0.boxes)
-        masks_n = 0 if r0.masks is None else len(r0.masks)
-        print(json.dumps({
-            "model": MODEL_NAME,
-            "image_url": image_url,
-            "boxes": boxes_n,
-            "masks": masks_n,
-            "conf": conf,
-            "imgsz": imgsz,
-        }, ensure_ascii=False))
-
-        # 0件なら「検出なし」で返す（エラー扱いにしない）
-        if boxes_n == 0 or masks_n == 0:
-            return {
-                "statusCode": 422,
-                "headers": {"content-type": "application/json"},
-                "body": json.dumps({
-                    "error": "No segmentation detected",
-                    "model": MODEL_NAME,
-                    "boxes": boxes_n,
-                    "masks": masks_n,
-                }, ensure_ascii=False)
-            }
-
-        idx = _pick_most_salient_instance(r0)
-        mask = r0.masks.data[idx].cpu().numpy()
-
-        cutout = _make_rgba_cutout(img, mask)
-        tmp_path = f"/tmp/{uuid.uuid4().hex}.png"
-        cutout.save(tmp_path, format="PNG", optimize=True)
-
-        with open(tmp_path, "rb") as f:
-            s3.put_object(
-                Bucket=S3_BUCKET,
-                Key=out_key,
-                Body=f,
-                ContentType="image/png",
-                CacheControl="public, max-age=31536000, immutable",
-            )
-
-        if return_mode == "s3":
-            url = f"s3://{S3_BUCKET}/{out_key}"
-        else:
-            url = s3.generate_presigned_url(
-                "get_object",
-                Params={"Bucket": S3_BUCKET, "Key": out_key},
-                ExpiresIn=PRESIGN_EXPIRES,
-            )
+        # バイナリ(PNG)で返す：bodyはbase64
+        resp_headers = {
+            "Content-Type": "image/png",
+            "Cache-Control": "no-store",
+        }
+        # S3 URLも返したい → ヘッダーに載せる（バイナリレスポンスと両立しやすい）
+        if s3_url:
+            resp_headers["X-S3-URL"] = s3_url
+            resp_headers["X-S3-Key"] = s3_key
 
         return {
             "statusCode": 200,
-            "headers": {"content-type": "application/json"},
-            "body": json.dumps({"bucket": S3_BUCKET, "key": out_key, "url": url}, ensure_ascii=False),
+            "isBase64Encoded": True,
+            "headers": resp_headers,
+            "body": base64.b64encode(out_png).decode("utf-8"),
         }
 
     except Exception as e:
         return {
-            "statusCode": 500,
-            "headers": {"content-type": "application/json"},
-            "body": json.dumps({"error": str(e)}, ensure_ascii=False),
+            "statusCode": 400,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"error": str(e)}),
         }

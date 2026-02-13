@@ -49,6 +49,7 @@ jobs:
         run: |
           mkdir -p Lambda_CropYOLO/models
           curl -L -o Lambda_CropYOLO/models/yolo26n-seg.pt "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-seg.pt"
+          curl -L -o Lambda_CropYOLO/models/yolo26s-seg.pt "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26s-seg.pt"
 
 
       - name: Verify model file exists
