@@ -1,12 +1,10 @@
-name: build-and-push-ecr
+name: crop-yolo-build
 
 on:
   push:
     branches: ["main"]
     paths:
-      - "Lambda_CropYOLO/lambda_function.py"
-      - "Lambda_CropYOLO/requirements.txt"
-      - ".github/workflows/Lambda_CropYOLO-push-ecr.yml"
+      - "Lambda_CropYOLO/**"
   workflow_dispatch:
 
 permissions:
@@ -15,39 +13,58 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPOSITORY: web-diary/crop-yolo-lambda
-  CONTEXT_DIR: ./Lambda_CropYOLO
+  ECR_REPO_BASE: crop-yolo-lambda/base
+  ECR_REPO_APP: crop-yolo-lambda
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
-      # OIDCでAWS認証（長期キー不要）
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      # buildx + GitHub Actions cache
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # ここが本体：ビルド & プッシュ
-      - name: Build and Push
+      - name: Compute requirements hash
+        id: reqhash
+        run: |
+          echo "hash=$(sha256sum Lambda_CropYOLO/requirements.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
+
+      # ---- Build & Push BASE (requirements hash tag) ----
+      - name: Build & Push BASE image
         uses: docker/build-push-action@v6
         with:
-          context: ${{ env.CONTEXT_DIR }}
+          context: ./Lambda_CropYOLO
+          file: ./Lambda_CropYOLO/Dockerfile.base
           push: true
           provenance: false
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:latest
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_BASE }}:base-${{ steps.reqhash.outputs.hash }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # ---- Build & Push APP (always) ----
+      - name: Build & Push APP image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./Lambda_CropYOLO
+          file: ./Lambda_CropYOLO/Dockerfile
+          push: true
+          provenance: false
+          build-args: |
+            BASE_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_BASE }}:base-${{ steps.reqhash.outputs.hash }}
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_APP }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
