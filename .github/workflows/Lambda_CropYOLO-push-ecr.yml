@@ -5,6 +5,7 @@ on:
     branches: ["main"]
     paths:
       - "Lambda_CropYOLO/**"
+      - ".github/workflows/Lambda_CropYOLO-push-ecr.yml"
   workflow_dispatch:
 
 permissions:
@@ -25,7 +26,7 @@ jobs:
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to ECR
