@@ -45,6 +45,11 @@ jobs:
         run: |
           echo "hash=$(sha256sum Lambda_CropYOLO/requirements.txt | awk '{print $1}')" >> $GITHUB_OUTPUT
 
+      - name: Download model asset
+        run: |
+          mkdir -p Lambda_CropYOLO/models
+          curl -L -o Lambda_CropYOLO/models/yolo26n-seg.pt "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-seg.pt"
+
 
       - name: Verify model file exists
         run: |
