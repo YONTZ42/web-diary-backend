@@ -58,16 +58,19 @@ def _pick_most_salient_instance(result) -> int:
 
 
 def _make_rgba_cutout(img_rgb: Image.Image, mask_2d: np.ndarray) -> Image.Image:
-    """
-    mask_2d: (H,W) boolean or 0..1 float
-    """
+    # mask_2d: (H,W) float(0..1) or uint8(0..255)
+
     if mask_2d.dtype != np.uint8:
         mask_u8 = (mask_2d > 0.5).astype(np.uint8) * 255
     else:
         mask_u8 = mask_2d
 
-    rgba = img_rgb.convert("RGBA")
+    # ✅ 重要：マスクを元画像サイズに合わせる
     alpha = Image.fromarray(mask_u8, mode="L")
+    if alpha.size != img_rgb.size:
+        alpha = alpha.resize(img_rgb.size, resample=Image.NEAREST)
+
+    rgba = img_rgb.convert("RGBA")
     rgba.putalpha(alpha)
     return rgba
 
