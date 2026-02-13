@@ -126,11 +126,14 @@ def lambda_handler(event, context):
 
         out_png = _segment_to_rgba_png(img_bytes)
 
-        s3_url = None
-        if s3_key:
-            if not bucket:
-                raise ValueError("s3Key was provided but BUCKET_NAME or x-s3-bucket is missing")
-            s3_url = _put_to_s3(out_png, bucket, s3_key)
+        if not bucket:
+            raise ValueError("BUCKET_NAME or x-s3-bucket is missing")
+        # key が無ければ自動生成
+        if not s3_key:
+            import uuid
+            s3_key = f"cutouts/{uuid.uuid4().hex}.png"
+
+        s3_url = _put_to_s3(out_png, bucket, s3_key)
 
         # バイナリ(PNG)で返す：bodyはbase64
         resp_headers = {
@@ -144,10 +147,10 @@ def lambda_handler(event, context):
 
         return {
             "statusCode": 200,
-            "isBase64Encoded": True,
-            "headers": resp_headers,
-            "body": base64.b64encode(out_png).decode("utf-8"),
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"bucket": bucket, "key": s3_key, "url": s3_url}),
         }
+
 
     except Exception as e:
         return {
