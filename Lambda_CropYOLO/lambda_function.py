@@ -6,6 +6,7 @@ import io
 import boto3
 import numpy as np
 from PIL import Image
+import urllib
 
 # ultralytics
 from ultralytics import YOLO
