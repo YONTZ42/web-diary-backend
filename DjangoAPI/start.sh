@@ -4,7 +4,9 @@ set -eu
 PORT="${PORT:-8080}"
 mkdir -p /app/staticfiles
 
-echo "[start] migrate..."
+echo "[start] making migrations.."
+python manage.py makemigrations
+echo "[migrating] migrate..."
 python manage.py migrate --noinput
 
 #echo "[start] collectstatic..."

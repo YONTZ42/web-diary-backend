@@ -137,7 +137,7 @@ class Sticker(BaseModel):
     last_used_at = models.DateTimeField(null=True, blank=True)
     usage_count = models.PositiveIntegerField(default=0)
     is_system = models.BooleanField(default=False)
-
+ 
     # AssetRef JSON
     png = models.JSONField() 
     thumb = models.JSONField(null=True, blank=True)
@@ -279,7 +279,7 @@ class NotebookPage(models.Model):
 # -----------------------------------------------------------------------------
 # 6. Stripe Purchase (Simplified)
 # -----------------------------------------------------------------------------
-
+"""
 class StripeProduct(BaseModel):
     product_type = models.CharField(max_length=50) # sticker_pack etc
     stripe_product_id = models.CharField(max_length=255)
@@ -300,3 +300,5 @@ class Purchase(BaseModel):
 
     class Meta:
         db_table = 'purchases'
+
+"""

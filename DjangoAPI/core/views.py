@@ -6,7 +6,7 @@ from django.conf import settings
 from .models import Schedule, User, Sticker, Page, Notebook, NotebookPage,UploadSession
 from .serializers import (
     ScheduleSerializer, UserRegistrationSerializer, UserSerializer, StickerSerializer, PageSerializer, NotebookSerializer,
-    UploadIssueSerializer, UploadConfirmSerializer
+    UploadIssueSerializer, UploadConfirmSerializer, GuestIssueResponseSerializer
 )
 from drf_spectacular.utils import extend_schema
 
@@ -29,6 +29,20 @@ class UserRegistrationView(generics.CreateAPIView):
     """ユーザー新規登録"""
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny] # 誰でもアクセス可能
+
+# --- Auth API ---
+# --- Gallery Viewer (public read by slug) ---
+# --- Auth: Guest ID Issue ---
+@extend_schema(
+    request=None,
+    responses={200: GuestIssueResponseSerializer},
+)
+class GuestIssueView(views.APIView):
+    """ゲストID発行（クライアントは localStorage に保存して X-Guest-Id で送る）"""
+    permission_classes = [AllowAny]
+    def post(self, request, *args, **kwargs):
+        guest_id = uuid.uuid4().hex
+        return Response({'guest_id': guest_id}, status=status.HTTP_200_OK)
 
 
 # --- 2. Upload API (S3 Presigned URL) ---
