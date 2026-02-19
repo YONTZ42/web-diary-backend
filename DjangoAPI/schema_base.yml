@@ -7,9 +7,8 @@ paths:
   /api/auth/guest/:
     post:
       operationId: auth_guest_create
-      description: ゲストID発行（クライアントは localStorage に保存して X-Guest-Id で送る）
       tags:
-      - auth
+      - Auth
       security:
       - jwtAuth: []
       - {}

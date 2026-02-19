@@ -13,7 +13,6 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description ゲストID発行（クライアントは localStorage に保存して X-Guest-Id で送る） */
         post: operations["auth_guest_create"];
         delete?: never;
         options?: never;
