@@ -50,6 +50,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ('id', 'email', 'display_name', 'avatar', 'stripe_customer_id', 'subscription_status', 'plan')
         read_only_fields = ('id', 'stripe_customer_id', 'subscription_status')
 
+
 # --- User Registration ---
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8, style={'input_type': 'password'})
@@ -66,6 +67,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             display_name=validated_data.get('display_name', '')
         )
         return user
+
+class GuestIssueResponseSerializer(serializers.Serializer):
+    guest_id = serializers.CharField()
+
 
 # --- Upload (Presigned URL) ---
 class UploadIssueSerializer(serializers.Serializer):
@@ -86,7 +91,8 @@ class StickerStyleSerializer(serializers.Serializer):
 class StickerSerializer(serializers.ModelSerializer):
     png = AssetRefSerializer()
     thumb = AssetRefSerializer(required=False, allow_null=True)
-    style = StickerStyleSerializer(required=False)
+    style = serializers.JSONField()
+    #style = StickerStyleSerializer(required=False)
     tags = serializers.ListField(
         child=serializers.CharField(),
         required=False,

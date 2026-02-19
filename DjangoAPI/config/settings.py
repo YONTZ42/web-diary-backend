@@ -64,6 +64,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'core',
+    'MiniatureMuseum',
     'storages',
     'djangorestframework_camel_case',  # ★これを追加
     'drf_spectacular',  # ★これを追加

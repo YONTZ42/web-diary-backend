@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import MeView, ScheduleViewSet, UploadView, StickerViewSet, PageViewSet, NotebookViewSet, UserRegistrationView
+from .views import MeView, ScheduleViewSet, UploadView, StickerViewSet, PageViewSet, NotebookViewSet, UserRegistrationView, GuestIssueView
 
 router = DefaultRouter()
 router.register(r'stickers', StickerViewSet, basename='sticker')
@@ -16,6 +16,8 @@ urlpatterns = [
     # あるいは単純に View 内で分岐させるなら path('uploads/<str:action>/', ...)
     path('uploads/<str:action>/', UploadView.as_view(), name='upload'),
     path('auth/register/', UserRegistrationView.as_view(), name='register'),
+    path('auth/register/', UserRegistrationView.as_view(), name='register'),
+    path('auth/guest/', GuestIssueView.as_view(), name='guest-issue'),
 
     path('', include(router.urls)),
 ]
