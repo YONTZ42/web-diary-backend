@@ -9,6 +9,10 @@ on:
 jobs:
   test-and-schema-check:
     runs-on: ubuntu-latest
+    defaults:
+          run:
+            # すべてのステップをこのディレクトリ配下で実行する
+            working-directory: ./DjangoAPI
     services:
       db:
         image: postgres:17
