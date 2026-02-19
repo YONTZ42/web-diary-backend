@@ -8,7 +8,7 @@ from .serializers import (
     ScheduleSerializer, UserRegistrationSerializer, UserSerializer, StickerSerializer, PageSerializer, NotebookSerializer,
     UploadIssueSerializer, UploadConfirmSerializer, GuestIssueResponseSerializer
 )
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, extend_schema_view
 
 from django.utils import timezone
 import boto3
@@ -33,16 +33,21 @@ class UserRegistrationView(generics.CreateAPIView):
 # --- Auth API ---
 # --- Gallery Viewer (public read by slug) ---
 # --- Auth: Guest ID Issue ---
-@extend_schema(
-    request=None,
-    responses={200: GuestIssueResponseSerializer},
-)
+
 class GuestIssueView(views.APIView):
-    """ゲストID発行（クライアントは localStorage に保存して X-Guest-Id で送る）"""
     permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=None,
+        responses={200: GuestIssueResponseSerializer},
+        operation_id="auth_guest_create",
+        tags=["Auth"],
+    )
     def post(self, request, *args, **kwargs):
         guest_id = uuid.uuid4().hex
-        return Response({'guest_id': guest_id}, status=status.HTTP_200_OK)
+        ser = GuestIssueResponseSerializer(data={"guest_id": guest_id})
+        ser.is_valid(raise_exception=True)
+        return Response(ser.data, status=status.HTTP_200_OK)
 
 
 # --- 2. Upload API (S3 Presigned URL) ---

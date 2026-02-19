@@ -1,90 +1,127 @@
+import base64
+import json
 import os
 import io
-import json
 import boto3
-import torch
 import numpy as np
-import requests
 from PIL import Image
-from sam2.build_sam import build_sam2
-from sam2.sam2_image_predictor import SAM2ImagePredictor
-
-
-# 環境変数（S3バケット名などはLambda側で設定）
-S3_BUCKET = os.environ.get("OUTPUT_BUCKET")
-MODEL_PATH = "sam2_hiera_small.pt"
-MODEL_CONFIG = "sam2_hiera_s.yaml" # ライブラリ内蔵のconfig名
-
-# モデルのグローバルロード（コールドスタート対策）
-device = torch.device("cpu")
-sam2_model = build_sam2(MODEL_CONFIG, MODEL_PATH, device=device)
-predictor = SAM2ImagePredictor(sam2_model)
+import uuid
+from ultralytics import YOLO
+from urllib.parse import urlparse
 
 s3 = boto3.client("s3")
 
+# ---- 環境変数から設定を取得 ----
+MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
+DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")
+S3_PREFIX = os.environ.get("S3_PREFIX", "cutouts/")
+
+# YOLO推論パラメータ (環境変数で動的に変更可能)
+CONF_THRES = float(os.environ.get("CONF_THRESHOLD", "0.25"))
+IOU_THRES = float(os.environ.get("IOU_THRESHOLD", "0.45"))
+MAX_DET = int(os.environ.get("MAX_DET", "10"))
+IMGSZ = int(os.environ.get("IMGSZ", "640"))
+RETINA_MASKS = os.environ.get("RETINA_MASKS", "true").lower() == "true"
+
+# モデルのロード
+MODEL_PATH = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", "/var/task"), MODEL_NAME)
+model = YOLO(MODEL_PATH)
+
 def lambda_handler(event, context):
     try:
+        # 1. eventからS3情報を取得して画像をダウンロード
+        # event 形式例: {"s3_url": "s3://bucket-name/path/to/image.jpg"} 
+        # もしくは直接 bucket と key を指定する場合も考慮
+        bucket, key = _parse_s3_event(event)
+        response = s3.get_object(Bucket=bucket, Key=key)
+        img_bytes = response['Body'].read()
+        img = Image.open(io.BytesIO(img_bytes)).convert("RGB")
         
-        greeting = event.get("greeting", None)
-        if isinstance(greeting, str) and greeting.strip():
-            return {
-                "statusCode": 200,
-                "body": json.dumps({"message": "Hello, Stkcker Geek!", "received": greeting})
-            }
-        
-        # 1. パラメータ取得
-        image_url = event.get("image_url")
-        if not image_url:
-            return {"statusCode": 400, "body": "No image_url provided"}
-
-        # 2. 画像のダウンロード
-        response = requests.get(image_url)
-        image = Image.open(io.BytesIO(response.content)).convert("RGB")
-        image_np = np.array(image)
-
-        # 3. SAM2 による推論
-        predictor.set_image(image_np)
-        
-        # プロンプト設定：とりあえず画像の中央を指定（物体が中央にある想定）
-        input_point = np.array([[image_np.shape[1] // 2, image_np.shape[0] // 2]])
-        input_label = np.array([1]) # 1は「その点を含む物体」
-
-        masks, scores, logits = predictor.predict(
-            point_coords=input_point,
-            point_labels=input_label,
-            multimask_output=False,
+        # 2. YOLO推論 (環境変数のパラメータを適用)
+        results = model.predict(
+            source=img,
+            conf=CONF_THRES,
+            iou=IOU_THRES,
+            max_det=MAX_DET,
+            imgsz=IMGSZ,
+            retina_masks=RETINA_MASKS
         )
+        
+        result = results[0]
+        s3_urls = []
 
-        # 4. 切り抜き処理（背景を透明化）
-        mask = masks[0]
-        # RGBA画像を作成
-        result_img = Image.new("RGBA", image.size, (0, 0, 0, 0))
-        result_img.paste(image, (0, 0), mask=Image.fromarray((mask * 255).astype(np.uint8)))
+        # 3. 検出された全物体をループで処理
+        if hasattr(result, 'masks') and result.masks is not None:
+            for mask_data in result.masks.data:
+                mask_np = mask_data.cpu().numpy()
+                
+                # 背景透過処理
+                out_png_bytes = _apply_mask_to_image(img, mask_np)
+                
+                # 結果をS3に保存 (保存先バケットは環境変数または入力と同じもの)
+                dest_bucket = DEFAULT_BUCKET or bucket
+                dest_key = f"{S3_PREFIX}{uuid.uuid4().hex}.png"
+                
+                url = _put_to_s3(out_png_bytes, dest_bucket, dest_key)
+                s3_urls.append(url)
 
-        # 5. S3へアップロード
-        output_key = f"output/{context.aws_request_id}.png"
-        buffer = io.BytesIO()
-        result_img.save(buffer, format="PNG")
-        buffer.seek(0)
-
-        s3.put_object(
-            Bucket=S3_BUCKET,
-            Key=output_key,
-            Body=buffer,
-            ContentType="image/png"
-        )
-
-        # 6. URLの返却（署名付きURLまたはパブリックURL）
-        res_url = f"https://{S3_BUCKET}.s3.amazonaws.com/{output_key}"
-
+        # 4. JSONレスポンス (URLのリストを返す)
         return {
             "statusCode": 200,
             "body": json.dumps({
-                "message": "success",
-                "s3_url": res_url
+                "detected_count": len(s3_urls),
+                "urls": s3_urls,
+                "input_source": f"s3://{bucket}/{key}",
+                "config_used": {
+                    "conf": CONF_THRES,
+                    "max_det": MAX_DET,
+                    "imgsz": IMGSZ,
+                    "retina_masks": RETINA_MASKS
+                }
             })
         }
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
+        return {
+            "statusCode": 500,
+            "body": json.dumps({"error": str(e)})
+        }
+
+def _parse_s3_event(event):
+    """eventからS3のバケット名とキーを抽出する"""
+    if "s3_url" in event:
+        parsed = urlparse(event["s3_url"])
+        return parsed.netloc, parsed.path.lstrip('/')
+    
+    # 直接指定の場合
+    bucket = event.get("bucket")
+    key = event.get("key")
+    if bucket and key:
+        return bucket, key
+    
+    raise ValueError("Event must contain s3_url or both bucket and key")
+
+def _apply_mask_to_image(original_img, mask_np):
+    """マスクを適用して透過PNGを生成"""
+    # マスクを元画像サイズにリサイズ
+    mask_img = Image.fromarray((mask_np * 255).astype(np.uint8)).resize(original_img.size, resample=Image.BILINEAR)
+    
+    rgba_img = original_img.copy().convert("RGBA")
+    rgba_img.putalpha(mask_img)
+    
+    buf = io.BytesIO()
+    rgba_img.save(buf, format="PNG")
+    return buf.getvalue()
+
+def _put_to_s3(buffer, bucket, key):
+    """S3にアップロードして署名付きURLを返す"""
+    s3.put_object(Bucket=bucket, Key=key, Body=buffer, ContentType="image/png")
+    
+    # 署名付きURLの生成 (1時間有効)
+    url = s3.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket, "Key": key},
+        ExpiresIn=3600
+    )
+    return url
