@@ -4,6 +4,22 @@ info:
   version: 1.0.0
   description: APIの詳細説明
 paths:
+  /api/auth/guest/:
+    post:
+      operationId: auth_guest_create
+      description: ゲストID発行（クライアントは localStorage に保存して X-Guest-Id で送る）
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GuestIssueResponse'
+          description: ''
   /api/auth/register/:
     post:
       operationId: auth_register_create
@@ -31,6 +47,441 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserRegistration'
+          description: ''
+  /api/exhibits/:
+    get:
+      operationId: exhibits_list
+      tags:
+      - exhibits
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Exhibit'
+          description: ''
+    post:
+      operationId: exhibits_create
+      tags:
+      - exhibits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibit'
+          description: ''
+  /api/exhibits/{id}/:
+    get:
+      operationId: exhibits_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this exhibit.
+        required: true
+      tags:
+      - exhibits
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibit'
+          description: ''
+    put:
+      operationId: exhibits_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this exhibit.
+        required: true
+      tags:
+      - exhibits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibit'
+          description: ''
+    patch:
+      operationId: exhibits_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this exhibit.
+        required: true
+      tags:
+      - exhibits
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedExhibit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedExhibit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedExhibit'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibit'
+          description: ''
+    delete:
+      operationId: exhibits_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this exhibit.
+        required: true
+      tags:
+      - exhibits
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/galleries/:
+    get:
+      operationId: galleries_list
+      tags:
+      - galleries
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Gallery'
+          description: ''
+    post:
+      operationId: galleries_create
+      tags:
+      - galleries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+  /api/galleries/{gallery_id}/exhibits/:
+    post:
+      operationId: galleries_exhibits_create
+      description: 'ネスト型: Exhibit追加（空枠に追加）'
+      parameters:
+      - in: path
+        name: gallery_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - galleries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibit'
+          description: ''
+        '400':
+          description: Bad Request
+        '401':
+          description: Not Authenticated
+        '403':
+          description: Forbidden
+        '409':
+          description: Slot already occupied
+  /api/galleries/{gallery_id}/exhibits/{slot_index}/:
+    put:
+      operationId: galleries_exhibits_update
+      description: 'ネスト型: slot_index 指定で作成 or 置換（推奨）'
+      parameters:
+      - in: path
+        name: gallery_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: slot_index
+        schema:
+          type: integer
+        required: true
+      tags:
+      - galleries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Exhibit'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibit'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exhibit'
+          description: ''
+        '400':
+          description: Bad Request
+        '401':
+          description: Not Authenticated
+        '403':
+          description: Forbidden
+    delete:
+      operationId: galleries_exhibits_destroy
+      description: 'ネスト型: slot_index 指定で作成 or 置換（推奨）'
+      parameters:
+      - in: path
+        name: gallery_id
+        schema:
+          type: string
+          format: uuid
+        required: true
+      - in: path
+        name: slot_index
+        schema:
+          type: integer
+        required: true
+      tags:
+      - galleries
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          description: Not Authenticated
+        '403':
+          description: Forbidden
+        '404':
+          description: Not found
+  /api/galleries/{id}/:
+    get:
+      operationId: galleries_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this gallery.
+        required: true
+      tags:
+      - galleries
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+    put:
+      operationId: galleries_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this gallery.
+        required: true
+      tags:
+      - galleries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+    patch:
+      operationId: galleries_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this gallery.
+        required: true
+      tags:
+      - galleries
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGallery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGallery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGallery'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+    delete:
+      operationId: galleries_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: A UUID string identifying this gallery.
+        required: true
+      tags:
+      - galleries
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/galleries/g/{slug}/:
+    get:
+      operationId: galleries_g_retrieve
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+        required: true
+      tags:
+      - galleries
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GalleryPublic'
           description: ''
   /api/me/:
     get:
@@ -862,6 +1313,236 @@ components:
           type: object
           additionalProperties: {}
           description: 画面表示に関する設定（theme, scrollX, scrollY, zoom等）
+    Exhibit:
+      type: object
+      description: 展示物（編集/管理用）。画像はS3 URL（string）を想定。
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        gallery:
+          type: string
+          format: uuid
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        guestId:
+          type: string
+          readOnly: true
+          nullable: true
+        slotIndex:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        imageOriginalUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+        imageCutoutPngUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        materialParams: {}
+        style:
+          type: string
+          maxLength: 50
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - gallery
+      - guestId
+      - id
+      - imageOriginalUrl
+      - owner
+      - slotIndex
+      - updatedAt
+    ExhibitPublic:
+      type: object
+      description: 公開閲覧用：owner/guest_id などは返さない。
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slotIndex:
+          type: integer
+          readOnly: true
+        imageOriginalUrl:
+          type: string
+          format: uri
+          readOnly: true
+        imageCutoutPngUrl:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        materialParams:
+          readOnly: true
+        style:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - createdAt
+      - description
+      - id
+      - imageCutoutPngUrl
+      - imageOriginalUrl
+      - materialParams
+      - slotIndex
+      - style
+      - title
+      - updatedAt
+    Gallery:
+      type: object
+      description: ギャラリー（編集/管理用）。retrieveではexhibitsも返す。
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        userStyle:
+          $ref: '#/components/schemas/UserStyleEnum'
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        guestId:
+          type: string
+          readOnly: true
+          nullable: true
+        title:
+          type: string
+          maxLength: 255
+        layoutCols:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        layoutRows:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        isPublic:
+          type: boolean
+        coverRenderUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        exhibits:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exhibit'
+          readOnly: true
+      required:
+      - createdAt
+      - exhibits
+      - guestId
+      - id
+      - owner
+      - slug
+      - updatedAt
+    GalleryPublic:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          readOnly: true
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          readOnly: true
+        layoutCols:
+          type: integer
+          readOnly: true
+        layoutRows:
+          type: integer
+          readOnly: true
+        isPublic:
+          type: boolean
+          readOnly: true
+        coverRenderUrl:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        exhibits:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExhibitPublic'
+          readOnly: true
+      required:
+      - coverRenderUrl
+      - createdAt
+      - exhibits
+      - id
+      - isPublic
+      - layoutCols
+      - layoutRows
+      - slug
+      - title
+      - updatedAt
+    GuestIssueResponse:
+      type: object
+      properties:
+        guestId:
+          type: string
+      required:
+      - guestId
     KindEnum:
       enum:
       - local
@@ -1008,6 +1689,110 @@ components:
         * `diary` - Diary
         * `schedule` - Schedule
         * `free` - Free
+    PatchedExhibit:
+      type: object
+      description: 展示物（編集/管理用）。画像はS3 URL（string）を想定。
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        gallery:
+          type: string
+          format: uuid
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        guestId:
+          type: string
+          readOnly: true
+          nullable: true
+        slotIndex:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        imageOriginalUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+        imageCutoutPngUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        materialParams: {}
+        style:
+          type: string
+          maxLength: 50
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+    PatchedGallery:
+      type: object
+      description: ギャラリー（編集/管理用）。retrieveではexhibitsも返す。
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        slug:
+          type: string
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+        userStyle:
+          $ref: '#/components/schemas/UserStyleEnum'
+        owner:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        guestId:
+          type: string
+          readOnly: true
+          nullable: true
+        title:
+          type: string
+          maxLength: 255
+        layoutCols:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        layoutRows:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        isPublic:
+          type: boolean
+        coverRenderUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        createdAt:
+          type: string
+          format: date-time
+          readOnly: true
+        updatedAt:
+          type: string
+          format: date-time
+          readOnly: true
+        exhibits:
+          type: array
+          items:
+            $ref: '#/components/schemas/Exhibit'
+          readOnly: true
     PatchedNotebook:
       type: object
       properties:
@@ -1182,8 +1967,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/AssetRef'
           nullable: true
-        style:
-          $ref: '#/components/schemas/StickerStyle'
+        style: {}
         tags:
           type: array
           items:
@@ -1337,8 +2121,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/AssetRef'
           nullable: true
-        style:
-          $ref: '#/components/schemas/StickerStyle'
+        style: {}
         tags:
           type: array
           items:
@@ -1394,21 +2177,10 @@ components:
       - id
       - owner
       - png
+      - style
       - updatedAt
       - usageCount
       - width
-    StickerStyle:
-      type: object
-      properties:
-        outline:
-          type: object
-          additionalProperties: {}
-        shadow:
-          type: object
-          additionalProperties: {}
-      required:
-      - outline
-      - shadow
     TokenObtainPair:
       type: object
       properties:
@@ -1511,6 +2283,14 @@ components:
       required:
       - email
       - password
+    UserStyleEnum:
+      enum:
+      - user
+      - guest
+      type: string
+      description: |-
+        * `user` - User
+        * `guest` - Guest
     VisibilityEnum:
       enum:
       - private

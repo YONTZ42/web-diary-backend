@@ -4,6 +4,23 @@
  */
 
 export interface paths {
+    "/api/auth/guest/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ゲストID発行（クライアントは localStorage に保存して X-Guest-Id で送る） */
+        post: operations["auth_guest_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/register/": {
         parameters: {
             query?: never;
@@ -15,6 +32,121 @@ export interface paths {
         put?: never;
         /** @description ユーザー新規登録 */
         post: operations["auth_register_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exhibits/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exhibits_list"];
+        put?: never;
+        post: operations["exhibits_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/exhibits/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["exhibits_retrieve"];
+        put: operations["exhibits_update"];
+        post?: never;
+        delete: operations["exhibits_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["exhibits_partial_update"];
+        trace?: never;
+    };
+    "/api/galleries/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["galleries_list"];
+        put?: never;
+        post: operations["galleries_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/galleries/{gallery_id}/exhibits/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description ネスト型: Exhibit追加（空枠に追加） */
+        post: operations["galleries_exhibits_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/galleries/{gallery_id}/exhibits/{slot_index}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** @description ネスト型: slot_index 指定で作成 or 置換（推奨） */
+        put: operations["galleries_exhibits_update"];
+        post?: never;
+        /** @description ネスト型: slot_index 指定で作成 or 置換（推奨） */
+        delete: operations["galleries_exhibits_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/galleries/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["galleries_retrieve"];
+        put: operations["galleries_update"];
+        post?: never;
+        delete: operations["galleries_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["galleries_partial_update"];
+        trace?: never;
+    };
+    "/api/galleries/g/{slug}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["galleries_g_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -282,6 +414,87 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** @description 展示物（編集/管理用）。画像はS3 URL（string）を想定。 */
+        Exhibit: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            gallery: string;
+            /** Format: uuid */
+            readonly owner: string | null;
+            readonly guestId: string | null;
+            slotIndex: number;
+            /** Format: uri */
+            imageOriginalUrl: string;
+            /** Format: uri */
+            imageCutoutPngUrl?: string | null;
+            materialParams?: unknown;
+            style?: string;
+            title?: string;
+            description?: string;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+        };
+        /** @description 公開閲覧用：owner/guest_id などは返さない。 */
+        ExhibitPublic: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly slotIndex: number;
+            /** Format: uri */
+            readonly imageOriginalUrl: string;
+            /** Format: uri */
+            readonly imageCutoutPngUrl: string | null;
+            readonly materialParams: unknown;
+            readonly style: string;
+            readonly title: string;
+            readonly description: string;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+        };
+        /** @description ギャラリー（編集/管理用）。retrieveではexhibitsも返す。 */
+        Gallery: {
+            /** Format: uuid */
+            readonly id: string;
+            slug: string;
+            userStyle?: components["schemas"]["UserStyleEnum"];
+            /** Format: uuid */
+            readonly owner: string | null;
+            readonly guestId: string | null;
+            title?: string;
+            layoutCols?: number;
+            layoutRows?: number;
+            isPublic?: boolean;
+            /** Format: uri */
+            coverRenderUrl?: string | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+            readonly exhibits: components["schemas"]["Exhibit"][];
+        };
+        GalleryPublic: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly slug: string;
+            readonly title: string;
+            readonly layoutCols: number;
+            readonly layoutRows: number;
+            readonly isPublic: boolean;
+            /** Format: uri */
+            readonly coverRenderUrl: string | null;
+            /** Format: date-time */
+            readonly createdAt: string;
+            /** Format: date-time */
+            readonly updatedAt: string;
+            readonly exhibits: components["schemas"]["ExhibitPublic"][];
+        };
+        GuestIssueResponse: {
+            guestId: string;
+        };
         /**
          * @description * `local` - local
          *     * `remote` - remote
@@ -346,6 +559,50 @@ export interface components {
          * @enum {string}
          */
         PageTypeEnum: "diary" | "schedule" | "free";
+        /** @description 展示物（編集/管理用）。画像はS3 URL（string）を想定。 */
+        PatchedExhibit: {
+            /** Format: uuid */
+            readonly id?: string;
+            /** Format: uuid */
+            gallery?: string;
+            /** Format: uuid */
+            readonly owner?: string | null;
+            readonly guestId?: string | null;
+            slotIndex?: number;
+            /** Format: uri */
+            imageOriginalUrl?: string;
+            /** Format: uri */
+            imageCutoutPngUrl?: string | null;
+            materialParams?: unknown;
+            style?: string;
+            title?: string;
+            description?: string;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+        };
+        /** @description ギャラリー（編集/管理用）。retrieveではexhibitsも返す。 */
+        PatchedGallery: {
+            /** Format: uuid */
+            readonly id?: string;
+            slug?: string;
+            userStyle?: components["schemas"]["UserStyleEnum"];
+            /** Format: uuid */
+            readonly owner?: string | null;
+            readonly guestId?: string | null;
+            title?: string;
+            layoutCols?: number;
+            layoutRows?: number;
+            isPublic?: boolean;
+            /** Format: uri */
+            coverRenderUrl?: string | null;
+            /** Format: date-time */
+            readonly createdAt?: string;
+            /** Format: date-time */
+            readonly updatedAt?: string;
+            readonly exhibits?: components["schemas"]["Exhibit"][];
+        };
         PatchedNotebook: {
             /** Format: uuid */
             readonly id?: string;
@@ -426,7 +683,7 @@ export interface components {
             readonly id?: string;
             png?: components["schemas"]["AssetRef"];
             thumb?: components["schemas"]["AssetRef"] | null;
-            style?: components["schemas"]["StickerStyle"];
+            style?: unknown;
             /** @description タグの配列 */
             tags?: string[];
             schemaVersion?: number;
@@ -495,7 +752,7 @@ export interface components {
             readonly id: string;
             png: components["schemas"]["AssetRef"];
             thumb?: components["schemas"]["AssetRef"] | null;
-            style?: components["schemas"]["StickerStyle"];
+            style: unknown;
             /** @description タグの配列 */
             tags?: string[];
             schemaVersion?: number;
@@ -516,14 +773,6 @@ export interface components {
             cropSource?: unknown;
             /** Format: uuid */
             readonly owner: string;
-        };
-        StickerStyle: {
-            outline: {
-                [key: string]: unknown;
-            };
-            shadow: {
-                [key: string]: unknown;
-            };
         };
         TokenObtainPair: {
             email: string;
@@ -564,6 +813,12 @@ export interface components {
             displayName?: string;
         };
         /**
+         * @description * `user` - User
+         *     * `guest` - Guest
+         * @enum {string}
+         */
+        UserStyleEnum: "user" | "guest";
+        /**
          * @description * `private` - Private
          *     * `friends` - Friends Only
          *     * `public` - Public
@@ -579,6 +834,25 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    auth_guest_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GuestIssueResponse"];
+                };
+            };
+        };
+    };
     auth_register_create: {
         parameters: {
             query?: never;
@@ -600,6 +874,467 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UserRegistration"];
+                };
+            };
+        };
+    };
+    exhibits_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"][];
+                };
+            };
+        };
+    };
+    exhibits_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Exhibit"];
+                "application/x-www-form-urlencoded": components["schemas"]["Exhibit"];
+                "multipart/form-data": components["schemas"]["Exhibit"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"];
+                };
+            };
+        };
+    };
+    exhibits_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this exhibit. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"];
+                };
+            };
+        };
+    };
+    exhibits_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this exhibit. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Exhibit"];
+                "application/x-www-form-urlencoded": components["schemas"]["Exhibit"];
+                "multipart/form-data": components["schemas"]["Exhibit"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"];
+                };
+            };
+        };
+    };
+    exhibits_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this exhibit. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    exhibits_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this exhibit. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedExhibit"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedExhibit"];
+                "multipart/form-data": components["schemas"]["PatchedExhibit"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"];
+                };
+            };
+        };
+    };
+    galleries_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"][];
+                };
+            };
+        };
+    };
+    galleries_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Gallery"];
+                "application/x-www-form-urlencoded": components["schemas"]["Gallery"];
+                "multipart/form-data": components["schemas"]["Gallery"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+        };
+    };
+    galleries_exhibits_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gallery_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Exhibit"];
+                "application/x-www-form-urlencoded": components["schemas"]["Exhibit"];
+                "multipart/form-data": components["schemas"]["Exhibit"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Slot already occupied */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    galleries_exhibits_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gallery_id: string;
+                slot_index: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Exhibit"];
+                "application/x-www-form-urlencoded": components["schemas"]["Exhibit"];
+                "multipart/form-data": components["schemas"]["Exhibit"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Exhibit"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    galleries_exhibits_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                gallery_id: string;
+                slot_index: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Forbidden */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    galleries_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this gallery. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+        };
+    };
+    galleries_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this gallery. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Gallery"];
+                "application/x-www-form-urlencoded": components["schemas"]["Gallery"];
+                "multipart/form-data": components["schemas"]["Gallery"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+        };
+    };
+    galleries_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this gallery. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    galleries_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this gallery. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedGallery"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedGallery"];
+                "multipart/form-data": components["schemas"]["PatchedGallery"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+        };
+    };
+    galleries_g_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GalleryPublic"];
                 };
             };
         };
