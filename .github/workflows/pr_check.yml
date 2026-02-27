@@ -66,6 +66,5 @@ jobs:
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" \
             tufin/oasdiff:latest \
-            --fail-on=breaking \
             diff /work/schema_base.yml /work/schema_pr.yml \
             --fail-on-breaking
