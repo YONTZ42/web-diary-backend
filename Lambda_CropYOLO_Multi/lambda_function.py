@@ -2,6 +2,8 @@ import json
 import os
 import io
 import boto3
+import base64
+import requests
 import numpy as np
 from PIL import Image
 import uuid
@@ -15,7 +17,7 @@ MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
 DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")
 S3_PREFIX = os.environ.get("S3_PREFIX", "masks/")
 
-# YOLO推論パラメータ (環境変数で変更可能)
+# YOLO推論パラメータ
 CONF_THRES = float(os.environ.get("CONF_THRESHOLD", "0.25"))
 IOU_THRES = float(os.environ.get("IOU_THRESHOLD", "0.45"))
 MAX_DET = int(os.environ.get("MAX_DET", "10"))
@@ -27,22 +29,16 @@ MODEL_PATH = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", "/var/task"), MODEL
 model = YOLO(MODEL_PATH)
 
 def lambda_handler(event, context):
-    # 1. 起動確認用フラグのチェック
     if event.get("only_for_boot"):
-        return {
-            "statusCode": 200,
-            "body": json.dumps("Hello, I am YOLO!")
-        }
+        return {"statusCode": 200, "body": json.dumps("Hello, I am YOLO!")}
 
     try:
-        # 2. S3URLから画像をダウンロード
-        bucket, key = _parse_s3_event(event)
-        response = s3.get_object(Bucket=bucket, Key=key)
-        img_bytes = response['Body'].read()
-        img = Image.open(io.BytesIO(img_bytes))
-        orig_size = img.size # オリジナル画像サイズ (W, H)
+        # 1. 画像の取得 (Base64 or URL or S3)
+        img_bytes = _get_image_data(event)
+        img = Image.open(io.BytesIO(img_bytes)).convert("RGB") # 安全のためRGB変換
+        orig_size = img.size 
         
-        # 3. YOLO推論
+        # 2. YOLO推論
         results = model.predict(
             source=img,
             conf=CONF_THRES,
@@ -55,61 +51,64 @@ def lambda_handler(event, context):
         result = results[0]
         mask_urls = []
 
-        # 4. マスクデータの画像化と保存
+        # 3. マスクデータの画像化と保存
         if hasattr(result, 'masks') and result.masks is not None:
-            # result.masks.data は [N, H, W] のテンソル
             for mask_tensor in result.masks.data:
-                # 0.0-1.0の値を0 or 255の白黒画像(Lモード)に変換
                 mask_np = (mask_tensor.cpu().numpy() * 255).astype(np.uint8)
-                
-                # 推論サイズからオリジナル画像サイズへリサイズ
                 mask_img = Image.fromarray(mask_np).resize(orig_size, resample=Image.NEAREST)
                 
-                # バイト列に変換 (透過なしのLモードなので非常に軽量)
                 buf = io.BytesIO()
                 mask_img.save(buf, format="PNG")
                 mask_bytes = buf.getvalue()
                 
-                # S3に保存
-                dest_bucket = DEFAULT_BUCKET or bucket
+                # 保存先バケットの決定
+                dest_bucket = DEFAULT_BUCKET
                 dest_key = f"{S3_PREFIX}{uuid.uuid4().hex}.png"
                 
                 url = _put_to_s3(mask_bytes, dest_bucket, dest_key)
                 mask_urls.append(url)
 
-        # 5. レスポンス
         return {
             "statusCode": 200,
             "body": json.dumps({
                 "detected_count": len(mask_urls),
-                "mask_urls": mask_urls,
-                "parameters": {
-                    "imgsz": IMGSZ,
-                    "retina_masks": RETINA_MASKS,
-                    "max_det": MAX_DET
-                }
+                "mask_urls": mask_urls
             })
         }
 
     except Exception as e:
         print(f"Error: {str(e)}")
-        return {
-            "statusCode": 500,
-            "body": json.dumps({"error": str(e)})
-        }
+        return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
 
-def _parse_s3_event(event):
-    if "s3_url" in event:
-        parsed = urlparse(event["s3_url"])
-        return parsed.netloc, parsed.path.lstrip('/')
-    bucket, key = event.get("bucket"), event.get("key")
-    if bucket and key: return bucket, key
-    raise ValueError("Missing s3_url or bucket/key")
+def _get_image_data(event):
+    """
+    優先順位: image_data (Base64) > image_url (HTTPS) > S3イベント
+    """
+    # Pattern 1: Base64 data
+    if "image_data" in event:
+        # "data:image/png;base64,..." のようなヘッダーがある場合を除去
+        header, encoded = event["image_data"].split(",", 1) if "," in event["image_data"] else (None, event["image_data"])
+        return base64.b64decode(encoded)
+
+    # Pattern 2: CloudFront or any HTTPS URL
+    if "image_url" in event:
+        url = event["image_url"]
+        res = requests.get(url, timeout=10)
+        res.raise_for_status()
+        return res.content
+
+    # Pattern 3: Classic S3 Bucket/Key
+    bucket = event.get("bucket")
+    key = event.get("key")
+    if bucket and key:
+        response = s3.get_object(Bucket=bucket, Key=key)
+        return response['Body'].read()
+
+    raise ValueError("No valid image source (image_data, image_url, or bucket/key) provided.")
 
 def _put_to_s3(buffer, bucket, key):
+    if not bucket:
+        raise ValueError("Environment variable BUCKET_NAME is not set.")
     s3.put_object(Bucket=bucket, Key=key, Body=buffer, ContentType="image/png")
-    return s3.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": bucket, "Key": key},
-        ExpiresIn=3600
-    )
+    # マスク画像もCloudFront経由で返したい場合はここを調整
+    return s3.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=3600)
