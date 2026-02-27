@@ -13,6 +13,7 @@ permissions:
   id-token: write
   contents: read
 
+
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPO: web-diary/generate-photo/genai
