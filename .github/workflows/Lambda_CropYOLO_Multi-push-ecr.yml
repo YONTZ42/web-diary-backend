@@ -88,3 +88,9 @@ jobs:
             ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Update Lambda function code
+        run: |
+          aws lambda update-function-code \
+            --function-name HelloYOLO \
+            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
