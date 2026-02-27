@@ -13,7 +13,7 @@ COPY requirements.txt .
 # 1. 依存関係を標準のsite-packages（/var/lang/lib/python3.11/site-packages）にインストール
 # --target を使わず、システムのpip環境に直接入れます
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt \
+    pip install -r requirements.txt && \
     pip install numpy && \
     pip install --extra-index-url https://download.pytorch.org/whl/cpu \
     torch==2.5.1 torchvision==0.20.1 && \
