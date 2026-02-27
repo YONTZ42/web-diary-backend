@@ -8,11 +8,9 @@ on:
       - ".github/workflows/Lambda_Genai-push-ecr.yml"
   workflow_dispatch:
 
-
 permissions:
   id-token: write
   contents: read
-
 
 env:
   AWS_REGION: ap-northeast-1
