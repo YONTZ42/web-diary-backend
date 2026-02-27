@@ -1,4 +1,4 @@
-name: crop-yolo_mult-build
+name: crop-yolo_multi-build
 
 on:
   push:
