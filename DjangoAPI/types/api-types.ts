@@ -152,6 +152,54 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/guest/gallery/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+         *
+         *     - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+         *     - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+         *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+         *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+         */
+        get: operations["guest_gallery_retrieve"];
+        put?: never;
+        /**
+         * @description Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+         *
+         *     - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+         *     - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+         *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+         *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+         */
+        post: operations["guest_gallery_create"];
+        /**
+         * @description Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+         *
+         *     - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+         *     - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+         *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+         *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+         */
+        delete: operations["guest_gallery_destroy"];
+        options?: never;
+        head?: never;
+        /**
+         * @description Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+         *
+         *     - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+         *     - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+         *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+         *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+         */
+        patch: operations["guest_gallery_partial_update"];
+        trace?: never;
+    };
     "/api/me/": {
         parameters: {
             query?: never;
@@ -454,11 +502,22 @@ export interface components {
             /** Format: date-time */
             readonly updatedAt: string;
         };
+        ExhibitUpsert: {
+            slotIndex: number;
+            title?: string;
+            description?: string;
+            /** Format: uri */
+            imageOriginalUrl: string;
+            /** Format: uri */
+            imageCutoutPngUrl?: string | null;
+            materialParams?: unknown;
+            style?: string;
+        };
         /** @description ギャラリー（編集/管理用）。retrieveではexhibitsも返す。 */
         Gallery: {
             /** Format: uuid */
             readonly id: string;
-            slug: string;
+            readonly slug: string;
             userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly owner: string | null;
@@ -473,7 +532,7 @@ export interface components {
             readonly createdAt: string;
             /** Format: date-time */
             readonly updatedAt: string;
-            readonly exhibits: components["schemas"]["Exhibit"][];
+            readonly exhibits: string;
         };
         GalleryPublic: {
             /** Format: uuid */
@@ -585,7 +644,7 @@ export interface components {
         PatchedGallery: {
             /** Format: uuid */
             readonly id?: string;
-            slug?: string;
+            readonly slug?: string;
             userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly owner?: string | null;
@@ -600,7 +659,7 @@ export interface components {
             readonly createdAt?: string;
             /** Format: date-time */
             readonly updatedAt?: string;
-            readonly exhibits?: components["schemas"]["Exhibit"][];
+            readonly exhibits?: string;
         };
         PatchedNotebook: {
             /** Format: uuid */
@@ -715,6 +774,13 @@ export interface components {
             readonly subscriptionStatus?: string;
             plan?: string;
         };
+        /**
+         * @description * `sticker_png` - sticker_png
+         *     * `page_asset` - page_asset
+         *     * `exhibit_image` - exhibit_image
+         * @enum {string}
+         */
+        PurposeEnum: "sticker_png" | "page_asset" | "exhibit_image";
         Schedule: {
             /** Format: uuid */
             readonly id: string;
@@ -792,7 +858,7 @@ export interface components {
         UploadIssue: {
             filename: string;
             mimeType: string;
-            purpose: string;
+            purpose: components["schemas"]["PurposeEnum"];
         };
         User: {
             /** Format: uuid */
@@ -1046,7 +1112,7 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["Gallery"];
                 "application/x-www-form-urlencoded": components["schemas"]["Gallery"];
@@ -1131,9 +1197,9 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["Exhibit"];
-                "application/x-www-form-urlencoded": components["schemas"]["Exhibit"];
-                "multipart/form-data": components["schemas"]["Exhibit"];
+                "application/json": components["schemas"]["ExhibitUpsert"];
+                "application/x-www-form-urlencoded": components["schemas"]["ExhibitUpsert"];
+                "multipart/form-data": components["schemas"]["ExhibitUpsert"];
             };
         };
         responses: {
@@ -1250,7 +1316,7 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
                 "application/json": components["schemas"]["Gallery"];
                 "application/x-www-form-urlencoded": components["schemas"]["Gallery"];
@@ -1335,6 +1401,164 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["GalleryPublic"];
                 };
+            };
+        };
+    };
+    guest_gallery_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+            /** @description Not Authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    guest_gallery_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["Gallery"];
+                "application/x-www-form-urlencoded": components["schemas"]["Gallery"];
+                "multipart/form-data": components["schemas"]["Gallery"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    guest_gallery_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    guest_gallery_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedGallery"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedGallery"];
+                "multipart/form-data": components["schemas"]["PatchedGallery"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Gallery"];
+                };
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not Authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
