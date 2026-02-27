@@ -18,6 +18,8 @@ S3_PREFIX = os.environ.get("S3_PREFIX", "cutouts/")
 PRESIGN_EXPIRES = int(os.environ.get("PRESIGN_EXPIRES", "3600"))
 YOLO_CONFIG_DIR= os.environ.get("YOLO_CONFIG_DIR", "/temp/Ultralytics")  # モデル配置ディレクトリ
 
+MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
+TMP_MODEL_PATH = f"/tmp/{MODEL_NAME}"
 # yolo26n-seg.pt / yolo26s-seg.pt ... など（デフォルトは軽量nano）
 MODEL_PATH = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", "/var/task"), MODEL_NAME)
 model = YOLO(MODEL_PATH)
@@ -25,8 +27,6 @@ DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")
 
 
 
-MODEL_NAME = os.environ.get("MODEL_NAME", "yolo26n-seg.pt")
-TMP_MODEL_PATH = f"/tmp/{MODEL_NAME}"
 
 if not os.path.exists(TMP_MODEL_PATH):
     # GitHubからDLして /tmp に保存

@@ -58,7 +58,7 @@ jobs:
       - name: Fetch base schema from main
         run: |
           git fetch origin main --depth=1
-          git show origin/main:schema.yml > schema_base.yml
+          git show origin/main:DjangoAPI/schema.yml > ./DjangoAPI/schema_base.yml
 
       # 3) oasdiffでbreaking change検知（breakingがあればここで落ちる）
       - name: Detect breaking changes (OpenAPI)

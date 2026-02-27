@@ -1,11 +1,11 @@
-name: crop-yolo-build
+name: crop-yolo_mult-build
 
 on:
   push:
     branches: ["main"]
     paths:
-      - "Lambda_CropYOLO/**"
-      - ".github/workflows/Lambda_CropYOLO-push-ecr.yml"
+      - "Lambda_CropYOLO_Multi/**"
+      - ".github/workflows/Lambda_CropYOLO_Multi-push-ecr.yml"
   workflow_dispatch:
 
 permissions:
@@ -15,7 +15,7 @@ permissions:
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPO_BASE: web-diary/crop-yolo-lambda/packages
-  ECR_REPO_APP: web-diary/crop-yolo-lambda
+  ECR_REPO_APP: web-diary/crop-yolo-lambda/multi
 
 jobs:
   build:
@@ -23,7 +23,7 @@ jobs:
     # ここで作業ディレクトリを固定
     defaults:
       run:
-        working-directory: ./Lambda_CropYOLO
+        working-directory: ./Lambda_CropYOLO_Multi
 
     steps:
       - uses: actions/checkout@v4
@@ -47,7 +47,7 @@ jobs:
       - name: Compute requirements hash
         id: reqhash
         # working-directory 指定のおかげで直下にアクセス可能
-        run: echo "hash=$(sha256sum requirements.txt | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
+        run: echo "hash=$(sha256sum ${{ github.workspace }}/Lambda_CropYOLO/requirements.txt | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
 
       - name: Download YOLO Models
         run: |
@@ -65,8 +65,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           # contextをフォルダ内に指定
-          context: ./Lambda_CropYOLO
-          file: ./Lambda_CropYOLO/Dockerfile.base
+          context: ./Lambda_CropYOLO_Multi
+          file: ./Lambda_CropYOLO_Multi/Dockerfile.base
           push: true
           provenance: false
           tags: |
@@ -78,8 +78,8 @@ jobs:
       - name: Build & Push APP image
         uses: docker/build-push-action@v6
         with:
-          context: ./Lambda_CropYOLO
-          file: ./Lambda_CropYOLO/Dockerfile
+          context: ./Lambda_CropYOLO_Multi
+          file: ./Lambda_CropYOLO_Multi/Dockerfile
           push: true
           provenance: false
           build-args: |
