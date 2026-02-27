@@ -13,11 +13,11 @@ COPY requirements.txt .
 # 1. 依存関係を標準のsite-packages（/var/lang/lib/python3.11/site-packages）にインストール
 # --target を使わず、システムのpip環境に直接入れます
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install -r requirements.txt \
     pip install numpy && \
     pip install --extra-index-url https://download.pytorch.org/whl/cpu \
     torch==2.5.1 torchvision==0.20.1 && \
-    pip install ultralytics --no-deps \
+    pip install ultralytics --no-deps 
 
 # 2. ★重要：ビルド中に「nms」が動作するかテストする
 # ここでエラーが出れば、ビルドが失敗するのでデプロイ前に気付けます
