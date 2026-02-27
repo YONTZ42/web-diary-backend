@@ -161,6 +161,7 @@ else:
 # Next.js (localhost:3000) からのアクセスを許可
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:5173",
     "http://127.0.0.1:3080",
     "http://192.168.3.4:3000",
     "https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com",
@@ -179,6 +180,7 @@ CORS_ALLOW_HEADERS = [
     'user-agent',
     'x-csrftoken',
     'x-requested-with',
+    'x-guest-id',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
 
@@ -212,10 +214,16 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.JSONParser',
     ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-
-
     # フロントエンドが camelCase なので、入出力で変換するライブラリを入れると便利ですが
     # 今回はモデル定義に集中するため省略します。
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "60/min",
+        "anon": "20/min",
+    },
 }
 
 

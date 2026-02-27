@@ -89,6 +89,11 @@ class Gallery(BaseModel):
                     models.Q(guest_id__isnull=False) & ~models.Q(guest_id='')
                 ) | models.Q(user_style='user')
             ),
+            models.UniqueConstraint(
+                fields=['guest_id'],
+                condition=models.Q(user_style='guest', deleted_at__isnull=True),
+                name='uniq_active_Gallery_per_guest',
+            )
         ]
 
     def clean(self):
@@ -143,7 +148,6 @@ class Exhibit(BaseModel):
 
     class Meta:
         db_table = 'exhibits'
-        unique_together = ('gallery', 'slot_index')
         indexes = [
             models.Index(fields=['gallery', 'slot_index']),
             models.Index(fields=['user_style', 'created_at']),
@@ -168,6 +172,11 @@ class Exhibit(BaseModel):
                     models.Q(user_style='guest', owner__isnull=True) &
                     models.Q(guest_id__isnull=False) & ~models.Q(guest_id='')
                 ) | models.Q(user_style='user')
+            ),
+            models.UniqueConstraint(
+                fields=['gallery', 'slot_index'],
+                condition=models.Q(deleted_at__isnull=True),
+                name='uniq_active_exhibit_slot_per_gallery',
             ),
         ]
 

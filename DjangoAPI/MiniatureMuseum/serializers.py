@@ -62,7 +62,8 @@ class ExhibitSerializer(serializers.ModelSerializer):
 
 class GallerySerializer(serializers.ModelSerializer):
     """ギャラリー（編集/管理用）。retrieveではexhibitsも返す。"""
-    exhibits = ExhibitSerializer(many=True, read_only=True)
+    exhibits = serializers.SerializerMethodField()
+    slug = serializers.SlugField(read_only=True)
 
     class Meta:
         model = Gallery
@@ -81,20 +82,44 @@ class GallerySerializer(serializers.ModelSerializer):
             'updated_at',
             'exhibits',
         )
-        read_only_fields = ('id', 'owner', 'guest_id', 'created_at', 'updated_at')
+        read_only_fields = ('id', 'slug', 'owner', 'guest_id', 'created_at', 'updated_at')
 
+    def get_exhibits(self, obj):
+        qs = obj.exhibits.filter(deleted_at__isnull=True).order_by('slot_index')
+        return ExhibitSerializer(qs, many=True, context=self.context).data
     def validate_slug(self, value: str) -> str:
         if value and len(value) > 64:
             raise serializers.ValidationError("slug is too long.")
         return value
 
     def create(self, validated_data):
-        # slugが無い場合はランダム生成（静かな公開用）
+        # ✅ slugが無い場合はランダム生成（静かな公開用）
         if not validated_data.get('slug'):
             import uuid
             validated_data['slug'] = uuid.uuid4().hex[:16]
         return super().create(validated_data)
 
+
+
+class ExhibitUpsertSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Exhibit
+        # ★クライアントが送るフィールドだけに絞る（gallery/owner/guest_id/user_styleは送らせない）
+        fields = [
+            "slot_index",
+            "title",
+            "description",
+            "image_original_url",        # ←あなたのモデル名に合わせて
+            "image_cutout_png_url",      # 任意
+            "material_params",
+            "style",                     # 任意
+        ]
+        extra_kwargs = {
+            # 必須/任意はここで制御（MVPなら image_original_url 必須にするのが自然）
+            "image_original_url": {"required": True, "allow_null": False},
+            "title": {"required": False, "allow_blank": True},
+            "description": {"required": False, "allow_blank": True},
+        }
 
 # --- Public viewer serializers (slug viewer) ---
 

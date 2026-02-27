@@ -25,7 +25,6 @@ services:
         CREATE_SUPERUSER: "${CREATE_SUPERUSER}"
         # DB接続情報（HOSTを'db'に合わせる）
         DATABASE_URL: "postgres://postgres:postgres@db:5432/postgres"
-      command: sh -c "./start.sh"
 
 
 volumes:

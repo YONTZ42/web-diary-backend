@@ -4,7 +4,7 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.utils import timezone
-
+from django.conf import settings
 # -----------------------------------------------------------------------------
 # 0. 共通 Abstract Model
 # -----------------------------------------------------------------------------
@@ -86,7 +86,8 @@ class UploadSession(BaseModel):
         ('failed', 'Failed'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
+    guest_id = models.CharField(max_length=64, null=True, blank=True, db_index=True)
     purpose = models.CharField(max_length=50) # sticker_png, page_asset, etc.
     s3_key = models.CharField(max_length=1024)
     mime = models.CharField(max_length=100)
@@ -95,6 +96,15 @@ class UploadSession(BaseModel):
 
     class Meta:
         db_table = 'upload_sessions'
+        constraints = [
+            models.CheckConstraint(
+                check=(
+                    (models.Q(user__isnull=False) & models.Q(guest_id__isnull=True)) |
+                    (models.Q(user__isnull=True) & models.Q(guest_id__isnull=False))
+                ),
+                name="uploadsession_owner_user_or_guest",
+            )
+        ]
 
 # -----------------------------------------------------------------------------
 # 2. Friends
