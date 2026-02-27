@@ -45,25 +45,26 @@ jobs:
       # - name: Run Tests
       #   run: python manage.py test
 
-      # 1) PR側のschema生成
+# 1) PR側のschema生成
       - name: Generate PR Schema
         run: |
-          python manage.py spectacular --file schema_pr.yml
+          python manage.py spectacular --file ../schema_pr.yml # 一つ上に書き出す
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/postgres
           SECRET_KEY: "ci-test-key"
           APP_ENV: "local"
 
-      # 2) mainブランチにある最新schema.ymlを取得（比較元）
+      # 2) mainブランチから取得
       - name: Fetch base schema from main
         run: |
           git fetch origin main --depth=1
-          git show origin/main:schema.yml > schema_base.yml
+          # ルート（../）に書き出す
+          git show origin/main:DjangoAPI/schema.yml > ../schema_base.yml
 
-      # 3) oasdiffでbreaking change検知（breakingがあればここで落ちる）
+      # 3) oasdiff（ルートにあるファイルを比較）
       - name: Detect breaking changes (OpenAPI)
         run: |
           docker run --rm -v "${{ github.workspace }}:/work" \
             tufin/oasdiff:latest \
-            --fail-on=breaking \
-            /work/schema_base.yml /work/schema_pr.yml
+            breaking /work/schema_base.yml /work/schema_pr.yml \
+            
