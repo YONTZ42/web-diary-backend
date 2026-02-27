@@ -1,12 +1,13 @@
-name: crop-yolo-build
+name: genai-image-build
 
 on:
   push:
     branches: ["main"]
     paths:
-      - "Lambda_CropYOLO/**"
-      - ".github/workflows/Lambda_CropYOLO-push-ecr.yml"
+      - "Lambda_Genai/**"
+      - ".github/workflows/Lambda_Genai-push-ecr.yml"
   workflow_dispatch:
+
 
 permissions:
   id-token: write
@@ -14,23 +15,19 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPO_BASE: web-diary/crop-yolo-lambda/packages
-  ECR_REPO_APP: web-diary/crop-yolo-lambda
+  ECR_REPO: web-diary/generate-photo/genai
+  LAMBDA_FUNCTION_NAME: generate_backfround_image_genai # AWS上のLambda関数名に書き換えてください
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # ここで作業ディレクトリを固定
     defaults:
       run:
-        working-directory: ./Lambda_CropYOLO
+        working-directory: ./Lambda_Genai
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
-          # checkoutはルートで行う必要があるためパス調整なし
-      
+
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -44,47 +41,24 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Compute requirements hash
-        id: reqhash
-        # working-directory 指定のおかげで直下にアクセス可能
-        run: echo "hash=$(sha256sum requirements.txt | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
-
-      - name: Download YOLO Models
-        run: |
-          mkdir -p models
-          curl -L -o models/yolo26n-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-seg.pt
-          curl -L -o models/yolo26s-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26s-seg.pt
-
-      - name: Verify model file exists
-        run: |
-          ls -la models
-          test -f models/yolo26n-seg.pt && echo "OK model exists"
-
-      # ---- Build & Push BASE ----
-      - name: Build & Push BASE image
+      # マルチステージビルドにより、この1ステップで軽量なイメージを作成
+      - name: Build & Push GenAI image
+        id: build-image
         uses: docker/build-push-action@v6
         with:
-          # contextをフォルダ内に指定
-          context: ./Lambda_CropYOLO
-          file: ./Lambda_CropYOLO/Dockerfile.base
+          context: ./Lambda_Genai
+          file: ./Lambda_Genai/Dockerfile
           push: true
           provenance: false
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_BASE }}:base-${{ steps.reqhash.outputs.hash }}
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # ---- Build & Push APP ----
-      - name: Build & Push APP image
-        uses: docker/build-push-action@v6
-        with:
-          context: ./Lambda_CropYOLO
-          file: ./Lambda_CropYOLO/Dockerfile
-          push: true
-          provenance: false
-          build-args: |
-            BASE_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_BASE }}:base-${{ steps.reqhash.outputs.hash }}
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      # Lambda関数のコード（イメージ）を更新
+      - name: Update Lambda function
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
