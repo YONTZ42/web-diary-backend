@@ -1,4 +1,4 @@
-name: crop-yolo_multi-build
+name: crop-yolo_multi-build-optimized
 
 on:
   push:
@@ -14,13 +14,12 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPO_BASE: web-diary/crop-yolo-lambda/packages
-  ECR_REPO_APP: web-diary/crop-yolo-lambda/multi
+  ECR_REPO: web-diary/crop-yolo-lambda/multi # 1つのリポジトリに統合
+  LAMBDA_FUNCTION_NAME: HelloYOLO
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    # ここで作業ディレクトリを固定
     defaults:
       run:
         working-directory: ./Lambda_CropYOLO_Multi
@@ -29,7 +28,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           lfs: true
-          # checkoutはルートで行う必要があるためパス調整なし
       
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -44,53 +42,31 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Compute requirements hash
-        id: reqhash
-        # working-directory 指定のおかげで直下にアクセス可能
-        run: echo "hash=$(sha256sum ${{ github.workspace }}/Lambda_CropYOLO/requirements.txt | cut -d ' ' -f 1)" >> $GITHUB_OUTPUT
-
+      # モデルファイルのダウンロード (キャッシュなしでも動作するが、Dockerfile外で管理)
       - name: Download YOLO Models
         run: |
           mkdir -p models
-          curl -L -o models/yolo26n-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-seg.pt
-          curl -L -o models/yolo26s-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26s-seg.pt
+          [ -f models/yolo26n-seg.pt ] || curl -L -o models/yolo26n-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-seg.pt
+          [ -f models/yolo26s-seg.pt ] || curl -L -o models/yolo26s-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26s-seg.pt
 
-      - name: Verify model file exists
-        run: |
-          ls -la models
-          test -f models/yolo26n-seg.pt && echo "OK model exists"
-
-      # ---- Build & Push BASE ----
-      - name: Build & Push BASE image
-        uses: docker/build-push-action@v6
-        with:
-          # contextをフォルダ内に指定
-          context: ./Lambda_CropYOLO_Multi
-          file: ./Lambda_CropYOLO_Multi/Dockerfile.base
-          push: true
-          provenance: false
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_BASE }}:base-${{ steps.reqhash.outputs.hash }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # ---- Build & Push APP ----
-      - name: Build & Push APP image
+      # ---- Build & Push (マルチステージを1つのステップで処理) ----
+      - name: Build & Push Image
         uses: docker/build-push-action@v6
         with:
           context: ./Lambda_CropYOLO_Multi
           file: ./Lambda_CropYOLO_Multi/Dockerfile
           push: true
           provenance: false
-          build-args: |
-            BASE_IMAGE=${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_BASE }}:base-${{ steps.reqhash.outputs.hash }}
           tags: |
-            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+          # ★GitHub Actions専用の高速キャッシュを利用
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      # ---- Lambda関数の更新 ----
       - name: Update Lambda function code
         run: |
           aws lambda update-function-code \
-            --function-name HelloYOLO \
-            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO_APP }}:latest
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
