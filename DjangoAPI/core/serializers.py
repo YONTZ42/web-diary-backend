@@ -78,6 +78,11 @@ class UploadIssueSerializer(serializers.Serializer):
     filename = serializers.CharField()
     mime_type = serializers.CharField()
     purpose = serializers.CharField() # sticker, page_asset 等
+    purpose = serializers.ChoiceField(choices=[
+        "sticker_png",
+        "page_asset",
+        "exhibit_image",
+    ])
 
 class UploadConfirmSerializer(serializers.Serializer):
     """アップロード完了報告（クライアント→サーバー）"""

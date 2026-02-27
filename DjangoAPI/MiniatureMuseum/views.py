@@ -10,10 +10,12 @@ from django.conf import settings
 from django.db import models
 from .models import Gallery, Exhibit
 from .serializers import (
-    GallerySerializer, ExhibitSerializer, ExhibitPublicSerializer,GalleryPublicSerializer
-)
+    GallerySerializer, ExhibitSerializer, ExhibitPublicSerializer,
+    GalleryPublicSerializer,ExhibitUpsertSerializer)
 
 from drf_spectacular.utils import extend_schema, OpenApiResponse
+from django.utils.text import slugify
+import uuid
 
 
 
@@ -60,6 +62,129 @@ class _GalleryActorMixin:
 
         return gallery, (mode, ident)
 
+class GuestGalleryView(views.APIView):
+    """
+    Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+
+    - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+    - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+    - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+    - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+    """
+    permission_classes = [AllowAny]
+
+    def _require_guest_id(self, request) -> str:
+        guest_id = request.headers.get('X-Guest-Id')
+        if not guest_id:
+            raise NotAuthenticated('Guest authentication required (X-Guest-Id).')
+        return guest_id
+
+    def _get_gallery(self, guest_id: str):
+        return Gallery.objects.filter(
+            user_style='guest',
+            guest_id=guest_id,
+            deleted_at__isnull=True,
+        ).first()
+
+    def _generate_unique_slug(self) -> str:
+        # 16桁ランダム（衝突時リトライ）
+        for _ in range(10):
+            s = uuid.uuid4().hex[:16]
+            if not Gallery.objects.filter(slug=s).exists():
+                return s
+        # さすがに衝突し続けない想定だが保険
+        return uuid.uuid4().hex
+
+    @extend_schema(
+        request=None,
+        responses={
+            200: GallerySerializer,
+            401: OpenApiResponse(description="Not Authenticated"),
+            404: OpenApiResponse(description="Not found"),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        guest_id = self._require_guest_id(request)
+        gallery = self._get_gallery(guest_id)
+        if not gallery:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(GallerySerializer(gallery, context={'request': request}).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=GallerySerializer,
+        responses={
+            200: GallerySerializer,  # 既存返却
+            201: GallerySerializer,  # 新規作成
+            400: OpenApiResponse(description="Bad Request"),
+            401: OpenApiResponse(description="Not Authenticated"),
+        },
+    )
+    def post(self, request, *args, **kwargs):
+        guest_id = self._require_guest_id(request)
+
+        existing = self._get_gallery(guest_id)
+        if existing:
+            # すでにあれば既存を返す（UX優先）
+            return Response(GallerySerializer(existing, context={'request': request}).data, status=status.HTTP_200_OK)
+
+        # 作成（user_style/guest_id は固定）
+        serializer = GallerySerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+
+        # slug は任意。未指定なら生成（Serializer.create も生成するが、ここでは衝突回避まで面倒を見る）
+        slug = serializer.validated_data.get('slug') or self._generate_unique_slug()
+
+        gallery = serializer.save(
+            user_style='guest',
+            owner=None,
+            guest_id=guest_id,
+            slug=slug,
+        )
+        return Response(GallerySerializer(gallery, context={'request': request}).data, status=status.HTTP_201_CREATED)
+
+    @extend_schema(
+        request=GallerySerializer,
+        responses={
+            200: GallerySerializer,
+            400: OpenApiResponse(description="Bad Request"),
+            401: OpenApiResponse(description="Not Authenticated"),
+            404: OpenApiResponse(description="Not found"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        guest_id = self._require_guest_id(request)
+        gallery = self._get_gallery(guest_id)
+        if not gallery:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Guest 側で更新を許可するフィールドを限定（安全）
+        # ※ slug / user_style / owner / guest_id は変更不可
+        allowed = {'title', 'layout_cols', 'layout_rows', 'is_public', 'cover_render_url'}
+        data = {k: v for k, v in request.data.items() if k in allowed}
+
+        serializer = GallerySerializer(gallery, data=data, partial=True, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        obj = serializer.save(user_style='guest', owner=None, guest_id=guest_id)
+        return Response(GallerySerializer(obj, context={'request': request}).data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        request=None,
+        responses={
+            204: OpenApiResponse(description="Deleted"),
+            401: OpenApiResponse(description="Not Authenticated"),
+            404: OpenApiResponse(description="Not found"),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        guest_id = self._require_guest_id(request)
+        gallery = self._get_gallery(guest_id)
+        if not gallery:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        gallery.delete()  # 論理削除
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
 
 @extend_schema(
 request=ExhibitSerializer,
@@ -105,7 +230,7 @@ class GalleryExhibitSlotUpsertView(_GalleryActorMixin, views.APIView):
     permission_classes = [AllowAny]
 
     @extend_schema(
-        request=ExhibitSerializer,
+        request=ExhibitUpsertSerializer,
         responses={
             200: ExhibitSerializer,
             201: ExhibitSerializer,
@@ -117,15 +242,22 @@ class GalleryExhibitSlotUpsertView(_GalleryActorMixin, views.APIView):
     def put(self, request, gallery_id, slot_index: int, *args, **kwargs):
         gallery, (mode, ident) = self._get_owned_gallery_or_404(request, gallery_id)
 
-        try:
-            exhibit = Exhibit.objects.filter(gallery=gallery, slot_index=slot_index, deleted_at__isnull=True).get()
-            partial = False  # 置換に寄せる
-            serializer = ExhibitSerializer(exhibit, data=request.data, partial=partial, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-        except Exhibit.DoesNotExist:
-            serializer = ExhibitSerializer(data=request.data, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            exhibit = None
+        exhibit = Exhibit.objects.filter(
+            gallery=gallery,
+            slot_index=slot_index,
+            deleted_at__isnull=True,
+        ).first()
+
+        # “置換”に寄せるなら partial=False だけど、フロントが全項目送らないと壊れる
+        # まずは partial=True が安全（送ったものだけ更新）
+        serializer = ExhibitUpsertSerializer(
+            exhibit,
+            data=request.data,
+            partial=True,
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+
 
         save_kwargs = {'gallery': gallery, 'slot_index': slot_index}
         if gallery.user_style == 'user':
@@ -151,29 +283,13 @@ class GalleryExhibitSlotUpsertView(_GalleryActorMixin, views.APIView):
     )
     def delete(self, request, gallery_id, slot_index: int, *args, **kwargs):
         gallery, (mode, ident) = self._get_owned_gallery_or_404(request, gallery_id)
-        qs = Exhibit.objects.filter(gallery=gallery, slot_index=slot_index, deleted_at__isnull=True)
-        deleted = qs.delete()[0]
-        if deleted == 0:
+        try:
+            obj = Exhibit.objects.filter(gallery=gallery, slot_index=slot_index, deleted_at__isnull=True).get()
+        except Exhibit.DoesNotExist:
             return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        obj.delete()  # 論理削除
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class GalleryPublicViewer(views.APIView):
-    """公開閲覧用: slug から Gallery + 全Exhibit を取得して返す（is_publicのみ）"""
-    permission_classes = [AllowAny]
-
-    def get(self, request, slug: str, *args, **kwargs):
-        try:
-            gallery = (
-                Gallery.objects
-                .filter(slug=slug, is_public=True, deleted_at__isnull=True)
-                .prefetch_related(models.Prefetch('exhibits', queryset=Exhibit.objects.order_by('slot_index')))
-                .get()
-            )
-        except Gallery.DoesNotExist:
-            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-        serializer = GalleryPublicSerializer(gallery, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
 # --- 6. Gallery / Exhibit API ---
 
@@ -183,10 +299,17 @@ class GalleryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        return Gallery.objects.filter(owner=self.request.user).order_by('-updated_at')
+        return Gallery.objects.filter(owner=self.request.user, deleted_at__isnull=True).order_by('-updated_at')
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(
+            user_style='user',
+            owner=self.request.user,
+            guest_id=None,
+        )
+
+    def perform_destroy(self, instance):
+        instance.delete()  # 論理削除
 
 
 class ExhibitViewSet(viewsets.ModelViewSet):
@@ -196,10 +319,16 @@ class ExhibitViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         # 自分の Exhibit のみ（Gallery owner と Exhibit owner の二重チェック）
-        return Exhibit.objects.filter(owner=self.request.user).select_related('gallery').order_by('-updated_at')
+        return Exhibit.objects.filter(
+            owner=self.request.user,
+            deleted_at__isnull=True,
+        ).select_related('gallery').order_by('-updated_at')
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        serializer.save(user_style='user', owner=self.request.user, guest_id=None)
+
+    def perform_destroy(self, instance):
+        instance.delete()  # 論理削除
 
 
 
@@ -214,6 +343,9 @@ class GalleryPublicView(generics.RetrieveAPIView):
             Gallery.objects
             .filter(is_public=True, deleted_at__isnull=True)  # ←論理削除あるなら入れる
             .prefetch_related(
-                models.Prefetch('exhibits', queryset=Exhibit.objects.order_by('slot_index'))
+                models.Prefetch(
+                    'exhibits',
+                    queryset=Exhibit.objects.filter(deleted_at__isnull=True).order_by('slot_index'),
+                )
             )
         )
