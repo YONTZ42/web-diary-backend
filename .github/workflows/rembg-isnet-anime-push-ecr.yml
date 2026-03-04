@@ -1,0 +1,63 @@
+name: rembg-isnet-anime-lambda-build
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "LambdaContainers/Lambda_RembgIsnetAnime/**"
+      - ".github/workflows/rembg-isnet-anime-push-ecr.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: ap-northeast-1
+  ECR_REPO: web-diary/rembg-lambda/isnet-anime # ECRリポジトリ名
+  LAMBDA_FUNCTION_NAME: rembg_isnet_anime # Lambda関数名
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./LambdaContainers/Lambda_RembgIsnetAnime
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Push Rembg image
+        id: build-image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./LambdaContainers/Lambda_RembgIsnetAnime
+          file: ./LambdaContainers/Lambda_RembgIsnetAnime/Dockerfile
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+            ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Update Mutiple Lambda function
+        run: |
+          aws lambda update-function-code \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+          

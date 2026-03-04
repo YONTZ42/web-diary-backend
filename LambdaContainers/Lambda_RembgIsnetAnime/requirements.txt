@@ -1,0 +1,7 @@
+numpy<2.0.0
+rembg
+onnxruntime
+boto3
+requests
+Pillow
+opencv-python-headless
