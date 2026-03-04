@@ -8,6 +8,7 @@ on:
       - ".github/workflows/rembg-birefnet-push-ecr.yml"
   workflow_dispatch:
 
+
 permissions:
   id-token: write
   contents: read
