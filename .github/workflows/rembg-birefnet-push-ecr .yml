@@ -17,6 +17,7 @@ env:
   ECR_REPO: web-diary/rembg-lambda/birefnet # ECRリポジトリ名
   LAMBDA_FUNCTION_NAME: rembg_birefnet # Lambda関数名
 
+
 jobs:
   build:
     runs-on: ubuntu-latest
