@@ -10,9 +10,7 @@ WORKDIR /build
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    pip install numpy && \
-    pip install rembg
+    pip install --prefer-binary -r requirements.txt
 
 # モデルの事前ダウンロード (isnet-general-use)
 # rembg は $U2NET_HOME/.u2net/ モデル名.onnx を探しに行く
