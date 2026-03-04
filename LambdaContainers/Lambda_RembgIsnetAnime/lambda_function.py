@@ -10,8 +10,6 @@ from PIL import Image
 
 s3 = boto3.client("s3")
 
-# --- モデル配置の強制修正 ---
-MODEL_NAME = os.environ.get("MODEL_NAME", "isnet-general-use")
 U2NET_HOME = "/tmp"
 os.environ["U2NET_HOME"] = U2NET_HOME
 os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
