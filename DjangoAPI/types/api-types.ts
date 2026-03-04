@@ -474,9 +474,11 @@ export interface components {
             /** Format: uri */
             imageOriginalUrl: string;
             /** Format: uri */
-            imageCutoutPngUrl?: string | null;
+            imageBackgroundUrl?: string | null;
+            /** Format: uri */
+            imageForegroundUrl?: string | null;
             materialParams?: unknown;
-            style?: string;
+            styleConfig?: unknown;
             title?: string;
             description?: string;
             /** Format: date-time */
@@ -489,14 +491,16 @@ export interface components {
             /** Format: uuid */
             readonly id: string;
             readonly slotIndex: number;
+            readonly title: string;
+            readonly description: string;
             /** Format: uri */
             readonly imageOriginalUrl: string;
             /** Format: uri */
-            readonly imageCutoutPngUrl: string | null;
+            readonly imageBackgroundUrl: string | null;
+            /** Format: uri */
+            readonly imageForegroundUrl: string | null;
             readonly materialParams: unknown;
-            readonly style: string;
-            readonly title: string;
-            readonly description: string;
+            readonly styleConfig: unknown;
             /** Format: date-time */
             readonly createdAt: string;
             /** Format: date-time */
@@ -509,9 +513,11 @@ export interface components {
             /** Format: uri */
             imageOriginalUrl: string;
             /** Format: uri */
-            imageCutoutPngUrl?: string | null;
+            imageBackgroundUrl?: string | null;
+            /** Format: uri */
+            imageForegroundUrl?: string | null;
             materialParams?: unknown;
-            style?: string;
+            styleConfig?: unknown;
         };
         /** @description ギャラリー（編集/管理用）。retrieveではexhibitsも返す。 */
         Gallery: {
@@ -630,9 +636,11 @@ export interface components {
             /** Format: uri */
             imageOriginalUrl?: string;
             /** Format: uri */
-            imageCutoutPngUrl?: string | null;
+            imageBackgroundUrl?: string | null;
+            /** Format: uri */
+            imageForegroundUrl?: string | null;
             materialParams?: unknown;
-            style?: string;
+            styleConfig?: unknown;
             title?: string;
             description?: string;
             /** Format: date-time */
