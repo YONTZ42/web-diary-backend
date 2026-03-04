@@ -11,6 +11,10 @@ import glob
 
 s3 = boto3.client("s3")
 
+os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
+os.environ["NUMBA_NUM_THREADS"] = "1"
+os.environ["U2NET_HOME"] = "/var/task"
+
 print(f"Current U2NET_HOME: {os.environ.get('U2NET_HOME')}")
 print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
 
