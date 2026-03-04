@@ -14,7 +14,7 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPO: web-diary/rembg-lambda/isnet # ECRリポジトリ名
+  ECR_REPO: web-diary/rembg-lambda/isnet-general # ECRリポジトリ名
   LAMBDA_FUNCTION_NAME: rembg_isnet_general # Lambda関数名
 
 jobs:
