@@ -1466,15 +1466,18 @@ components:
           type: string
           format: uri
           maxLength: 2048
-        imageCutoutPngUrl:
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        imageForegroundUrl:
           type: string
           format: uri
           nullable: true
           maxLength: 2048
         materialParams: {}
-        style:
-          type: string
-          maxLength: 50
+        styleConfig: {}
         title:
           type: string
           maxLength: 255
@@ -1508,25 +1511,29 @@ components:
         slotIndex:
           type: integer
           readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
         imageOriginalUrl:
           type: string
           format: uri
           readOnly: true
-        imageCutoutPngUrl:
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        imageForegroundUrl:
           type: string
           format: uri
           readOnly: true
           nullable: true
         materialParams:
           readOnly: true
-        style:
-          type: string
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        description:
-          type: string
+        styleConfig:
           readOnly: true
         createdAt:
           type: string
@@ -1540,11 +1547,12 @@ components:
       - createdAt
       - description
       - id
-      - imageCutoutPngUrl
+      - imageBackgroundUrl
+      - imageForegroundUrl
       - imageOriginalUrl
       - materialParams
       - slotIndex
-      - style
+      - styleConfig
       - title
       - updatedAt
     ExhibitUpsert:
@@ -1563,15 +1571,18 @@ components:
           type: string
           format: uri
           maxLength: 2048
-        imageCutoutPngUrl:
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        imageForegroundUrl:
           type: string
           format: uri
           nullable: true
           maxLength: 2048
         materialParams: {}
-        style:
-          type: string
-          maxLength: 50
+        styleConfig: {}
       required:
       - imageOriginalUrl
       - slotIndex
@@ -1868,15 +1879,18 @@ components:
           type: string
           format: uri
           maxLength: 2048
-        imageCutoutPngUrl:
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        imageForegroundUrl:
           type: string
           format: uri
           nullable: true
           maxLength: 2048
         materialParams: {}
-        style:
-          type: string
-          maxLength: 50
+        styleConfig: {}
         title:
           type: string
           maxLength: 255
