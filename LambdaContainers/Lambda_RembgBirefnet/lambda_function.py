@@ -6,7 +6,6 @@ import base64
 import requests
 import uuid
 from PIL import Image
-from rembg import remove, new_session
 
 s3 = boto3.client("s3")
 # 重要: rembg がモデルを探すディレクトリを強制指定
@@ -24,6 +23,8 @@ ALPHA_MATTING = os.environ.get("ALPHA_MATTING", "false").lower() == "true"
 ALPHA_MATTING_FOREGROUND_THRESHOLD = int(os.environ.get("AM_FG_THRESHOLD", "240"))
 ALPHA_MATTING_BACKGROUND_THRESHOLD = int(os.environ.get("AM_BG_THRESHOLD", "10"))
 ALPHA_MATTING_ERODE_SIZE = int(os.environ.get("AM_ERODE_SIZE", "10"))
+
+from rembg import remove, new_session
 
 # セッションの初期化（初回起動時にモデルがロードされる）
 session = new_session(MODEL_NAME)
