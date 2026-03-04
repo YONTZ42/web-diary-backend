@@ -9,7 +9,11 @@ from PIL import Image
 from rembg import remove, new_session
 
 s3 = boto3.client("s3")
-
+# 重要: rembg がモデルを探すディレクトリを強制指定
+os.environ["U2NET_HOME"] = "/var/task"
+# Numba のキャッシュエラー対策
+os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
+os.environ["NUMBA_NUM_THREADS"] = "1"
 # ---- 環境変数から設定を取得 ----
 MODEL_NAME = os.environ.get("MODEL_NAME", "birefnet-general-lite")
 DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")
