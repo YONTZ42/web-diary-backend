@@ -11,26 +11,6 @@ import glob
 
 s3 = boto3.client("s3")
 
-U2NET_HOME = "/tmp"
-os.environ["U2NET_HOME"] = U2NET_HOME
-os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
-
-# /tmp/.u2net フォルダを作成し、/var/task/.u2net 内のファイルをリンクまたはコピー
-source_dir = "/var/task/.u2net"
-target_dir = os.path.join(U2NET_HOME, ".u2net")
-
-if not os.path.exists(target_dir):
-    os.makedirs(target_dir, exist_ok=True)
-    # 存在するモデルファイルを全て /tmp にシンボリックリンク（またはコピー）
-    for item in os.listdir(source_dir):
-        s = os.path.join(source_dir, item)
-        d = os.path.join(target_dir, item)
-        if not os.path.exists(d):
-            try:
-                os.symlink(s, d)
-            except OSError:
-                shutil.copy2(s, d)
-
 print(f"Current U2NET_HOME: {os.environ.get('U2NET_HOME')}")
 print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
 
