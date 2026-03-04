@@ -8,7 +8,6 @@ import numpy as np
 from PIL import Image
 import uuid
 from ultralytics import YOLO
-from urllib.parse import urlparse
 
 s3 = boto3.client("s3")
 
@@ -29,16 +28,34 @@ MODEL_PATH = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", "/var/task"), MODEL
 model = YOLO(MODEL_PATH)
 
 def lambda_handler(event, context):
-    if event.get("only_for_boot"):
+    # ---------------------------------------------------------
+    # 1. パラメータの抽出 (Function URL対応)
+    # ---------------------------------------------------------
+    # デフォルトは event をそのままパラメータとして扱う
+    params = event
+
+    # Function URL経由(bodyがJSON文字列)の場合はパースして params に代入
+    if "body" in event and isinstance(event["body"], str):
+        try:
+            params = json.loads(event["body"])
+        except json.JSONDecodeError:
+            print("Failed to parse JSON body")
+            return {"statusCode": 400, "body": json.dumps({"error": "Invalid JSON body"})}
+
+    # ---------------------------------------------------------
+    # 2. 処理開始
+    # ---------------------------------------------------------
+    if params.get("only_for_boot"):
         return {"statusCode": 200, "body": json.dumps("Hello, I am YOLO!")}
 
     try:
-        # 1. 画像の取得 (Base64 or URL or S3)
-        img_bytes = _get_image_data(event)
+        # 抽出した params を渡して画像データを取得
+        img_bytes = _get_image_data(params)
+        
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB") # 安全のためRGB変換
         orig_size = img.size 
         
-        # 2. YOLO推論
+        # YOLO推論
         results = model.predict(
             source=img,
             conf=CONF_THRES,
@@ -51,7 +68,7 @@ def lambda_handler(event, context):
         result = results[0]
         mask_urls = []
 
-        # 3. マスクデータの画像化と保存
+        # マスクデータの画像化と保存
         if hasattr(result, 'masks') and result.masks is not None:
             for mask_tensor in result.masks.data:
                 mask_np = (mask_tensor.cpu().numpy() * 255).astype(np.uint8)
@@ -78,28 +95,35 @@ def lambda_handler(event, context):
 
     except Exception as e:
         print(f"Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
 
-def _get_image_data(event):
+def _get_image_data(params):
     """
+    params (dict) から画像データを抽出
     優先順位: image_data (Base64) > image_url (HTTPS) > S3イベント
     """
     # Pattern 1: Base64 data
-    if "image_data" in event:
-        # "data:image/png;base64,..." のようなヘッダーがある場合を除去
-        header, encoded = event["image_data"].split(",", 1) if "," in event["image_data"] else (None, event["image_data"])
+    if "image_data" in params:
+        data_str = params["image_data"]
+        # "data:image/png;base64,..." ヘッダーがある場合を除去 (念のため残す)
+        if "," in data_str:
+            header, encoded = data_str.split(",", 1)
+        else:
+            encoded = data_str
         return base64.b64decode(encoded)
 
     # Pattern 2: CloudFront or any HTTPS URL
-    if "image_url" in event:
-        url = event["image_url"]
+    if "image_url" in params:
+        url = params["image_url"]
         res = requests.get(url, timeout=10)
         res.raise_for_status()
         return res.content
 
     # Pattern 3: Classic S3 Bucket/Key
-    bucket = event.get("bucket")
-    key = event.get("key")
+    bucket = params.get("bucket")
+    key = params.get("key")
     if bucket and key:
         response = s3.get_object(Bucket=bucket, Key=key)
         return response['Body'].read()
@@ -109,6 +133,12 @@ def _get_image_data(event):
 def _put_to_s3(buffer, bucket, key):
     if not bucket:
         raise ValueError("Environment variable BUCKET_NAME is not set.")
+    
     s3.put_object(Bucket=bucket, Key=key, Body=buffer, ContentType="image/png")
-    # マスク画像もCloudFront経由で返したい場合はここを調整
-    return s3.generate_presigned_url("get_object", Params={"Bucket": bucket, "Key": key}, ExpiresIn=3600)
+    
+    # 署名付きURLを発行して返す (有効期限1時間)
+    return s3.generate_presigned_url(
+        "get_object", 
+        Params={"Bucket": bucket, "Key": key}, 
+        ExpiresIn=3600
+    )
