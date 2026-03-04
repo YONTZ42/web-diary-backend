@@ -7,6 +7,7 @@ import requests
 import uuid
 import shutil
 from PIL import Image
+import glob
 
 s3 = boto3.client("s3")
 
@@ -29,6 +30,9 @@ if not os.path.exists(target_dir):
                 os.symlink(s, d)
             except OSError:
                 shutil.copy2(s, d)
+
+print(f"Current U2NET_HOME: {os.environ.get('U2NET_HOME')}")
+print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
 
 # ---- 環境変数から設定を取得 ----
 MODEL_NAME = os.environ.get("MODEL_NAME", "isnet-general-use")
