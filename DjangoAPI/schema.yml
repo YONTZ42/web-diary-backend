@@ -7,9 +7,8 @@ paths:
   /api/auth/guest/:
     post:
       operationId: auth_guest_create
-      description: ゲストID発行（クライアントは localStorage に保存して X-Guest-Id で送る）
       tags:
-      - auth
+      - Auth
       security:
       - jwtAuth: []
       - {}
@@ -224,7 +223,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Gallery'
-        required: true
       security:
       - jwtAuth: []
       responses:
@@ -299,13 +297,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Exhibit'
+              $ref: '#/components/schemas/ExhibitUpsert'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Exhibit'
+              $ref: '#/components/schemas/ExhibitUpsert'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Exhibit'
+              $ref: '#/components/schemas/ExhibitUpsert'
         required: true
       security:
       - jwtAuth: []
@@ -403,7 +401,6 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/Gallery'
-        required: true
       security:
       - jwtAuth: []
       responses:
@@ -483,6 +480,133 @@ paths:
               schema:
                 $ref: '#/components/schemas/GalleryPublic'
           description: ''
+  /api/guest/gallery/:
+    get:
+      operationId: guest_gallery_retrieve
+      description: |-
+        Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+
+        - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+        - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+        - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+        - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+      tags:
+      - guest
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+        '401':
+          description: Not Authenticated
+        '404':
+          description: Not found
+    post:
+      operationId: guest_gallery_create
+      description: |-
+        Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+
+        - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+        - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+        - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+        - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+      tags:
+      - guest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Gallery'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+        '400':
+          description: Bad Request
+        '401':
+          description: Not Authenticated
+    patch:
+      operationId: guest_gallery_partial_update
+      description: |-
+        Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+
+        - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+        - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+        - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+        - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+      tags:
+      - guest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGallery'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGallery'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGallery'
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Gallery'
+          description: ''
+        '400':
+          description: Bad Request
+        '401':
+          description: Not Authenticated
+        '404':
+          description: Not found
+    delete:
+      operationId: guest_gallery_destroy
+      description: |-
+        Guest 用: 1ゲスト=1ギャラリー を前提にした入口
+
+        - GET   /api/guest/gallery/ : 自分の Gallery を返す（なければ404）
+        - POST  /api/guest/gallery/ : 自分の Gallery を作成（すでにあれば既存を返す）
+        - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
+        - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
+      tags:
+      - guest
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '204':
+          description: Deleted
+        '401':
+          description: Not Authenticated
+        '404':
+          description: Not found
   /api/me/:
     get:
       operationId: me_retrieve
@@ -1231,6 +1355,7 @@ paths:
         required: true
       security:
       - jwtAuth: []
+      - {}
       responses:
         '200':
           content:
@@ -1341,15 +1466,18 @@ components:
           type: string
           format: uri
           maxLength: 2048
-        imageCutoutPngUrl:
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        imageForegroundUrl:
           type: string
           format: uri
           nullable: true
           maxLength: 2048
         materialParams: {}
-        style:
-          type: string
-          maxLength: 50
+        styleConfig: {}
         title:
           type: string
           maxLength: 255
@@ -1383,25 +1511,29 @@ components:
         slotIndex:
           type: integer
           readOnly: true
+        title:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
         imageOriginalUrl:
           type: string
           format: uri
           readOnly: true
-        imageCutoutPngUrl:
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          readOnly: true
+          nullable: true
+        imageForegroundUrl:
           type: string
           format: uri
           readOnly: true
           nullable: true
         materialParams:
           readOnly: true
-        style:
-          type: string
-          readOnly: true
-        title:
-          type: string
-          readOnly: true
-        description:
-          type: string
+        styleConfig:
           readOnly: true
         createdAt:
           type: string
@@ -1415,13 +1547,45 @@ components:
       - createdAt
       - description
       - id
-      - imageCutoutPngUrl
+      - imageBackgroundUrl
+      - imageForegroundUrl
       - imageOriginalUrl
       - materialParams
       - slotIndex
-      - style
+      - styleConfig
       - title
       - updatedAt
+    ExhibitUpsert:
+      type: object
+      properties:
+        slotIndex:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        imageOriginalUrl:
+          type: string
+          format: uri
+          maxLength: 2048
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        imageForegroundUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        materialParams: {}
+        styleConfig: {}
+      required:
+      - imageOriginalUrl
+      - slotIndex
     Gallery:
       type: object
       description: ギャラリー（編集/管理用）。retrieveではexhibitsも返す。
@@ -1432,7 +1596,7 @@ components:
           readOnly: true
         slug:
           type: string
-          maxLength: 64
+          readOnly: true
           pattern: ^[-a-zA-Z0-9_]+$
         userStyle:
           $ref: '#/components/schemas/UserStyleEnum'
@@ -1472,9 +1636,7 @@ components:
           format: date-time
           readOnly: true
         exhibits:
-          type: array
-          items:
-            $ref: '#/components/schemas/Exhibit'
+          type: string
           readOnly: true
       required:
       - createdAt
@@ -1717,15 +1879,18 @@ components:
           type: string
           format: uri
           maxLength: 2048
-        imageCutoutPngUrl:
+        imageBackgroundUrl:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 2048
+        imageForegroundUrl:
           type: string
           format: uri
           nullable: true
           maxLength: 2048
         materialParams: {}
-        style:
-          type: string
-          maxLength: 50
+        styleConfig: {}
         title:
           type: string
           maxLength: 255
@@ -1749,7 +1914,7 @@ components:
           readOnly: true
         slug:
           type: string
-          maxLength: 64
+          readOnly: true
           pattern: ^[-a-zA-Z0-9_]+$
         userStyle:
           $ref: '#/components/schemas/UserStyleEnum'
@@ -1789,9 +1954,7 @@ components:
           format: date-time
           readOnly: true
         exhibits:
-          type: array
-          items:
-            $ref: '#/components/schemas/Exhibit'
+          type: string
           readOnly: true
     PatchedNotebook:
       type: object
@@ -2043,6 +2206,16 @@ components:
         plan:
           type: string
           maxLength: 50
+    PurposeEnum:
+      enum:
+      - sticker_png
+      - page_asset
+      - exhibit_image
+      type: string
+      description: |-
+        * `sticker_png` - sticker_png
+        * `page_asset` - page_asset
+        * `exhibit_image` - exhibit_image
     Schedule:
       type: object
       properties:
@@ -2230,7 +2403,7 @@ components:
         mimeType:
           type: string
         purpose:
-          type: string
+          $ref: '#/components/schemas/PurposeEnum'
       required:
       - filename
       - mimeType

@@ -1,11 +1,11 @@
-name: genai-image-build
+name: rembg-isnet-lambda-build
 
 on:
   push:
     branches: ["main"]
     paths:
-      - "LambdaContainers/Lambda_Genai/**"
-      - ".github/workflows/Lambda_Genai-push-ecr.yml"
+      - "LambdaContainers/LambdaRembgIsnet/**"
+      - ".github/workflows/rembg-isnet-push-ecr.yml"
   workflow_dispatch:
 
 permissions:
@@ -14,18 +14,19 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPO: web-diary/generate-photo/genai
-  LAMBDA_FUNCTION_NAME: generate_backfround_image_genai # AWS上のLambda関数名に書き換えてください
+  ECR_REPO: web-diary/rembg/isnet # ECRリポジトリ名
+  LAMBDA_FUNCTION_NAME: "rembg_isnet_general rembg_isnet_anime rembg_birefnet_lite" # Lambda関数名
 
 jobs:
   build:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./LambdaContainers/Lambda_Genai
+        working-directory: ./LambdaContainers/Lambda_RembgIsnet
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Configure AWS Credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -40,13 +41,12 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # マルチステージビルドにより、この1ステップで軽量なイメージを作成
-      - name: Build & Push GenAI image
+      - name: Build & Push Rembg image
         id: build-image
         uses: docker/build-push-action@v6
         with:
-          context: ./LambdaContainers/Lambda_Genai
-          file: ./LambdaContainers/Lambda_Genai/Dockerfile
+          context: ./LambdaContainers/Lambda_RembgIsnet
+          file: ./LambdaContainers/Lambda_RembgIsnet/Dockerfile
           push: true
           provenance: false
           tags: |
@@ -55,9 +55,11 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # Lambda関数のコード（イメージ）を更新
-      - name: Update Lambda function
+      - name: Update Mutiple Lambda function
         run: |
-          aws lambda update-function-code \
-            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
-            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+          for FUNCTION_NAME in ${{ env.LAMBDA_FUNCTION_NAMES }}; do
+            echo "Updating Lambda function: $FUNCTION_NAME"
+            aws lambda update-function-code \
+              --function-name $FUNCTION_NAME \
+              --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+          done

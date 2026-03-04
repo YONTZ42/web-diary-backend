@@ -23,9 +23,10 @@ class ExhibitSerializer(serializers.ModelSerializer):
             'guest_id',
             'slot_index',
             'image_original_url',
-            'image_cutout_png_url',
+            'image_background_url',
+            'image_foreground_url',
             'material_params',
-            'style',
+            'style_config',
             'title',
             'description',
             'created_at',
@@ -110,9 +111,10 @@ class ExhibitUpsertSerializer(serializers.ModelSerializer):
             "title",
             "description",
             "image_original_url",        # ←あなたのモデル名に合わせて
-            "image_cutout_png_url",      # 任意
+            "image_background_url",      # 任意
+            "image_foreground_url",
             "material_params",
-            "style",                     # 任意
+            "style_config",                     # 任意
         ]
         extra_kwargs = {
             # 必須/任意はここで制御（MVPなら image_original_url 必須にするのが自然）
@@ -130,13 +132,14 @@ class ExhibitPublicSerializer(serializers.ModelSerializer):
         model = Exhibit
         fields = (
             'id',
-            'slot_index',
-            'image_original_url',
-            'image_cutout_png_url',
-            'material_params',
-            'style',
-            'title',
-            'description',
+            "slot_index",
+            "title",
+            "description",
+            "image_original_url",        # ←あなたのモデル名に合わせて
+            "image_background_url",      # 任意
+            "image_foreground_url",
+            "material_params",
+            "style_config",                     # 任意
             'created_at',
             'updated_at',
         )

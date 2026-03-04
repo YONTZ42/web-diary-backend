@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "Lambda_CropYOLO/**"
+      - "LambdaContainers/Lambda_CropYOLO/**"
       - ".github/workflows/Lambda_CropYOLO-push-ecr.yml"
   workflow_dispatch:
 
@@ -23,7 +23,7 @@ jobs:
     # ここで作業ディレクトリを固定
     defaults:
       run:
-        working-directory: ./Lambda_CropYOLO
+        working-directory: ./LambdaContainers/Lambda_CropYOLO
 
     steps:
       - uses: actions/checkout@v4
@@ -65,8 +65,8 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           # contextをフォルダ内に指定
-          context: ./Lambda_CropYOLO
-          file: ./Lambda_CropYOLO/Dockerfile.base
+          context: ./LambdaContainers/Lambda_CropYOLO
+          file: ./LambdaContainers/Lambda_CropYOLO/Dockerfile.base
           push: true
           provenance: false
           tags: |
@@ -78,8 +78,8 @@ jobs:
       - name: Build & Push APP image
         uses: docker/build-push-action@v6
         with:
-          context: ./Lambda_CropYOLO
-          file: ./Lambda_CropYOLO/Dockerfile
+          context: ./LambdaContainers/Lambda_CropYOLO
+          file: ./LambdaContainers/Lambda_CropYOLO/Dockerfile
           push: true
           provenance: false
           build-args: |

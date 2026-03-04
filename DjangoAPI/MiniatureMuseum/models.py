@@ -136,13 +136,24 @@ class Exhibit(BaseModel):
 
     # 画像URL（S3 URL）
     image_original_url = models.URLField(max_length=2048)
-    image_cutout_png_url = models.URLField(max_length=2048, null=True, blank=True)
+    image_background_url = models.URLField(max_length=2048, null=True, blank=True)
+    image_foreground_url = models.URLField(max_length=2048, null=True, blank=True)
 
     # WebGPU材質パラメータ（JSON）
     # 例: {"preset": "clear_sheet", "roughness": 0.2, "metalness": 0.0, ...}
     material_params = models.JSONField(default=dict, blank=True)
 
-    style = models.CharField(max_length=50, blank=True, default='')
+    # --- マテリアル・エフェクト設定 (JSON) ---
+    # WebGPUでシェーダーに渡すためのパラメータ群
+    # 例: {
+    #   "depth": 5.0,  (mm単位の厚み)
+    #   "foreground_effect": "hologram",
+    #   "background_effect": "none",
+    #   "hologram_intensity": 0.8,
+    #   "glitter_density": 0.5
+    # }
+    style_config = models.JSONField(default=dict, blank=True)
+
     title = models.CharField(max_length=255, blank=True, default='')
     description = models.TextField(blank=True, default='')
 

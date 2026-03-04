@@ -4,7 +4,7 @@ on:
   push:
     branches: ["main"]
     paths:
-      - "Lambda_CropYOLO_Multi/**"
+      - "LambdaContainers/Lambda_CropYOLO_Multi/**"
       - ".github/workflows/Lambda_CropYOLO_Multi-push-ecr.yml"
   workflow_dispatch:
 
@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./Lambda_CropYOLO_Multi
+        working-directory: ./LambdaContainers/Lambda_CropYOLO_Multi
 
     steps:
       - uses: actions/checkout@v4
@@ -54,8 +54,8 @@ jobs:
       - name: Build & Push Image
         uses: docker/build-push-action@v6
         with:
-          context: ./Lambda_CropYOLO_Multi
-          file: ./Lambda_CropYOLO_Multi/Dockerfile
+          context: ./LambdaContainers/Lambda_CropYOLO_Multi
+          file: ./LambdaContainers/Lambda_CropYOLO_Multi/Dockerfile
           push: true
           provenance: false
           tags: |
