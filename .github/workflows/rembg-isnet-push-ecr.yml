@@ -14,8 +14,8 @@ permissions:
 
 env:
   AWS_REGION: ap-northeast-1
-  ECR_REPO: web-diary/rembg/isnet # ECRリポジトリ名
-  LAMBDA_FUNCTION_NAME: "rembg_isnet_general rembg_isnet_anime rembg_birefnet_lite" # Lambda関数名
+  ECR_REPO: web-diary/rembg-lambda # ECRリポジトリ名
+  LAMBDA_FUNCTION_NAME: rembg_isnet_general # Lambda関数名
 
 jobs:
   build:
@@ -57,9 +57,7 @@ jobs:
 
       - name: Update Mutiple Lambda function
         run: |
-          for FUNCTION_NAME in ${{ env.LAMBDA_FUNCTION_NAMES }}; do
-            echo "Updating Lambda function: $FUNCTION_NAME"
-            aws lambda update-function-code \
-              --function-name $FUNCTION_NAME \
-              --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
-          done
+          aws lambda update-function-code \
+            --function-name ${{ env.LAMBDA_FUNCTION_NAME }} \
+            --image-uri ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPO }}:latest
+          

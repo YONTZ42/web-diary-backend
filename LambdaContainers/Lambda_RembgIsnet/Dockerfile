@@ -1,33 +1,41 @@
+# --- Stage 1: Builder ---
+FROM public.ecr.aws/lambda/python:3.11 AS builder
+
+ENV PIP_NO_CACHE_DIR=1
+
+# ビルドに必要な最小限のライブラリ（onnxruntime や opencv のビルド等に備える）
+RUN yum -y update && yum -y install gcc-c++ curl && yum clean all
+
+WORKDIR /build
+
+COPY requirements.txt .
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
+
+# モデルの事前ダウンロード (isnet-general-use)
+# rembg は $U2NET_HOME/.u2net/ モデル名.onnx を探しに行く
+RUN mkdir -p /build/models/.u2net && \
+    curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx \
+    -o /build/models/.u2net/isnet-general-use.onnx
+
+# --- Stage 2: Runtime ---
 FROM public.ecr.aws/lambda/python:3.11
 
-# システムライブラリのインストール (OpenCV等の依存関係)
-RUN yum install -y mesa-libGL
+# 実行に必要な最小限のランタイムライブラリ (libGLはopencv用)
+RUN yum -y install mesa-libGL && yum clean all
 
-# 作業ディレクトリの設定
+# Builder ステージから Python パッケージをコピー
+COPY --from=builder /var/lang/lib/python3.11/site-packages/ /var/lang/lib/python3.11/site-packages/
+
+# モデルファイルをコピー
+COPY --from=builder /build/models/.u2net /var/task/.u2net
+
 WORKDIR ${LAMBDA_TASK_ROOT}
 
-# Pythonライブラリのインストール
-# rembg[gpu] ではなく通常の rembg (CPU版) を使用 (Lambdaは通常GPUなしのため)
-RUN pip install --no-cache-dir \
-    rembg \
-    onnxruntime \
-    boto3 \
-    requests \
-    numpy \
-    Pillow
+# rembgがモデルを探す基準ディレクトリを /var/task に指定
+ENV U2NET_HOME=/var/task
 
-# モデルファイルの事前ロード設定
-# rembg は $U2NET_HOME/.u2net/ にモデルを探しに行く
-ENV U2NET_HOME=${LAMBDA_TASK_ROOT}
-RUN mkdir -p ${LAMBDA_TASK_ROOT}/.u2net
-
-# ビルド時にモデルをダウンロードしておく (isnet-general-use)
-# これにより実行時のインターネットアクセスと遅延を防ぐ
-RUN curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx \
-    -o ${LAMBDA_TASK_ROOT}/.u2net/isnet-general-use.onnx
-
-# コードのコピー
+# コードをコピー
 COPY lambda_function.py .
 
-# ハンドラの設定
-CMD [ "lambda_function.lambda_handler" ]
+CMD ["lambda_function.lambda_handler"]

@@ -1,4 +1,7 @@
-# 最新の Google Gen AI SDK
-google-genai
-httpx
+rembg
+onnxruntime
 boto3
+requests
+numpy
+Pillow
+opencv-python-headless
