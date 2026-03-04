@@ -10,6 +10,7 @@ WORKDIR /build
 
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
+    pip install numpy && \
     pip install -r requirements.txt
 
 # モデルの事前ダウンロード (isnet-general-use)
