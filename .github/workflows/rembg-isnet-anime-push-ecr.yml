@@ -24,6 +24,7 @@ jobs:
       run:
         working-directory: ./LambdaContainers/Lambda_RembgIsnetAnime
 
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
