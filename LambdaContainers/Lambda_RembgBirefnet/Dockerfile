@@ -15,8 +15,8 @@ RUN pip install --upgrade pip && \
 # モデルの事前ダウンロード (isnet-general-use)
 # rembg は $U2NET_HOME/.u2net/ モデル名.onnx を探しに行く
 RUN mkdir -p /build/models/.u2net && \
-    curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx \
-    -o /build/models/.u2net/isnet-general-use.onnx
+    curl -L https://github.com/danielgatis/rembg/releases/download/v0.0.0/birefnet-general-lite.onnx \
+    -o /build/models/.u2net/birefnet-general-lite.onnx
 
 # --- Stage 2: Runtime ---
 FROM public.ecr.aws/lambda/python:3.11
@@ -34,7 +34,8 @@ WORKDIR ${LAMBDA_TASK_ROOT}
 
 # rembgがモデルを探す基準ディレクトリを /var/task に指定
 ENV U2NET_HOME=/var/task
-
+# Numbaのキャッシュディレクトリを書き込み可能な /tmp に変更
+ENV NUMBA_CACHE_DIR=/tmp/numba_cache
 # コードをコピー
 COPY lambda_function.py .
 
