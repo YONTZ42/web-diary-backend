@@ -12,30 +12,12 @@ import glob
 s3 = boto3.client("s3")
 
 
-os.environ["U2NET_HOME"] = "/tmp/.u2net"
+os.environ["U2NET_HOME"] = "/var/task/.u2net"
 os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
 os.environ["NUMBA_NUM_THREADS"] = "1"
 
 print(f"Current U2NET_HOME: {os.environ.get('U2NET_HOME')}")
 print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
-
-
-# モデルファイルを /var/task/.u2net から /tmp/.u2net へコピー
-# これにより pooch が /tmp 内で自由に管理ファイルを作成できるようになります
-source_dir = "/var/task/.u2net"
-target_dir = "/tmp/.u2net"
-
-if not os.path.exists(target_dir):
-    # 親ディレクトリである /tmp は存在するので、
-    # /var/task/.u2net フォルダごと /tmp/.u2net にコピーまたはリンクする
-    try:
-        # フォルダごとシンボリックリンクを張るのが最速
-        os.symlink(source_dir, target_dir)
-    except OSError:
-        # 失敗した場合は中身をコピー
-        os.makedirs(target_dir, exist_ok=True)
-        for item in os.listdir(source_dir):
-            shutil.copy2(os.path.join(source_dir, item), os.path.join(target_dir, item))
 
 
 # ---- 環境変数から設定を取得 ----
