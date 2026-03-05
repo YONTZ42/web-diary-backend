@@ -1,15 +1,19 @@
 import os
+import json
+import boto3
+import base64
+import requests
+import uuid
+
 # --- Numbaのエラーと遅延を解消する設定 ---
 os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
 os.environ["NUMBA_THREADING_LAYER"] = "workqueue" # ロックエラーを防ぐ
 os.environ["OMP_NUM_THREADS"] = "1"
 os.environ["MKL_NUM_THREADS"] = "1"
 os.environ["NUMBA_NUM_THREADS"] = "1"
-import json
-import boto3
-import base64
-import requests
-import uuid
+os.environ["NUMBA_DISABLE_INTEL_SVML"] = "1"
+# これが効く環境もある（ダメなら外してOK）
+os.environ["NUMBA_DISABLE_PARALLEL"] = "1"
 
 
 s3 = boto3.client("s3")
