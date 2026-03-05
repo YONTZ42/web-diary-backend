@@ -11,8 +11,8 @@ import glob
 
 s3 = boto3.client("s3")
 
-U2NET_HOME = "/var/task"
-os.environ["U2NET_HOME"] = U2NET_HOME
+
+os.environ["U2NET_HOME"] = "/tmp"
 os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
 os.environ["NUMBA_NUM_THREADS"] = "1"
 
@@ -21,7 +21,7 @@ print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
 
 # モデルファイルを /var/task/.u2net から /tmp/.u2net へコピー
 # これにより pooch が /tmp 内で自由に管理ファイルを作成できるようになります
-source_dir = "/var/task/.u2net"
+source_dir = "/opt/models/.u2net"
 target_dir = "/tmp/.u2net"
 
 if not os.path.exists(target_dir):
