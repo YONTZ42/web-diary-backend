@@ -31,11 +31,19 @@ COPY --from=builder /build/models/.u2net /var/task/.u2net
 
 WORKDIR ${LAMBDA_TASK_ROOT}
 
-# rembgがモデルを探す基準ディレクトリを /var/task に指定
-ENV NUMBA_CACHE_DIR=/tmp/numba_cache
-ENV NUMBA_NUM_THREADS=1
 
 # コードをコピー
 COPY lambda_function.py .
+
+# --- キャッシュ作成のためのダミー実行 ---
+# 1. Lambda実行時と同じように /tmp/.u2net を作成し、モデルへのリンクを張る
+# 2. PYTHONPATH を設定し、モデルをロードするスクリプトを実行する
+RUN mkdir -p /tmp/.u2net && \
+    ln -s /var/task/.u2net/* /tmp/.u2net/ && \
+    export PYTHONPATH=${LAMBDA_TASK_ROOT} && \
+    export U2NET_HOME=/tmp/.u2net && \
+    python3 -c "from rembg import new_session; new_session('isnet-anime')" && \
+    rm -rf /tmp/.u2net
+
 
 CMD ["lambda_function.lambda_handler"]
