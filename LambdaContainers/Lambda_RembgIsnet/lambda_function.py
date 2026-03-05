@@ -5,8 +5,6 @@ import boto3
 import base64
 import requests
 import uuid
-import shutil
-from PIL import Image
 import glob
 
 s3 = boto3.client("s3")

@@ -32,7 +32,7 @@ COPY --from=builder /build/models/.u2net /var/task/.u2net
 WORKDIR ${LAMBDA_TASK_ROOT}
 
 # rembgがモデルを探す基準ディレクトリを /var/task に指定
-ENV U2NET_HOME=/var/task
+ENV U2NET_HOME=/var/task/.u2net
 # Numbaのキャッシュディレクトリを書き込み可能な /tmp に変更
 ENV NUMBA_CACHE_DIR=/tmp/numba_cache
 # コードをコピー
