@@ -57,7 +57,6 @@ def _get_session():
             providers=['CPUExecutionProvider']
         )
     return _SESSION
-_SESSION=_get_session()
 
 def lambda_handler(event, context):
     # 1. パラメータの抽出 (Function URL / API Gateway対応)
@@ -80,6 +79,7 @@ def lambda_handler(event, context):
         print("before get_session", time.perf_counter())
         # 背景除去の実行
         # rembg.remove は bytes を受け取り bytes を返すことが可能
+        _SESSION=_get_session()
         from rembg import remove
         output_bytes = remove(
             img_bytes,
