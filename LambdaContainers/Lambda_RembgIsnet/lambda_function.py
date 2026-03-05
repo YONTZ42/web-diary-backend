@@ -26,16 +26,18 @@ source_dir = "/var/task/.u2net"
 target_dir = "/tmp/.u2net"
 
 if not os.path.exists(target_dir):
-    os.makedirs(target_dir, exist_ok=True)
-    for item in os.listdir(source_dir):
-        s = os.path.join(source_dir, item)
-        d = os.path.join(target_dir, item)
-        if not os.path.exists(d):
-            # シンボリックリンクで十分な場合が多いですが、権限エラー回避にはコピーが確実
-            try:
-                os.symlink(s, d)
-            except OSError:
-                shutil.copy2(s, d)
+    # 親ディレクトリである /tmp は存在するので、
+    # /var/task/.u2net フォルダごと /tmp/.u2net にコピーまたはリンクする
+    try:
+        # フォルダごとシンボリックリンクを張るのが最速
+        os.symlink(source_dir, target_dir)
+    except OSError:
+        # 失敗した場合は中身をコピー
+        os.makedirs(target_dir, exist_ok=True)
+        for item in os.listdir(source_dir):
+            shutil.copy2(os.path.join(source_dir, item), os.path.join(target_dir, item))
+
+
 # ---- 環境変数から設定を取得 ----
 MODEL_NAME = os.environ.get("MODEL_NAME", "isnet-general-use")
 DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")
