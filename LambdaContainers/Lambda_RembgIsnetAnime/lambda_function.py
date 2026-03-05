@@ -10,15 +10,22 @@ import glob
 
 s3 = boto3.client("s3")
 
-os.environ["U2NET_HOME"] = "/var/task/.u2net"
-os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
-os.environ["NUMBA_NUM_THREADS"] = "1"
+# --- 必須設定 ---
+# poochが一時ファイルを作れるように /tmp を指定
+os.environ["U2NET_HOME"] = "/tmp/.u2net"
 
-print(f"Current U2NET_HOME: {os.environ.get('U2NET_HOME')}")
-print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
+# 1. 起動時に /var/task/.u2net から /tmp/.u2net へリンクを張る
+source_dir = "/var/task/.u2net"
+target_dir = "/tmp/.u2net"
 
-
-
+if not os.path.exists(target_dir):
+    os.makedirs(target_dir, exist_ok=True)
+    for item in os.listdir(source_dir):
+        s = os.path.join(source_dir, item)
+        d = os.path.join(target_dir, item)
+        if not os.path.exists(d):
+            os.symlink(s, d)
+            
 # ---- 環境変数から設定を取得 ----
 MODEL_NAME = os.environ.get("MODEL_NAME", "isnet-anime")
 DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")
