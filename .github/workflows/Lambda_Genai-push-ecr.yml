@@ -15,7 +15,7 @@ permissions:
 env:
   AWS_REGION: ap-northeast-1
   ECR_REPO: web-diary/generate-photo/genai
-  LAMBDA_FUNCTION_NAME: generate_backfround_image_genai # AWS上のLambda関数名に書き換えてください
+  LAMBDA_FUNCTION_NAME: generate_background_image_genai # AWS上のLambda関数名に書き換えてください
 
 jobs:
   build:
