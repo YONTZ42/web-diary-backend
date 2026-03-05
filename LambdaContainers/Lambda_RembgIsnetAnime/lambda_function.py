@@ -47,11 +47,11 @@ ALPHA_MATTING_FOREGROUND_THRESHOLD = int(os.environ.get("AM_FG_THRESHOLD", "240"
 ALPHA_MATTING_BACKGROUND_THRESHOLD = int(os.environ.get("AM_BG_THRESHOLD", "10"))
 ALPHA_MATTING_ERODE_SIZE = int(os.environ.get("AM_ERODE_SIZE", "10"))
 
-from rembg import remove, new_session
 _SESSION = None
 def _get_session():
     global _SESSION
     if _SESSION is None:
+        from rembg import new_session
         _SESSION = new_session(
             model_name=MODEL_NAME,
             providers=['CPUExecutionProvider']
@@ -78,6 +78,7 @@ def lambda_handler(event, context):
         print("before get_session", time.perf_counter())
         # 背景除去の実行
         # rembg.remove は bytes を受け取り bytes を返すことが可能
+        from rembg import remove
         output_bytes = remove(
             img_bytes,
             session=_get_session,
