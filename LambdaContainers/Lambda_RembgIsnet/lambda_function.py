@@ -19,9 +19,10 @@ os.environ["NUMBA_NUM_THREADS"] = "1"
 print(f"Current U2NET_HOME: {os.environ.get('U2NET_HOME')}")
 print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
 
+
 # モデルファイルを /var/task/.u2net から /tmp/.u2net へコピー
 # これにより pooch が /tmp 内で自由に管理ファイルを作成できるようになります
-source_dir = "/opt/models/.u2net"
+source_dir = "/var/task/.u2net"
 target_dir = "/tmp/.u2net"
 
 if not os.path.exists(target_dir):
