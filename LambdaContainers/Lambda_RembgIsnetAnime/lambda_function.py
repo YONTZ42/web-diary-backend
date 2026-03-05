@@ -83,7 +83,7 @@ def lambda_handler(event, context):
         from rembg import remove
         output_bytes = remove(
             img_bytes,
-            session=_get_session,
+            session=_SESSION,
             alpha_matting=ALPHA_MATTING,
             alpha_matting_foreground_threshold=ALPHA_MATTING_FOREGROUND_THRESHOLD,
             alpha_matting_background_threshold=ALPHA_MATTING_BACKGROUND_THRESHOLD,
