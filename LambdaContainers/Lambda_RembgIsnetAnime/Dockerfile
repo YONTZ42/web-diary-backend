@@ -4,7 +4,7 @@ FROM public.ecr.aws/lambda/python:3.11 AS builder
 ENV PIP_NO_CACHE_DIR=1
 
 # ビルドに必要な最小限のライブラリ（onnxruntime や opencv のビルド等に備える）
-RUN yum -y update && yum -y install libgomp gcc-c++ && yum clean all
+RUN yum -y update && yum -y install gcc-c++ && yum clean all
 
 WORKDIR /build
 
