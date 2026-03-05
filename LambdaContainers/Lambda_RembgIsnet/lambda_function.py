@@ -17,7 +17,6 @@ os.environ["NUMBA_NUM_THREADS"] = "1"
 print(f"Current U2NET_HOME: {os.environ.get('U2NET_HOME')}")
 print(f"Check files: {glob.glob('/var/task/.u2net/*')}")
 
-
 # ---- 環境変数から設定を取得 ----
 MODEL_NAME = os.environ.get("MODEL_NAME", "isnet-general-use")
 DEFAULT_BUCKET = os.environ.get("BUCKET_NAME", "")

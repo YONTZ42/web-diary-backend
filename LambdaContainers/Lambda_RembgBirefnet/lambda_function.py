@@ -32,8 +32,10 @@ ALPHA_MATTING_ERODE_SIZE = int(os.environ.get("AM_ERODE_SIZE", "10"))
 from rembg import remove, new_session
 
 # セッションの初期化（初回起動時にモデルがロードされる）
-session = new_session(MODEL_NAME)
-
+session = new_session(
+    model_name=MODEL_NAME,
+    providers=['CPUExecutionProvider']
+    )
 def lambda_handler(event, context):
     # 1. パラメータの抽出 (Function URL / API Gateway対応)
     params = event
