@@ -57,7 +57,7 @@ def _get_session():
             providers=['CPUExecutionProvider']
         )
     return _SESSION
-_get_session()
+_SESSION=_get_session()
 
 def lambda_handler(event, context):
     # 1. パラメータの抽出 (Function URL / API Gateway対応)
