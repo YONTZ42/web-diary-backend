@@ -4,6 +4,7 @@ import boto3
 import base64
 import requests
 import uuid
+import time
 
 # --- Numbaのエラーと遅延を解消する設定 ---
 os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
@@ -46,6 +47,15 @@ ALPHA_MATTING_FOREGROUND_THRESHOLD = int(os.environ.get("AM_FG_THRESHOLD", "240"
 ALPHA_MATTING_BACKGROUND_THRESHOLD = int(os.environ.get("AM_BG_THRESHOLD", "10"))
 ALPHA_MATTING_ERODE_SIZE = int(os.environ.get("AM_ERODE_SIZE", "10"))
 
+from rembg import remove, new_session
+_SESSION = None
+def _get_session():
+    global _SESSION
+    if _SESSION is None:
+        _SESSION = new_session(
+            model_name=MODEL_NAME,
+            providers=['CPUExecutionProvider']
+        )
 
 def lambda_handler(event, context):
     # 1. パラメータの抽出 (Function URL / API Gateway対応)
@@ -58,29 +68,26 @@ def lambda_handler(event, context):
 
     # 2. 起動確認用
     if params.get("only_for_boot"):
+        _get_session
         return {"statusCode": 200, "body": json.dumps("Hello, I am Rembg (IS-Net)!")}
 
-    from rembg import remove, new_session
-    # セッションの初期化（初回起動時にモデルがロードされる）
-    session = new_session(
-        model_name=MODEL_NAME,
-        providers=['CPUExecutionProvider']
 
-        )
     try:
         # 画像データの取得
         img_bytes = _get_image_data(params)
-        
+        print("before get_session", time.perf_counter())
         # 背景除去の実行
         # rembg.remove は bytes を受け取り bytes を返すことが可能
         output_bytes = remove(
             img_bytes,
-            session=session,
+            session=_get_session,
             alpha_matting=ALPHA_MATTING,
             alpha_matting_foreground_threshold=ALPHA_MATTING_FOREGROUND_THRESHOLD,
             alpha_matting_background_threshold=ALPHA_MATTING_BACKGROUND_THRESHOLD,
             alpha_matting_erode_size=ALPHA_MATTING_ERODE_SIZE
         )
+        print("after get_session", time.perf_counter())
+
 
         # S3への保存
         dest_bucket = DEFAULT_BUCKET
