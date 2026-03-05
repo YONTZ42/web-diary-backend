@@ -28,7 +28,7 @@ RUN yum -y install mesa-libGL && yum clean all
 COPY --from=builder /var/lang/lib/python3.11/site-packages/ /var/lang/lib/python3.11/site-packages/
 
 # モデルファイルをコピー
-COPY --from=builder /build/models/.u2net /var/task/.u2net
+COPY --from=builder /build/models/.u2net /opt/models/.u2net
 
 WORKDIR ${LAMBDA_TASK_ROOT}
 
