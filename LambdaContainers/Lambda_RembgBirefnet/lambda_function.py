@@ -8,6 +8,12 @@ import uuid
 import glob
 
 
+# --- Numbaのエラーと遅延を解消する設定 ---
+os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
+os.environ["NUMBA_THREADING_LAYER"] = "workqueue" # ロックエラーを防ぐ
+os.environ["OMP_NUM_THREADS"] = "1"              # スレッド競合を防ぐ
+os.environ["NUMBA_NUM_THREADS"] = "1"
+
 # --- 必須設定 ---
 # poochが一時ファイルを作れるように /tmp を指定
 os.environ["U2NET_HOME"] = "/tmp/.u2net"
