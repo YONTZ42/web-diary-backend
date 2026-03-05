@@ -9,8 +9,6 @@ import glob
 
 
 s3 = boto3.client("s3")
-
-
 os.environ["U2NET_HOME"] = "/var/task/.u2net"
 os.environ["NUMBA_CACHE_DIR"] = "/tmp/numba_cache"
 os.environ["NUMBA_NUM_THREADS"] = "1"
