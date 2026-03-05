@@ -45,12 +45,7 @@ ALPHA_MATTING_FOREGROUND_THRESHOLD = int(os.environ.get("AM_FG_THRESHOLD", "240"
 ALPHA_MATTING_BACKGROUND_THRESHOLD = int(os.environ.get("AM_BG_THRESHOLD", "10"))
 ALPHA_MATTING_ERODE_SIZE = int(os.environ.get("AM_ERODE_SIZE", "10"))
 
-from rembg import remove, new_session
-# セッションの初期化（初回起動時にモデルがロードされる）
-session = new_session(
-    model_name=MODEL_NAME,
-    providers=['CPUExecutionProvider']
-    )
+
 def lambda_handler(event, context):
     # 1. パラメータの抽出 (Function URL / API Gateway対応)
     params = event
@@ -64,6 +59,13 @@ def lambda_handler(event, context):
     if params.get("only_for_boot"):
         return {"statusCode": 200, "body": json.dumps("Hello, I am Rembg (IS-Net)!")}
 
+    from rembg import remove, new_session
+    # セッションの初期化（初回起動時にモデルがロードされる）
+    session = new_session(
+        model_name=MODEL_NAME,
+        providers=['CPUExecutionProvider']
+
+        )
     try:
         # 画像データの取得
         img_bytes = _get_image_data(params)
