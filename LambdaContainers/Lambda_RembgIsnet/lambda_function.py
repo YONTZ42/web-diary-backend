@@ -12,7 +12,7 @@ s3 = boto3.client("s3")
 
 # --- 必須設定 ---
 # poochが一時ファイルを作れるように /tmp を指定
-os.environ["U2NET_HOME"] = "/tmp"
+os.environ["U2NET_HOME"] = "/tmp/.u2net"
 
 # 1. 起動時に /var/task/.u2net から /tmp/.u2net へリンクを張る
 source_dir = "/var/task/.u2net"
