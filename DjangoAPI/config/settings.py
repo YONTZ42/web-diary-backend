@@ -20,12 +20,12 @@ from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 #DATABASE_custom=True -> DATABASE_URLを使って接続
 
 env = environ.Env(
     DEBUG=(bool, False),
 )
+
 
 # ローカルで "python manage.py runserver" する時だけ .env を読む（本番は読まない）
 if os.path.exists(BASE_DIR / ".env"):
@@ -34,6 +34,7 @@ if os.path.exists(BASE_DIR / ".env"):
 # 1) 環境の判定（ここが分岐の軸）
 APP_ENV = env.str("APP_ENV", default="local")  # local / docker / apprunner / prod など好きに
 DEBUG = env.bool("DEBUG", default=(APP_ENV == "local"))
+GOOGLE_OAUTH_CLIENT_ID = env.str("GOOGLE_OAUTH_CLIENT_ID", default="")
 
 
 
@@ -65,9 +66,11 @@ INSTALLED_APPS = [
     'corsheaders',
     'core',
     'MiniatureMuseum',
+    'rembgAPI',
     'storages',
     'djangorestframework_camel_case',  # ★これを追加
     'drf_spectacular',  # ★これを追加
+
 ]
 
 

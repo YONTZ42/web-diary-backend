@@ -71,6 +71,12 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class GuestIssueResponseSerializer(serializers.Serializer):
     guest_id = serializers.CharField()
 
+class GoogleLoginRequestSerializer(serializers.Serializer):
+    id_token = serializers.CharField()
+
+class TokenPairSerializer(serializers.Serializer):
+    access = serializers.CharField()
+    refresh = serializers.CharField()
 
 # --- Upload (Presigned URL) ---
 class UploadIssueSerializer(serializers.Serializer):

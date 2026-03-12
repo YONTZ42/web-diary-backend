@@ -5,6 +5,7 @@ db.sqlite3
 db.sqlite3-journal
 __pycache__/
 *.py[cod]
+*.pyc
 media/
 staticfiles/
 
@@ -14,7 +15,6 @@ staticfiles/
 *.env
 .venv
 env/
-venv/
 ENV/
 .env.local
 

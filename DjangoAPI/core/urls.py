@@ -1,6 +1,11 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import MeView, ScheduleViewSet, UploadView, StickerViewSet, PageViewSet, NotebookViewSet, UserRegistrationView, GuestIssueView
+from .views import ScheduleViewSet,  StickerViewSet, PageViewSet, NotebookViewSet
+from .views_auth import (
+    MeView, UserRegistrationView,
+    GoogleLoginView,
+    GuestIssueView)
+from .views_upload import UploadView
 
 router = DefaultRouter()
 router.register(r'stickers', StickerViewSet, basename='sticker')
@@ -16,8 +21,8 @@ urlpatterns = [
     # あるいは単純に View 内で分岐させるなら path('uploads/<str:action>/', ...)
     path('uploads/<str:action>/', UploadView.as_view(), name='upload'),
     path('auth/register/', UserRegistrationView.as_view(), name='register'),
-    path('auth/register/', UserRegistrationView.as_view(), name='register'),
     path('auth/guest/', GuestIssueView.as_view(), name='guest-issue'),
+    path('auth/google/', GoogleLoginView.as_view(), name='google-login'),
 
     path('', include(router.urls)),
 ]
