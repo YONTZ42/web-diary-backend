@@ -4,6 +4,22 @@
  */
 
 export interface paths {
+    "/api/auth/google/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_google_login"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/guest/": {
         parameters: {
             query?: never;
@@ -556,6 +572,9 @@ export interface components {
             readonly updatedAt: string;
             readonly exhibits: components["schemas"]["ExhibitPublic"][];
         };
+        GoogleLoginRequest: {
+            idToken: string;
+        };
         GuestIssueResponse: {
             guestId: string;
         };
@@ -853,6 +872,10 @@ export interface components {
             readonly access: string;
             readonly refresh: string;
         };
+        TokenPair: {
+            access: string;
+            refresh: string;
+        };
         TokenRefresh: {
             readonly access: string;
             refresh: string;
@@ -907,6 +930,31 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    auth_google_login: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GoogleLoginRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["GoogleLoginRequest"];
+                "multipart/form-data": components["schemas"]["GoogleLoginRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TokenPair"];
+                };
+            };
+        };
+    };
     auth_guest_create: {
         parameters: {
             query?: never;

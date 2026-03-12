@@ -4,6 +4,33 @@ info:
   version: 1.0.0
   description: APIの詳細説明
 paths:
+  /api/auth/google/:
+    post:
+      operationId: auth_google_login
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleLoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GoogleLoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GoogleLoginRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenPair'
+          description: ''
   /api/auth/guest/:
     post:
       operationId: auth_guest_create
@@ -1698,6 +1725,13 @@ components:
       - slug
       - title
       - updatedAt
+    GoogleLoginRequest:
+      type: object
+      properties:
+        idToken:
+          type: string
+      required:
+      - idToken
     GuestIssueResponse:
       type: object
       properties:
@@ -2373,6 +2407,16 @@ components:
       - access
       - email
       - password
+      - refresh
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
       - refresh
     TokenRefresh:
       type: object
