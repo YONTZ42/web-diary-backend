@@ -22,11 +22,7 @@ import urllib.request
 
 
 model_repository_name = "https://github.com/danielgatis/rembg/releases/download/v0.0.0/"
-model_names = [
-    "isnet-general-use.onnx",
-    "isnet-anime.onnx",
-    "birefnet-general-lite.onnx"
-]
+model_names = ["isnet-general-use.onnx", "isnet-anime.onnx", "birefnet-general-lite.onnx"]
 for model_name in model_names:
     url = model_repository_name + model_name
     dest_dir = "/app/.u2net"
