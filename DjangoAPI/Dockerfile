@@ -23,7 +23,7 @@ import urllib.request
 
 model_repository_name = "https://github.com/danielgatis/rembg/releases/download/v0.0.0/"
 model_names = [
-    "isnet-general-use.onnx"
+    "isnet-general-use.onnx",
     "isnet-anime.onnx",
     "birefnet-general-lite.onnx"
 ]
