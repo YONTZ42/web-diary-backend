@@ -8,8 +8,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     U2NET_HOME=/app/.u2net \
     MODEL_NAME=isnet-general-use \
     OMP_NUM_THREADS=1 \
-    OMP_WAIT_POLICY=PASSIVE
-    MODEL_CHECKSUM_DISABLED=1
+    OMP_WAIT_POLICY=PASSIVE \
+
 
 
 # 依存関係だけ先にコピーして、コード変更時の再buildを速くする
