@@ -17,7 +17,7 @@ COPY requirements.txt /app/
 
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir --prefer-binary -r /app/requirements.txt && \
-    mkdir -p /app/.u2net && \
+    mkdir -p /app/.u2net
 
 # アプリ本体は後からコピー
 COPY . /app/
