@@ -170,6 +170,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com",
     "https://api.memocho.link",
     "https://memocho.link",
+    "https://acrylic-stand-frontend.vercel.app"
+
 ]
 # 必要に応じて Credentials (Cookieなど) を許可
 CORS_ALLOW_CREDENTIALS = True
@@ -193,7 +195,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://192.168.3.4:8080",
     'https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com', 
     'https://api.memocho.link',
-    'https://memocho.link']
+    'https://memocho.link',]
 
 
 # --- 3. DRF Settings ---
