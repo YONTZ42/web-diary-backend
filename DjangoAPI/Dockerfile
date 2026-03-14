@@ -10,8 +10,6 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     OMP_NUM_THREADS=1 \
     OMP_WAIT_POLICY=PASSIVE
 
-
-
 # 依存関係だけ先にコピーして、コード変更時の再buildを速くする
 COPY requirements.txt /app/
 
