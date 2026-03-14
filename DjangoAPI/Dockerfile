@@ -10,6 +10,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     OMP_NUM_THREADS=1 \
     OMP_WAIT_POLICY=PASSIVE
 
+
+    
 # 依存関係だけ先にコピーして、コード変更時の再buildを速くする
 COPY requirements.txt /app/
 
@@ -23,7 +25,7 @@ RUN python -c "from rembg import new_session; \
 models = ['isnet-general-use', 'isnet-anime', 'birefnet-general-lite']; \
 [new_session(m) for m in models]"
 # --------------------------------------
-    
+
 # アプリ本体は後からコピー
 COPY . /app/
 
