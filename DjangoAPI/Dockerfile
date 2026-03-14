@@ -17,6 +17,13 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir --prefer-binary -r /app/requirements.txt && \
     mkdir -p /app/.u2net
 
+# --- ここでモデルを事前にダウンロード ---
+# python -c を使ってインラインで実行します
+RUN python -c "from rembg import new_session; \
+models = ['isnet-general-use', 'isnet-anime', 'birefnet-general-lite']; \
+[new_session(m) for m in models]"
+# --------------------------------------
+    
 # アプリ本体は後からコピー
 COPY . /app/
 

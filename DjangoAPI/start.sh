@@ -24,7 +24,6 @@ if [ "${CREATE_SUPERUSER:-0}" = "1" ]; then
   python manage.py shell -c "
 from django.contrib.auth import get_user_model
 import os
-from rembg import new_session
 
 User = get_user_model()
 email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
@@ -42,22 +41,6 @@ if not User.objects.filter(email=email).exists():
     print('created superuser:', email)
 else:
     print('superuser already exists:', email)
-
-models = [
-    "isnet-general-use",
-    "isnet-anime",
-    "birefnet-general-lite",
-]
-
-for model in models:
-    try:
-        print(f"[warmup] loading model: {model}")
-        new_session(model)
-        print(f"[warmup] cached: {model}")
-    except Exception as e:
-        print(f"[warmup] failed for {model}: {e}")
-        raise
-
 "
 fi
 # ---------------------------------------------------
