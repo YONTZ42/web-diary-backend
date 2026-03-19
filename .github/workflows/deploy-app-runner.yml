@@ -68,6 +68,13 @@ jobs:
           docker push ${DJANGO_REPO_URI}:${IMAGE_TAG}
 
 
+      - name: Debug CDK Stacks
+        working-directory: ./aws-infra
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          # 他の環境変数もここにある状態で
+        run: npx cdk list --app "npx ts-node bin/aws-app.ts"
+
       - name: Deploy AppRunner stack
         working-directory: ./aws-infra
         env:
