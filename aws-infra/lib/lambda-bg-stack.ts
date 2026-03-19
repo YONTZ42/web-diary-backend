@@ -9,16 +9,21 @@ export interface LambdaBgStackProps extends StackProps {
   projectName: string;
   stage: string;
   bucket: s3.IBucket;
-  bgRepo: ecr.IRepository;
+  bgRepoName: string;
   bgImageTag: string;
 }
 
 export class LambdaBgStack extends Stack {
   public readonly bgFunction: lambda.DockerImageFunction;
 
+
   constructor(scope: Construct, id: string, props: LambdaBgStackProps) {
     super(scope, id, props);
-
+    const bgRepo = ecr.Repository.fromRepositoryName(
+      this,
+      "ImportedBgRepo",
+      props.bgRepoName
+    );
     const role = new iam.Role(this, "BgRole", {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
     });
@@ -33,7 +38,7 @@ export class LambdaBgStack extends Stack {
 
     this.bgFunction = new lambda.DockerImageFunction(this, "BackgroundGenerator", {
       functionName: `${props.projectName}-${props.stage}-backgroundgenerator`.toLowerCase(),
-      code: lambda.DockerImageCode.fromEcr(props.bgRepo, {
+      code: lambda.DockerImageCode.fromEcr(bgRepo, {
         tagOrDigest: props.bgImageTag,
       }),
       role,

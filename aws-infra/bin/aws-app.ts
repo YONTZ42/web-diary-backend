@@ -17,23 +17,6 @@ const env = {
 
 const prefix = `${config.projectName}-${config.stage}`;
 
-const djangoRepo = ecr.Repository.fromRepositoryName(
-  app,
-  "ImportedDjangoRepo",
-  config.djangoEcrRepoName
-);
-
-const yoloRepo = ecr.Repository.fromRepositoryName(
-  app,
-  "ImportedYoloRepo",
-  config.lambdaYoloEcrRepoName
-);
-
-const bgRepo = ecr.Repository.fromRepositoryName(
-  app,
-  "ImportedBgRepo",
-  config.lambdaBgEcrRepoName
-);
 
 const mediaDomainName =
   config.domainName && config.mediaSubdomain
