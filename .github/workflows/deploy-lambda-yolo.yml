@@ -91,6 +91,7 @@ jobs:
 
           LAMBDA_YOLO_IMAGE_TAG: ${{ github.sha }}
 
+
           APP_ENV: ${{ env.STAGE }}
           DEBUG: ${{ github.ref_name == 'main' && 'false' || 'true' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
