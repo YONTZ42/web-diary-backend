@@ -22,10 +22,10 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    environment: ${{ vars.STAGE }}
     env:
-      STAGE: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
-      AWS_REGION: ${{ vars.AWS_REGION}}
+      STAGE: ${{ vars.STAGE }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
       PROJECT_NAME: ${{ vars.PROJECT_NAME }}
       
     steps:
@@ -73,15 +73,16 @@ jobs:
       - name: Deploy AppRunner stack
         working-directory: ./aws-infra
         env:
-          STAGE: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
+          STAGE: ${{ vars.STAGE }}
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
-
+          AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
           DJANGO_IMAGE_TAG: ${{ github.sha }}
 
+
           APP_ENV: ${{ env.STAGE }}
-          DEBUG: ${{ github.ref_name == 'main' && 'false' || 'true' }}
+          DEBUG: ${{ github.ref_name == 'main' && 'False' || 'True' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
@@ -94,8 +95,9 @@ jobs:
 
           CLOUDFRONT_PUBLIC_KEY_ID: ${{ secrets.CLOUDFRONT_PUBLIC_KEY_ID }}
 
-
-
+          CREATE_SUPERUSER: ${{ secrets.CREATE_SUPERUSER }}
+          DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
+          DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
         run: |
           npx cdk deploy \
             ${PROJECT_NAME}-${STAGE}-storage \

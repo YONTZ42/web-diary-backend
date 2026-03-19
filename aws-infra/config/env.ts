@@ -64,7 +64,7 @@ export const config = {
 
   djangoEnv: {
     APP_ENV: process.env.APP_ENV ??"staging",
-    DEBUG: process.env.DEBUG ?? "true",
+    DEBUG: process.env.DEBUG ?? "True",
     DATABASE_URL: process.env.DATABASE_URL ?? "",
     SECRET_KEY: process.env.SECRET_KEY ?? "",
     ALLOWED_HOSTS: process.env.ALLOWED_HOSTS ?? "",

@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 #DATABASE_custom=True -> DATABASE_URLを使って接続
 
 env = environ.Env(
-    DEBUG=(bool, False),
+    DEBUG=(bool, True),
 )
 
 # ローカルで "python manage.py runserver" する時だけ .env を読む（本番は読まない）
@@ -102,7 +102,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-database_url=env("DATABASE_URL" , "")
+database_url=env("DATABASE_URL" , default="")
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 if database_url:
@@ -191,7 +191,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com', 
     'https://api.memocho.link',
     'https://memocho.link',
-    'https://api-stg.memocho.link']
+    'https://api-staging.memocho.link']
 
 
 # --- 3. DRF Settings ---
