@@ -11,6 +11,7 @@ import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import { Construct } from "constructs";
+import * as targets from "aws-cdk-lib/aws-route53-targets";
 
 export interface StorageStackProps extends StackProps {
   bucketName: string;
@@ -92,15 +93,31 @@ export class StorageStack extends Stack {
       });
 
       this.distributionDomainName = this.distribution.distributionDomainName;
+
+      if (props.enableCloudFront && this.distribution && this.hostedZone && props.mediaDomainName) {
+        const recordName = props.mediaDomainName.slice(
+          0,
+          -(props.hostedZoneDomain!.length + 1)
+        );
+
+        new route53.ARecord(this, "MediaAliasRecord", {
+          zone: this.hostedZone,
+          recordName,
+          target: route53.RecordTarget.fromAlias(
+            new targets.CloudFrontTarget(this.distribution)
+          ),
+        });
+      }
+    
     }
 
     new CfnOutput(this, "MediaBucketName", {
       value: this.mediaBucket.bucketName
     });
 
-    if (this.distributionDomainName) {
+    if (props.enableCloudFront && this.distribution) {
       new CfnOutput(this, "MediaDistributionDomainName", {
-        value: this.distributionDomainName
+        value: this.distribution.distributionDomainName,
       });
     }
   }

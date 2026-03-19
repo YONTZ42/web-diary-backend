@@ -46,7 +46,7 @@ const lambdaBgStack = new LambdaBgStack(app, `${prefix}-lambda-bg`, {
   projectName: config.projectName,
   stage: config.stage,
   bucket: storageStack.mediaBucket,
-  bgRepoName: config.lambdaYoloEcrRepoName,
+  bgRepoName: config.lambdaBgEcrRepoName,
   bgImageTag: config.lambdaBgImageTag,
 });
 lambdaBgStack.addDependency(storageStack);
@@ -56,7 +56,7 @@ const apiDomainName =
     ? `${config.apiSubdomain}.${config.domainName}`
     : undefined;
 
-const mediaBaseUrl = storageStack.distributionDomainName
+const mediaBaseUrl = config.enableCloudFront
   ? `https://${storageStack.distributionDomainName}`
   : `https://${storageStack.mediaBucket.bucketRegionalDomainName}`;
 
