@@ -70,6 +70,7 @@ jobs:
           docker build -t ${DJANGO_REPO_URI}:${IMAGE_TAG} ./DjangoAPI
           docker push ${DJANGO_REPO_URI}:${IMAGE_TAG}
 
+
       - name: Deploy AppRunner stack
         working-directory: ./aws-infra
         env:

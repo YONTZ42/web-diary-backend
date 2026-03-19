@@ -34,7 +34,7 @@ const domainName= process.env.DOMAIN_NAME ?? "";
 export const config = {
   awsAccountId: required("CDK_DEFAULT_ACCOUNT", process.env.AWS_ACCOUNT_ID),
   awsRegion: required("CDK_DEFAULT_REGION", process.env.AWS_REGION ?? "ap-northeast-1"),
-  projectName: withStage(required("PROJECT_NAME", "mini-museum")),
+  projectName: required("PROJECT_NAME", "mini-museum"),
   stage: stage,
 
   domainName: domainName,
