@@ -50,7 +50,7 @@ export const config = {
   mediaBucketName: s3BucketName,
   enableCloudFront: optionalBool("ENABLE_CLOUDFRONT", true),
 
-  apprunnerServiceName: withStage(required("APP_RUNNER_SERVICE_NAME", "mini-museum-api")),
+  apprunnerServiceName: required("APP_RUNNER_SERVICE_NAME", "mini-museum-api"),
   apprunnerPort: Number(process.env.APP_RUNNER_PORT ?? "8080"),
 
   djangoImageTag: process.env.DJANGO_IMAGE_TAG ?? "initial",

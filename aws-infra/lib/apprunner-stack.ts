@@ -186,34 +186,22 @@ export class AppRunnerStack extends Stack {
 
       new route53.CnameRecord(this, "ApiCustomDomainDnsRecord", {
         zone: hostedZone,
-        recordName,
+        recordName:props.domainName + ".",
         domainName: domainDescription.getResponseField("DNSTarget"),
         ttl: Duration.minutes(5),
       });
-
-
-      const validationRecordFullName = domainDescription.getResponseField(
-        "CustomDomains.0.CertificateValidationRecords.0.Name"
-      ).replace(/\.$/, "");
-      const validationRecordValue = domainDescription.getResponseField(
-        "CustomDomains.0.CertificateValidationRecords.0.Value"
-      ).replace(/\.$/, "");
-      const validationRecordName = validationRecordFullName.endsWith(
-        `.${props.hostedZoneDomain}`
-      )
-        ? validationRecordFullName.slice(
-            0,
-            -(props.hostedZoneDomain.length + 1)
-          )
-        : validationRecordFullName;
 
       new route53.CnameRecord(
         this,
         "ApiCustomDomainCertificateValidationRecord",
         {
           zone: hostedZone,
-          recordName: validationRecordName,
-          domainName: validationRecordValue,
+          recordName: domainDescription.getResponseField(
+            "CustomDomains.0.CertificateValidationRecords.0.Name"
+          ) + ".", 
+          domainName: domainDescription.getResponseField(
+            "CustomDomains.0.CertificateValidationRecords.0.Value"
+          ),
           ttl: Duration.minutes(5),
         }
       );
