@@ -11,7 +11,7 @@ export interface AppRunnerStackProps extends StackProps {
   projectName: string;
   stage: string;
   serviceName: string;
-  port: number;
+  port: string;
   djangoRepoName: string;
   djangoImageTag: string;
   bucket: s3.IBucket;
@@ -72,7 +72,7 @@ export class AppRunnerStack extends Stack {
           imageIdentifier: `${djangoRepo.repositoryUri}:${props.djangoImageTag}`,
           imageRepositoryType: "ECR",
           imageConfiguration: {
-            port: String(props.port),
+            port: props.port,
             runtimeEnvironmentVariables: runtimeEnv,
           },
         },
