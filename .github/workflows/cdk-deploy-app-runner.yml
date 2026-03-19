@@ -79,6 +79,7 @@ jobs:
 
           DJANGO_IMAGE_TAG: ${{ github.sha }}
 
+
           APP_ENV: ${{ env.STAGE }}
           DEBUG: ${{ github.ref_name == 'main' && 'False' || 'True' }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
