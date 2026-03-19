@@ -102,12 +102,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-DATABASE_custom = env.bool('DATABASE_custom', default=True)
-if DEBUG==False:
-    DATABASE_custom=True
+database_url=env("DATABASE_URL" , "")
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-if DATABASE_custom:
+if database_url:
     # 3. データベース設定 (Neon対応)
     # env.db() は DATABASE_URL = postgres://user:pass@host/db を自動解析します
     DATABASES = {
@@ -165,7 +163,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://192.168.3.4:3000",
     "https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com",
     "https://api.memocho.link",
-    "https://memocho.link",
+    "https://api-production.memocho.link",
+    "https://api-staging.memocho.link",
     "https://acrylic-stand-frontend.vercel.app"
 
 ]
@@ -191,7 +190,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://192.168.3.4:8080",
     'https://gnfhrmjdwy.ap-northeast-1.awsapprunner.com', 
     'https://api.memocho.link',
-    'https://memocho.link',]
+    'https://memocho.link',
+    'https://api-stg.memocho.link']
 
 
 # --- 3. DRF Settings ---

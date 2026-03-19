@@ -1,29 +1,39 @@
 #!/usr/bin/env node
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
+import * as ecr from "aws-cdk-lib/aws-ecr";
 import { config } from "../config/env";
 import { AppRunnerStack } from "../lib/apprunner-stack";
-import { EcrStack } from "../lib/ecr-stack";
-import { LambdaStack } from "../lib/lambda-stack";
-import { MonitoringStack } from "../lib/monitoring-stack";
+import { LambdaBgStack } from "../lib/lambda-bg-stack";
+import { LambdaYoloStack } from "../lib/lambda-yolo-stack";
 import { StorageStack } from "../lib/storage-stack";
 
 const app = new cdk.App();
 
 const env = {
   account: config.awsAccountId,
-  region: config.awsRegion
+  region: config.awsRegion,
 };
 
 const prefix = `${config.projectName}-${config.stage}`;
 
-const ecrStack = new EcrStack(app, `${prefix}-ecr`, {
-  env,
-  djangoRepoName: config.djangoEcrRepoName,
-  lambdaRembgRepoName: config.lambdaRembgEcrRepoName,
-  lambdaYoloRepoName: config.lambdaYoloEcrRepoName,
-  lambdaBgRepoName: config.lambdaBgEcrRepoName
-});
+const djangoRepo = ecr.Repository.fromRepositoryName(
+  app,
+  "ImportedDjangoRepo",
+  config.djangoEcrRepoName
+);
+
+const yoloRepo = ecr.Repository.fromRepositoryName(
+  app,
+  "ImportedYoloRepo",
+  config.lambdaYoloEcrRepoName
+);
+
+const bgRepo = ecr.Repository.fromRepositoryName(
+  app,
+  "ImportedBgRepo",
+  config.lambdaBgEcrRepoName
+);
 
 const mediaDomainName =
   config.domainName && config.mediaSubdomain
@@ -35,23 +45,28 @@ const storageStack = new StorageStack(app, `${prefix}-storage`, {
   bucketName: config.mediaBucketName,
   enableCloudFront: config.enableCloudFront,
   mediaDomainName,
-  hostedZoneDomain: config.hostedZoneDomain || undefined
+  hostedZoneDomain: config.hostedZoneDomain || undefined,
 });
 
-const lambdaStack = new LambdaStack(app, `${prefix}-lambda`, {
+const lambdaYoloStack = new LambdaYoloStack(app, `${prefix}-lambda-yolo`, {
   env,
   projectName: config.projectName,
   stage: config.stage,
   bucket: storageStack.mediaBucket,
-  rembgRepo: ecrStack.lambdaRembgRepo,
-  yoloRepo: ecrStack.lambdaYoloRepo,
-  bgRepo: ecrStack.lambdaBgRepo,
-  rembgImageTag: config.lambdaRembgImageTag,
+  yoloRepo,
   yoloImageTag: config.lambdaYoloImageTag,
-  bgImageTag: config.lambdaBgImageTag
 });
-lambdaStack.addDependency(ecrStack);
-lambdaStack.addDependency(storageStack);
+lambdaYoloStack.addDependency(storageStack);
+
+const lambdaBgStack = new LambdaBgStack(app, `${prefix}-lambda-bg`, {
+  env,
+  projectName: config.projectName,
+  stage: config.stage,
+  bucket: storageStack.mediaBucket,
+  bgRepo,
+  bgImageTag: config.lambdaBgImageTag,
+});
+lambdaBgStack.addDependency(storageStack);
 
 const apiDomainName =
   config.domainName && config.apiSubdomain
@@ -68,28 +83,14 @@ const appRunnerStack = new AppRunnerStack(app, `${prefix}-apprunner`, {
   stage: config.stage,
   serviceName: config.apprunnerServiceName,
   port: config.apprunnerPort,
-  djangoRepo: ecrStack.djangoRepo,
+  djangoRepo,
   djangoImageTag: config.djangoImageTag,
   bucket: storageStack.mediaBucket,
   mediaBaseUrl,
   domainName: apiDomainName,
   hostedZoneDomain: config.hostedZoneDomain || undefined,
-  djangoEnv: config.djangoEnv
+  djangoEnv: config.djangoEnv,
 });
-appRunnerStack.addDependency(ecrStack);
 appRunnerStack.addDependency(storageStack);
-
-const monitoringStack = new MonitoringStack(app, `${prefix}-monitoring`, {
-  env,
-  alarmEmail: config.alarmEmail || undefined,
-  appRunnerService: appRunnerStack.service,
-  lambdaFunctions: [
-    lambdaStack.rembgFunction,
-    lambdaStack.yoloFunction,
-    lambdaStack.bgFunction
-  ]
-});
-monitoringStack.addDependency(lambdaStack);
-monitoringStack.addDependency(appRunnerStack);
 
 app.synth();

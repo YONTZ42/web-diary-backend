@@ -1,0 +1,98 @@
+name: deploy-app-runner
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "DjangoAPI/**"
+      - "aws-infra/bin/aws-ecr.ts"
+      - "aws-infra/bin/aws-app.ts"
+      - "aws-infra/lib/ecr-stack.ts"
+      - "aws-infra/lib/apprunner-stack.ts"
+      - "aws-infra/lib/storage-stack.ts"
+      - ".github/workflows/deploy-app-runner.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
+    env:
+      STAGE: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
+      AWS_REGION: ${{ vars.AWS_REGION}}
+      PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+      
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_IAM_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: gha-apprunner-cdk
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install infra dependencies
+        working-directory: ./aws-infra
+        run: npm ci
+
+      - name: Deploy ECR stack
+        working-directory: ./aws-infra
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: |
+          npx cdk deploy ${PROJECT_NAME}-${STAGE}-ecr \
+            --app "npx ts-node bin/aws-ecr.ts" \
+            --require-approval never \
+            --outputs-file cdk-outputs.json
+
+      - name: Read Django ECR output
+        working-directory: ./aws-infra
+        run: |
+          echo "DJANGO_REPO_URI=$(jq -r 'to_entries[0].value.DjangoRepoUri' cdk-outputs.json)" >> $GITHUB_ENV
+
+      - uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build and push Django image
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker build -t ${DJANGO_REPO_URI}:${IMAGE_TAG} ./DjangoAPI
+          docker push ${DJANGO_REPO_URI}:${IMAGE_TAG}
+
+      - name: Deploy AppRunner stack
+        working-directory: ./aws-infra
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+          DJANGO_IMAGE_TAG: ${{ github.sha }}
+
+          APP_ENV: ${{ env.STAGE }}
+          DEBUG: ${{ github.ref_name == 'main' && 'false' || 'true' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+
+          ALARM_EMAIL: ${{ secrets.ALARM_EMAIL }}
+          DOMAIN_NAME: ${{ secrets.DOMAIN_NAME }}
+          HOSTED_ZONE_DOMAIN: ${{ secrets.HOSTED_ZONE_DOMAIN }}
+
+          CLOUDFRONT_PUBLIC_KEY_ID: ${{ secrets.CLOUDFRONT_PUBLIC_KEY_ID }}
+
+
+        run: |
+          npx cdk deploy \
+            ${PROJECT_NAME}-${STAGE}-storage \
+            ${PROJECT_NAME}-${STAGE}-apprunner \
+            --app "npx ts-node bin/aws-app.ts" \
+            --require-approval never

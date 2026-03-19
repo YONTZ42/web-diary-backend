@@ -16,6 +16,7 @@ from django.utils import timezone
 import boto3
 import uuid
 import os
+from botocore.config import Config
 
 # --- 2. Upload API (S3 Presigned URL) ---
 class UploadView(views.APIView):
@@ -72,8 +73,7 @@ class UploadView(views.APIView):
 
         # Presigned URL生成
         s3 = boto3.client('s3', 
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            config=Config(signature_version='s4'),
             region_name=settings.AWS_S3_REGION_NAME
         )
         url = s3.generate_presigned_url(
@@ -123,8 +123,7 @@ class UploadView(views.APIView):
 
         # S3上の存在確認（Head Object）
         s3 = boto3.client('s3', 
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            config=Config(signature_version='s4'),
             region_name=settings.AWS_S3_REGION_NAME
         )
         try:
