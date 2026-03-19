@@ -13,8 +13,6 @@ on:
       - ".github/workflows/deploy-app-runner.yml"
   workflow_dispatch:
 
-
-
 permissions:
   id-token: write
   contents: read
