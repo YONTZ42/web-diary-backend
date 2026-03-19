@@ -5,6 +5,7 @@ dotenv.config();
 function required(name: string, fallback?: string): string {
   const value = process.env[name] ?? fallback;
   if (!value) {
+    console.error(`FATAL: Missing environment variable [${name}]`);
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;

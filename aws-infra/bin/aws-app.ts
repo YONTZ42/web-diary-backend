@@ -83,7 +83,7 @@ const appRunnerStack = new AppRunnerStack(app, `${prefix}-apprunner`, {
   stage: config.stage,
   serviceName: config.apprunnerServiceName,
   port: config.apprunnerPort,
-  djangoRepo,
+  djangoRepoName: config.djangoEcrRepoName,
   djangoImageTag: config.djangoImageTag,
   bucket: storageStack.mediaBucket,
   mediaBaseUrl,

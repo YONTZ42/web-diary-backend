@@ -12,7 +12,7 @@ export interface AppRunnerStackProps extends StackProps {
   stage: string;
   serviceName: string;
   port: number;
-  djangoRepo: ecr.IRepository;
+  djangoRepoName: string;
   djangoImageTag: string;
   bucket: s3.IBucket;
   mediaBaseUrl: string;
@@ -27,6 +27,12 @@ export class AppRunnerStack extends Stack {
 
   constructor(scope: Construct, id: string, props: AppRunnerStackProps) {
     super(scope, id, props);
+
+    const djangoRepo = ecr.Repository.fromRepositoryName(
+      this,
+      "ImportedDjangoRepo",
+      props.djangoRepoName
+    );
 
     const accessRole = new iam.Role(this, "AppRunnerAccessRole", {
       assumedBy: new iam.ServicePrincipal("build.apprunner.amazonaws.com"),
@@ -60,14 +66,14 @@ export class AppRunnerStack extends Stack {
     ];
 
     this.service = new apprunner.CfnService(this, "ApiService", {
-      serviceName: `${props.projectName}-${props.stage}-${props.serviceName}`,
+      serviceName: `${props.serviceName}-${props.stage}`,
       sourceConfiguration: {
         authenticationConfiguration: {
           accessRoleArn: accessRole.roleArn,
         },
         autoDeploymentsEnabled: false,
         imageRepository: {
-          imageIdentifier: `${props.djangoRepo.repositoryUri}:${props.djangoImageTag}`,
+          imageIdentifier: `${djangoRepo.repositoryUri}:${props.djangoImageTag}`,
           imageRepositoryType: "ECR",
           imageConfiguration: {
             port: String(props.port),
