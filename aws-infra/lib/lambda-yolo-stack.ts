@@ -43,7 +43,7 @@ export class LambdaYoloStack extends Stack {
       }),
       role,
       timeout: Duration.seconds(90),
-      memorySize: 3072,
+      memorySize: 3008,
       ephemeralStorageSize: Size.gibibytes(2),
       architecture: lambda.Architecture.X86_64,
       environment: {

@@ -56,10 +56,6 @@ export class AppRunnerStack extends Stack {
         value,
       })),
       {
-        name: "AWS_STORAGE_BUCKET_NAME",
-        value: props.bucket.bucketName,
-      },
-      {
         name: "MEDIA_BASE_URL",
         value: props.mediaBaseUrl,
       },

@@ -23,6 +23,7 @@ const mediaDomainName =
     ? `${config.mediaSubdomain}.${config.domainName}`
     : undefined;
 
+    
 const storageStack = new StorageStack(app, `${prefix}-storage`, {
   env,
   bucketName: config.mediaBucketName,
