@@ -1,4 +1,4 @@
-import { CfnOutput, Duration, Stack, StackProps } from "aws-cdk-lib";
+import { CfnOutput, Duration, Stack, StackProps, Fn } from "aws-cdk-lib";
 import * as apprunner from "aws-cdk-lib/aws-apprunner";
 import * as ecr from "aws-cdk-lib/aws-ecr";
 import * as iam from "aws-cdk-lib/aws-iam";
@@ -186,19 +186,22 @@ export class AppRunnerStack extends Stack {
 
       new route53.CnameRecord(this, "ApiCustomDomainDnsRecord", {
         zone: hostedZone,
-        recordName:props.domainName + ".",
+        recordName: recordName,
         domainName: domainDescription.getResponseField("DNSTarget"),
         ttl: Duration.minutes(5),
       });
-
+      
+      
+      const validationRecordNameFull = domainDescription.getResponseField(
+        "CustomDomains.0.CertificateValidationRecords.0.Name"
+      );
       new route53.CnameRecord(
         this,
         "ApiCustomDomainCertificateValidationRecord",
         {
           zone: hostedZone,
-          recordName: domainDescription.getResponseField(
-            "CustomDomains.0.CertificateValidationRecords.0.Name"
-          ) + ".", 
+          recordName: Fn.select(0, 
+            Fn.split("." + props.hostedZoneDomain, validationRecordNameFull)),
           domainName: domainDescription.getResponseField(
             "CustomDomains.0.CertificateValidationRecords.0.Value"
           ),
