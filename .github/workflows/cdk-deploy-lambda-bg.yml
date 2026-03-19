@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     env:
-      STAGE: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
+      STAGE: ${{ vars.STAGE }}
       AWS_REGION: ${{ vars.AWS_REGION}}
       PROJECT_NAME: ${{ vars.PROJECT_NAME }}
       
@@ -77,6 +77,8 @@ jobs:
       - name: Deploy Lambda BG stack
         working-directory: ./aws-infra
         env:
+          STAGE: ${{ vars.STAGE }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
           LAMBDA_BG_IMAGE_TAG: ${{ github.sha }}

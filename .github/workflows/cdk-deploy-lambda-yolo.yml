@@ -24,7 +24,7 @@ jobs:
     #staging環境とproduction環境で分離
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     env:
-      STAGE: ${{ var.STAGE }}
+      STAGE: ${{ vars.STAGE }}
       AWS_REGION: ${{ vars.AWS_REGION}}
       PROJECT_NAME: ${{ vars.PROJECT_NAME }}
       
@@ -89,10 +89,11 @@ jobs:
       - name: Deploy Lambda YOLO stack
         working-directory: ./aws-infra
         env:
+          STAGE: ${{ vars.STAGE }}
+          PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
           LAMBDA_YOLO_IMAGE_TAG: ${{ github.sha }}
-
 
           APP_ENV: ${{ env.STAGE }}
           DEBUG: ${{ github.ref_name == 'main' && 'false' || 'true' }}
