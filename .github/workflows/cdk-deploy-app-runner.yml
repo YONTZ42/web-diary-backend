@@ -22,7 +22,7 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: ${{ vars.STAGE }}
+    environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     env:
       STAGE: ${{ vars.STAGE }}
       AWS_REGION: ${{ vars.AWS_REGION }}
@@ -75,7 +75,6 @@ jobs:
         env:
           STAGE: ${{ vars.STAGE }}
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
-          AWS_REGION: ${{ vars.AWS_REGION }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
           DJANGO_IMAGE_TAG: ${{ github.sha }}
@@ -98,6 +97,7 @@ jobs:
           CREATE_SUPERUSER: ${{ secrets.CREATE_SUPERUSER }}
           DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
           DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
+
         run: |
           npx cdk deploy \
             ${PROJECT_NAME}-${STAGE}-storage \

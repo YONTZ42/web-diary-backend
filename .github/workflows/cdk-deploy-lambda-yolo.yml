@@ -24,7 +24,7 @@ jobs:
     #staging環境とproduction環境で分離
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     env:
-      STAGE: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
+      STAGE: ${{ var.STAGE }}
       AWS_REGION: ${{ vars.AWS_REGION}}
       PROJECT_NAME: ${{ vars.PROJECT_NAME }}
       

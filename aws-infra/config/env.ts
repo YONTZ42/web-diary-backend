@@ -73,6 +73,9 @@ export const config = {
     AWS_STORAGE_BUCKET_NAME: s3BucketName,
     AWS_S3_REGION: "ap-northeast-1",
     CLOUDFRONT_DOMAIN: `${mediaSubdomain}.${domainName}`,
-    CLOUDFRONT_PUBLIC_KEY_ID: process.env.CLOUDFRONT_PUBLIC_KEY_ID ?? ""
+    CLOUDFRONT_PUBLIC_KEY_ID: process.env.CLOUDFRONT_PUBLIC_KEY_ID ?? "",
+    CREATE_SUPERUSER: process.env.CREATE_SUPERUSER,
+    DJANGO_SUPERUSER_EMAIL: process.env.DJANGO_SUPERUSER_EMAIL,
+    DJANGO_SUPERUSER_PASSWORD: process.env.DJANGO_SUPERUSER_PASSWORD
   }
 };
