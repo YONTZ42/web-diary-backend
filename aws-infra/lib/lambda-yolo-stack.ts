@@ -9,7 +9,7 @@ export interface LambdaYoloStackProps extends StackProps {
   projectName: string;
   stage: string;
   bucket: s3.IBucket;
-  yoloRepo: ecr.IRepository;
+  yoloRepoName: string;
   yoloImageTag: string;
 }
 
@@ -18,6 +18,11 @@ export class LambdaYoloStack extends Stack {
 
   constructor(scope: Construct, id: string, props: LambdaYoloStackProps) {
     super(scope, id, props);
+    const yoloRepo = ecr.Repository.fromRepositoryName(
+      this,
+      "ImportedBgRepo",
+      props.yoloRepoName
+    );
 
     const role = new iam.Role(this, "YoloRole", {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
@@ -33,7 +38,7 @@ export class LambdaYoloStack extends Stack {
 
     this.yoloFunction = new lambda.DockerImageFunction(this, "YoloProcessor", {
       functionName: `${props.projectName}-${props.stage}-yoloprocessor`.toLowerCase(),
-      code: lambda.DockerImageCode.fromEcr(props.yoloRepo, {
+      code: lambda.DockerImageCode.fromEcr(yoloRepo, {
         tagOrDigest: props.yoloImageTag,
       }),
       role,

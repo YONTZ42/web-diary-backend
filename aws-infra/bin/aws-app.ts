@@ -53,7 +53,7 @@ const lambdaYoloStack = new LambdaYoloStack(app, `${prefix}-lambda-yolo`, {
   projectName: config.projectName,
   stage: config.stage,
   bucket: storageStack.mediaBucket,
-  yoloRepo,
+  yoloRepoName: config.lambdaYoloEcrRepoName,
   yoloImageTag: config.lambdaYoloImageTag,
 });
 lambdaYoloStack.addDependency(storageStack);
@@ -63,7 +63,7 @@ const lambdaBgStack = new LambdaBgStack(app, `${prefix}-lambda-bg`, {
   projectName: config.projectName,
   stage: config.stage,
   bucket: storageStack.mediaBucket,
-  bgRepo,
+  bgRepoName: config.lambdaYoloEcrRepoName,
   bgImageTag: config.lambdaBgImageTag,
 });
 lambdaBgStack.addDependency(storageStack);
