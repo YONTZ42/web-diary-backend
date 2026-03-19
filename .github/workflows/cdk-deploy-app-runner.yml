@@ -10,12 +10,14 @@ on:
       - "aws-infra/lib/ecr-stack.ts"
       - "aws-infra/lib/apprunner-stack.ts"
       - "aws-infra/lib/storage-stack.ts"
-      - ".github/workflows/deploy-app-runner.yml"
+      - ".github/workflows/cdk-deploy-app-runner.yml"
   workflow_dispatch:
 
 permissions:
   id-token: write
   contents: read
+
+
 
 jobs:
   deploy:

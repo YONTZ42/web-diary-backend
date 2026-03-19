@@ -1,16 +1,16 @@
-name: deploy-lambda-yolo
+name: deploy-lambda-bg
 
 on:
   push:
     branches: [main, develop]
     paths:
-      - "LambdaContainers/Lambda_CropYOLO_Multi/**"
+      - "LambdaContainers/Lambda_Genai/**"
       - "aws-infra/bin/aws-ecr.ts"
       - "aws-infra/bin/aws-app.ts"
       - "aws-infra/lib/ecr-stack.ts"
-      - "aws-infra/lib/lambda-yolo-stack.ts"
+      - "aws-infra/lib/lambda-bg-stack.ts"
       - "aws-infra/lib/storage-stack.ts"
-      - ".github/workflows/deploy-lambda-yolo.yml"
+      - ".github/workflows/cdk-deploy-lambda-bg.yml"
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,6 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    #staging環境とproduction環境で分離
     environment: ${{ github.ref_name == 'main' && 'production' || 'staging' }}
     env:
       STAGE: ${{ github.ref_name == 'main' && 'production' || 'staging'}}
@@ -30,8 +29,6 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
-        with:
-          lfs: true
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -56,43 +53,33 @@ jobs:
             --require-approval never \
             --outputs-file cdk-outputs.json
 
-      - name: Read YOLO ECR output
+      - name: Read BG ECR output
         working-directory: ./aws-infra
         run: |
-          echo "YOLO_REPO_URI=$(jq -r 'to_entries[0].value.LambdaYoloRepoUri' cdk-outputs.json)" >> $GITHUB_ENV
+          echo "BG_REPO_URI=$(jq -r 'to_entries[0].value.LambdaBgRepoUri' cdk-outputs.json)" >> $GITHUB_ENV
 
       - uses: aws-actions/amazon-ecr-login@v2
 
       - uses: docker/setup-buildx-action@v3
 
-      - name: Download YOLO Models
-        working-directory: ./LambdaContainers/Lambda_CropYOLO_Multi
-        run: |
-          mkdir -p models
-          [ -f models/yolo26n-seg.pt ] || curl -L -o models/yolo26n-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-seg.pt
-          [ -f models/yolo26s-seg.pt ] || curl -L -o models/yolo26s-seg.pt https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26s-seg.pt
-
-
-      - name: Build and push YOLO image
+      - name: Build and push BG image
         uses: docker/build-push-action@v6
         with:
-          context: ./LambdaContainers/Lambda_CropYOLO_Multi
-          file: ./LambdaContainers/Lambda_CropYOLO_Multi/Dockerfile
+          context: ./LambdaContainers/Lambda_Genai
+          file: ./LambdaContainers/Lambda_Genai/Dockerfile
           push: true
           provenance: false
           tags: |
-            ${{ env.YOLO_REPO_URI }}:${{ github.sha }}
+            ${{ env.BG_REPO_URI }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-
-      - name: Deploy Lambda YOLO stack
+      - name: Deploy Lambda BG stack
         working-directory: ./aws-infra
         env:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
-          LAMBDA_YOLO_IMAGE_TAG: ${{ github.sha }}
-
+          LAMBDA_BG_IMAGE_TAG: ${{ github.sha }}
 
           APP_ENV: ${{ env.STAGE }}
           DEBUG: ${{ github.ref_name == 'main' && 'false' || 'true' }}
@@ -107,10 +94,11 @@ jobs:
           HOSTED_ZONE_DOMAIN: ${{ secrets.HOSTED_ZONE_DOMAIN }}
 
           CLOUDFRONT_PUBLIC_KEY_ID: ${{ secrets.CLOUDFRONT_PUBLIC_KEY_ID }}
+          CLOUDFRONT_PRIVATE_KEY: ${{ secrets.CLOUDFRONT_PRIVATE_KEY }}
 
         run: |
           npx cdk deploy \
             ${PROJECT_NAME}-${STAGE}-storage \
-            ${PROJECT_NAME}-${STAGE}-lambda-yolo \
+            ${PROJECT_NAME}-${STAGE}-lambda-bg \
             --app "npx ts-node bin/aws-app.ts" \
             --require-approval never
