@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 import uuid
 from ultralytics import YOLO
+import time
 
 s3 = boto3.client("s3")
 
@@ -27,19 +28,42 @@ RETINA_MASKS = os.environ.get("RETINA_MASKS", "true").lower() == "true"
 MODEL_PATH = os.path.join(os.environ.get("LAMBDA_TASK_ROOT", "/var/task"), MODEL_NAME)
 model = YOLO(MODEL_PATH)
 
+
+def _log(level: str, message: str, **fields):
+    payload = {
+        "message": message,
+        "service": os.environ.get("SERVICE_NAME", "mini-museum-yolo"),
+        "stage": os.environ.get("STAGE", os.environ.get("APP_ENV", "staging")),
+        "component": "lambda.yolo",
+        **fields,
+    }
+    print(json.dumps(payload, ensure_ascii=False))
+
+
 def lambda_handler(event, context):
+    started_at = time.perf_counter()
+    aws_request_id = getattr(context, "aws_request_id", None)
+
     # ---------------------------------------------------------
     # 1. パラメータの抽出 (Function URL対応)
     # ---------------------------------------------------------
     # デフォルトは event をそのままパラメータとして扱う
     params = event
 
+
     # Function URL経由(bodyがJSON文字列)の場合はパースして params に代入
     if "body" in event and isinstance(event["body"], str):
         try:
             params = json.loads(event["body"])
         except json.JSONDecodeError:
-            print("Failed to parse JSON body")
+            _log(
+                "error",
+                "failed to parse json body",
+                event="request_failed",
+                error_code="INVALID_JSON_BODY",
+                aws_request_id=aws_request_id,
+                status_code=400,
+            ) 
             return {"statusCode": 400, "body": json.dumps({"error": "Invalid JSON body"})}
 
     # ---------------------------------------------------------
@@ -51,10 +75,22 @@ def lambda_handler(event, context):
     try:
         # 抽出した params を渡して画像データを取得
         img_bytes = _get_image_data(params)
-        
+        input_source = "image_data" if "image_data" in params else "image_url" if "image_url" in params else "s3"
+ 
         img = Image.open(io.BytesIO(img_bytes)).convert("RGB") # 安全のためRGB変換
         orig_size = img.size 
-        
+
+        _log(
+            "info",
+            "yolo request started",
+            event="yolo_request_started",
+            aws_request_id=aws_request_id,
+            input_source=input_source,
+            source_image_size_bytes=len(img_bytes),
+            image_width=orig_size[0],
+            image_height=orig_size[1],
+        )
+
         # YOLO推論
         results = model.predict(
             source=img,
@@ -85,6 +121,17 @@ def lambda_handler(event, context):
                 url = _put_to_s3(mask_bytes, dest_bucket, dest_key)
                 mask_urls.append(url)
 
+        duration_ms = int((time.perf_counter() - started_at) * 1000)
+        _log(
+            "info",
+            "yolo request succeeded",
+            event="yolo_request_succeeded",
+            aws_request_id=aws_request_id,
+            input_source=input_source,
+            detected_count=len(mask_urls),
+            duration_ms=duration_ms,
+            status_code=200,
+        )
         return {
             "statusCode": 200,
             "body": json.dumps({
@@ -94,8 +141,18 @@ def lambda_handler(event, context):
         }
 
     except Exception as e:
-        print(f"Error: {str(e)}")
         import traceback
+        duration_ms = int((time.perf_counter() - started_at) * 1000)
+        _log(
+            "error",
+            "yolo request failed",
+            event="yolo_request_failed",
+            aws_request_id=aws_request_id,
+            error_type=type(e).__name__,
+            error_code="YOLO_REQUEST_FAILED",
+            duration_ms=duration_ms,
+            status_code=500,
+        )
         traceback.print_exc()
         return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
 

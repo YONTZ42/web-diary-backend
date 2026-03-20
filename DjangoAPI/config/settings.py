@@ -15,6 +15,11 @@ from pathlib import Path
 import os
 import environ
 from datetime import timedelta
+import logging
+import structlog
+
+from config.ligging_utils import configure_structlog, AddDefaultFields
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -29,28 +34,27 @@ if os.path.exists(BASE_DIR / ".env"):
     environ.Env.read_env(BASE_DIR / ".env")
 
 # 1) 環境の判定（ここが分岐の軸）
-APP_ENV = env.str("APP_ENV", default="local")  # local / docker / apprunner / prod など好きに
+APP_ENV = env.str("APP_ENV", default="staging")  # staging or production
 DEBUG = env.bool("DEBUG", default=(APP_ENV == "local"))
 GOOGLE_OAUTH_CLIENT_ID = env.str("GOOGLE_OAUTH_CLIENT_ID", default="")
 
+STAGE = env.str("STAGE", default=APP_ENV)
+SERVICE_NAME = env.str("SERVICE_NAME", default="mini-museum-api")
+LOG_LEVEL = env.str("LOG_LEVEL", default="INFO").upper()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = env('SECRET_KEY', default="dummy-key")
-# SECURITY WARNING: don't run with debug turned on in production!
-#DEBUG = env('DEBUG')
 
 # App Runnerのデフォルトドメインや自分のドメインを環境変数から読み込む
 # ALLOWED_HOSTS = ['*'] は本番ではNG
-#ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['localhost', '127.0.0.1','192.168.3.4'])
 raw_allowed_hosts = env('ALLOWED_HOSTS', default='localhost,127.0.0.1')
 ALLOWED_HOSTS = [h.strip().replace('"', '').replace("'", "") for h in raw_allowed_hosts.split(',')]
-#ALLOWED_HOSTS=['*']
+
+
 # Application definition
-
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -80,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'config.request_context.RequestContextMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -194,7 +199,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://api-staging.memocho.link']
 
 
-# --- 3. DRF Settings ---
+# --- 3. DRF Settings And LOGGING ---
+configure_structlog()
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication', # JWT推奨
@@ -227,7 +233,6 @@ REST_FRAMEWORK = {
     },
 }
 
-
 SPECTACULAR_SETTINGS = {
     'TITLE': 'API Documentation',
     'DESCRIPTION': 'APIの詳細説明',
@@ -240,6 +245,81 @@ SPECTACULAR_SETTINGS = {
         'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
         'drf_spectacular.hooks.postprocess_schema_enums',
     ],
+}
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "filters": {
+        "default_fields": {
+            "()": "config.logging_utils.AddDefaultFields",
+        },
+    },
+    "formatters": {
+        "json": {
+            "()": "structlog.stdlib.ProcessorFormatter",
+            "processor": structlog.processors.JSONRenderer(),
+            "foreign_pre_chain": [
+                structlog.contextvars.merge_contextvars,
+                structlog.stdlib.add_logger_name,
+                structlog.stdlib.add_log_level,
+                structlog.processors.TimeStamper(fmt="iso", key="timestamp"),
+            ],
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "filters": ["default_fields"],
+            "formatter": "json",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.access": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.api": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.auth": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.health": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.rembg": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "botocore": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "urllib3": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOG_LEVEL,
+    },
 }
 
 

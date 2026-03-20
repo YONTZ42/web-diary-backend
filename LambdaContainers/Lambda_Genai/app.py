@@ -4,6 +4,7 @@ import uuid
 import base64
 import logging
 from datetime import datetime
+import time
 
 import boto3
 import httpx
@@ -13,6 +14,17 @@ from google.genai import types
 # ロギング設定
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
+
+def _log(level: str, message: str, **fields):
+    payload = {
+        "message": message,
+        "service": os.environ.get("SERVICE_NAME", "mini-museum-gen-image"),
+        "stage": os.environ.get("STAGE", os.environ.get("APP_ENV", "local")),
+        "component": "lambda.app",
+        **fields,
+    }
+    getattr(logger, level.lower())(json.dumps(payload, ensure_ascii=False))
+
 
 # --- グローバル初期化 (Cold Start対策) ---
 API_KEY = os.environ.get('GOOGLE_API_KEY')
@@ -30,16 +42,28 @@ OUTPUT_MIME_TYPE = os.environ.get('OUTPUT_MIME_TYPE', 'image/png')
 ASPECT_RATIO = os.environ.get('ASPECT_RATIO', '1:1')
 
 def handler(event, context):
+    started_at = time.perf_counter()
+    aws_request_id = getattr(context, "aws_request_id", None)
+
     try:
         # ---------------------------------------------------------
         # 1. パラメータの抽出 (Function URL対応)
         # ---------------------------------------------------------
         params = event
+
         # Function URL経由(bodyがJSON文字列)の場合はパースして params に代入
         if "body" in event and isinstance(event["body"], str):
             try:
                 params = json.loads(event["body"])
             except json.JSONDecodeError:
+                _log(
+                    "error",
+                    "invalid json body",
+                    event="request_failed",
+                    error_code="INVALID_JSON_BODY",
+                    aws_request_id=aws_request_id,
+                    status_code=400,
+                )
                 return {
                     'statusCode': 400, 
                     'body': json.dumps({'success': False, 'error': 'Invalid JSON body'})
@@ -54,6 +78,7 @@ def handler(event, context):
         user_prompt = params.get('prompt', '')
         image_url = params.get('image_url')
         image_data_raw = params.get('image_data') # Base64文字列 (header付きの可能性あり)
+        input_source = "image_data" if image_data_raw else "image_url" if image_url else "text_only"
 
         # ---------------------------------------------------------
         # 3. コンテンツの組み立て
@@ -70,7 +95,14 @@ def handler(event, context):
                 encoded = image_data_raw
             
             image_bytes = base64.b64decode(encoded)
-            
+            _log(
+                "info",
+                "decoded input image_data",
+                event="image_decode_succeeded",
+                aws_request_id=aws_request_id,
+                input_source=input_source,
+                source_image_size_bytes=len(image_bytes),
+            )
             contents.append(
                 types.Part.from_bytes(
                     data=image_bytes,
@@ -79,10 +111,26 @@ def handler(event, context):
             )
         elif image_url:
             # URLから画像をダウンロード
-            logger.info(f"Fetching image from URL: {image_url}")
+            _log(
+                "info",
+                "fetching input image from url",
+                event="image_fetch_started",
+                aws_request_id=aws_request_id,
+                input_source=input_source,
+                image_url=image_url,
+            )
             resp = httpx.get(image_url, timeout=10.0)
             resp.raise_for_status()
-            
+            _log(
+                "info",
+                "fetched input image from url",
+                event="image_fetch_succeeded",
+                aws_request_id=aws_request_id,
+                input_source=input_source,
+                image_url=image_url,
+                source_image_size_bytes=len(resp.content),
+            )
+  
             contents.append(
                 types.Part.from_bytes(
                     data=resp.content,
@@ -93,7 +141,14 @@ def handler(event, context):
         # ---------------------------------------------------------
         # 4. Geminiによる画像生成
         # ---------------------------------------------------------
-        logger.info(f"Generating content with model: {MODEL_NAME}")
+        _log(
+            "info",
+            "generating image content",
+            event="generation_started",
+            aws_request_id=aws_request_id,
+            model_name=MODEL_NAME,
+            input_source=input_source,
+        )
         response = client.models.generate_content(
             model=MODEL_NAME,
             contents=contents,
@@ -132,6 +187,20 @@ def handler(event, context):
         # 最終的なURLの生成
         final_url = f"https://{CLOUDFRONT_DOMAIN}/{file_key}" if CLOUDFRONT_DOMAIN else f"https://{BUCKET_NAME}.s3.amazonaws.com/{file_key}"
 
+
+        duration_ms = int((time.perf_counter() - started_at) * 1000)
+        _log(
+            "info",
+            "image generation succeeded",
+            event="request_succeeded",
+            aws_request_id=aws_request_id,
+            model_name=MODEL_NAME,
+            input_source=input_source,
+            file_key=file_key,
+            duration_ms=duration_ms,
+            status_code=200,
+        )
+
         return {
             'statusCode': 200,
             'body': json.dumps({
@@ -142,7 +211,18 @@ def handler(event, context):
         }
 
     except Exception as e:
-        logger.error(f"Error: {str(e)}", exc_info=True)
+        duration_ms = int((time.perf_counter() - started_at) * 1000)
+        _log(
+            "error",
+            "image generation failed",
+            event="request_failed",
+            aws_request_id=aws_request_id,
+            error_type=type(e).__name__,
+            error_code="GEN_IMAGE_FAILED",
+            duration_ms=duration_ms,
+            status_code=500,
+        )
+        logger.exception("Unhandled exception in app.handler")
         return {
             'statusCode': 500,
             'body': json.dumps({'success': False, 'error': str(e)})
