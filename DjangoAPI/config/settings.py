@@ -18,7 +18,7 @@ from datetime import timedelta
 import logging
 import structlog
 
-from config.ligging_utils import configure_structlog, AddDefaultFields
+from config.logging_utils import configure_structlog, AddDefaultFields
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

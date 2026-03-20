@@ -184,6 +184,7 @@ export class AppRunnerStack extends Stack {
       );
       domainDescription.node.addDependency(domainAssociation);
 
+      
       new route53.CnameRecord(this, "ApiCustomDomainDnsRecord", {
         zone: hostedZone,
         recordName: recordName,

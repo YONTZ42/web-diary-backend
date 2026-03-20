@@ -23,7 +23,7 @@ export class EcrStack extends Stack {
         imageTagMutability: ecr.TagMutability.IMMUTABLE,
         lifecycleRules: [
           {
-            maxImageCount: 30,
+            maxImageCount: 5,
           },
         ],
         removalPolicy: RemovalPolicy.RETAIN,
