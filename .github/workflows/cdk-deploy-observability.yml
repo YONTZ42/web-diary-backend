@@ -66,9 +66,9 @@ jobs:
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
-          DJANGO_IMAGE_TAG: ${{ github.sha }}
-          LAMBDA_YOLO_IMAGE_TAG: ${{ github.sha }}
-          LAMBDA_BG_IMAGE_TAG: ${{ github.sha }}
+          DJANGO_IMAGE_TAG: latest
+          LAMBDA_YOLO_IMAGE_TAG: latest
+          LAMBDA_BG_IMAGE_TAG: latest
 
           ALARM_EMAIL: ${{ secrets.ALARM_EMAIL }}
           SLACK_WORKSPACE_ID: ${{ secrets.SLACK_WORKSPACE_ID }}

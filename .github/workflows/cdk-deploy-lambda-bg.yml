@@ -71,6 +71,7 @@ jobs:
           provenance: false
           tags: |
             ${{ env.BG_REPO_URI }}:${{ github.sha }}
+            ${{ env.BG_REPO_URI }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 

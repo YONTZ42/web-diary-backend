@@ -69,7 +69,9 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t ${DJANGO_REPO_URI}:${IMAGE_TAG} ./DjangoAPI
+          docker tag ${DJANGO_REPO_URI}:${IMAGE_TAG} ${DJANGO_REPO_URI}:latest
           docker push ${DJANGO_REPO_URI}:${IMAGE_TAG}
+          docker push ${DJANGO_REPO_URI}:latest
 
       - name: Deploy AppRunner stack
         working-directory: ./aws-infra
@@ -79,7 +81,6 @@ jobs:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
           DJANGO_IMAGE_TAG: ${{ github.sha }}
-
 
           APP_ENV: ${{ env.STAGE }}
           DEBUG: ${{ github.ref_name == 'main' && 'False' || 'True' }}
