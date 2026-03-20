@@ -46,8 +46,11 @@ jobs:
           STAGE: ${{ vars.STAGE }}
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
           ALARM_EMAIL: ${{ secrets.ALARM_EMAIL }}
-          SLACK_WEBHOOK_SECRET_ARN: ${{ secrets.SLACK_WEBHOOK_SECRET_ARN }}
+          SLACK_WORKSPACE_ID: ${{ secrets.SLACK_WORKSPACE_ID }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+
           RUNBOOK_BASE_URL: ${{ vars.RUNBOOK_BASE_URL }}
         run: |
           npx cdk synth \
@@ -63,7 +66,9 @@ jobs:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
           ALARM_EMAIL: ${{ secrets.ALARM_EMAIL }}
-          SLACK_WEBHOOK_SECRET_ARN: ${{ secrets.SLACK_WEBHOOK_SECRET_ARN }}
+          SLACK_WORKSPACE_ID: ${{ secrets.SLACK_WORKSPACE_ID }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+
           RUNBOOK_BASE_URL: ${{ vars.RUNBOOK_BASE_URL }}
         run: |
           npx cdk deploy \
