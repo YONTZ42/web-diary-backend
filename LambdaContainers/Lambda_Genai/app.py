@@ -223,6 +223,8 @@ def handler(event, context):
             status_code=500,
         )
         logger.exception("Unhandled exception in app.handler")
+
+
         return {
             'statusCode': 500,
             'body': json.dumps({'success': False, 'error': str(e)})
