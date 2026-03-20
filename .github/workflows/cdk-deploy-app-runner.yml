@@ -2,7 +2,7 @@ name: deploy-app-runner
 
 on:
   push:
-    branches: [main, develop]
+    branches: [develop] #production環境でmainブランチ
     paths:
       - "DjangoAPI/**"
       - "aws-infra/bin/aws-ecr.ts"

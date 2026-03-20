@@ -2,7 +2,7 @@ name: deploy-lambda-bg
 
 on:
   push:
-    branches: [main, develop]
+    branches: [develop] #production環境でmainブランチ
     paths:
       - "LambdaContainers/Lambda_Genai/**"
       - "aws-infra/bin/aws-ecr.ts"

@@ -2,7 +2,7 @@ name: deploy-lambda-yolo
 
 on:
   push:
-    branches: [main, develop]
+    branches: [develop] #production環境でmainブランチ
     paths:
       - "LambdaContainers/Lambda_CropYOLO_Multi/**"
       - "aws-infra/bin/aws-ecr.ts"
