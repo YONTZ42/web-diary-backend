@@ -82,6 +82,7 @@ jobs:
           provenance: false
           tags: |
             ${{ env.YOLO_REPO_URI }}:${{ github.sha }}
+            ${{ env.YOLO_REPO_URI }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -116,3 +117,4 @@ jobs:
             ${PROJECT_NAME}-${STAGE}-lambda-yolo \
             --app "npx ts-node bin/aws-app.ts" \
             --require-approval never
+            

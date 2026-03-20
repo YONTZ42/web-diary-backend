@@ -53,6 +53,7 @@ jobs:
             --require-approval never \
             --outputs-file cdk-outputs.json
 
+
       - name: Read BG ECR output
         working-directory: ./aws-infra
         run: |
