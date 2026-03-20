@@ -111,9 +111,10 @@ const alertingStack = new AlertingStack(app, `${prefix}-alerting`, {
   projectName: config.projectName,
   stage: config.stage,
   alarmTopic: monitoringStack.alarmTopic,
-  slackWebhookSecretArn: config.slackWebhookSecretArn,
-  runbookBaseUrl: config.runbookBaseUrl || undefined,
+  slackWorkspaceId: config.slackWorkspaceId,
+  slackChannelId: config.slackChannelId,
 });
+
 alertingStack.addDependency(monitoringStack);
 
 
