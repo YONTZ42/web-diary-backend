@@ -58,12 +58,17 @@ jobs:
             ${PROJECT_NAME}-${STAGE}-alerting \
             --app "npx ts-node bin/aws-app.ts"
 
+
       - name: Deploy Monitoring and Alerting stacks
         working-directory: ./aws-infra
         env:
           STAGE: ${{ vars.STAGE }}
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+
+          DJANGO_IMAGE_TAG: ${{ github.sha }}
+          LAMBDA_YOLO_IMAGE_TAG: ${{ github.sha }}
+          LAMBDA_BG_IMAGE_TAG: ${{ github.sha }}
 
           ALARM_EMAIL: ${{ secrets.ALARM_EMAIL }}
           SLACK_WORKSPACE_ID: ${{ secrets.SLACK_WORKSPACE_ID }}
@@ -76,4 +81,3 @@ jobs:
             ${PROJECT_NAME}-${STAGE}-alerting \
             --app "npx ts-node bin/aws-app.ts" \
             --require-approval never
-            

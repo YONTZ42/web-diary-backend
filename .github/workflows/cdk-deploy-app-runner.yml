@@ -98,7 +98,7 @@ jobs:
           CREATE_SUPERUSER: ${{ secrets.CREATE_SUPERUSER }}
           DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
           DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
-          SLACK_WEBHOOK_SECRET_ARN: ${{ secrets.SLACK_WEBHOOK_SECRET_ARN }}
+
 
         run: |
           npx cdk deploy \
