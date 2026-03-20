@@ -76,3 +76,4 @@ jobs:
             ${PROJECT_NAME}-${STAGE}-alerting \
             --app "npx ts-node bin/aws-app.ts" \
             --require-approval never
+            
