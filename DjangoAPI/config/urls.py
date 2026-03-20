@@ -17,7 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
-
+from .views_health import health_check, HealthView
 # SimpleJWTのビューをインポート
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -28,12 +28,11 @@ from drf_spectacular.views import (
     SpectacularRedocView, 
     SpectacularSwaggerView
 )
-def health_check(request):
-    return HttpResponse("ok", status=200)
 
 urlpatterns = [
-    path('healthz', health_check),  # App Runner用のエンドポイント
-    
+    path('healthz', health_check),  # App Runner用のshallow check
+    path('health', HealthView.as_view()),     # AppRunner deploy 後のdeep check(S3, DB)
+
     path('admin/', admin.site.urls),
     path('api/', include('core.urls')),
     path('api/', include('MiniatureMuseum.urls')),

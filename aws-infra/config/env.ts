@@ -61,6 +61,8 @@ export const config = {
   djangoMemory: Number(process.env.APP_RUNNER_MEMORY ?? "2048"),
 
   alarmEmail: process.env.ALARM_EMAIL ?? "",
+  slackWebhookSecretArn: process.env.SLACK_WEBHOOK_SECRET_ARN ?? "",
+  runbookBaseUrl: process.env.RUNBOOK_BASE_URL ?? "",
 
   djangoEnv: {
     APP_ENV: process.env.APP_ENV ??"staging",

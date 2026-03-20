@@ -8,6 +8,10 @@ import { LambdaBgStack } from "../lib/lambda-bg-stack";
 import { LambdaYoloStack } from "../lib/lambda-yolo-stack";
 import { StorageStack } from "../lib/storage-stack";
 
+import { AlertingStack } from "../lib/alerting-stack";
+import { MonitoringStack } from "../lib/monitoring-stack";
+
+
 const app = new cdk.App();
 
 const env = {
@@ -76,5 +80,41 @@ const appRunnerStack = new AppRunnerStack(app, `${prefix}-apprunner`, {
   djangoEnv: config.djangoEnv,
 });
 appRunnerStack.addDependency(storageStack);
+
+// ... 既存 stack 作成後
+
+const monitoringStack = new MonitoringStack(app, `${prefix}-monitoring`, {
+  env,
+  projectName: config.projectName,
+  stage: config.stage,
+  alarmEmail: config.alarmEmail || undefined,
+  appRunnerService: appRunnerStack.service,
+  lambdaConfigs: [
+    {
+      fn: lambdaBgStack.bgFunction,
+      durationWarningMs: 15000,
+      durationCriticalMs: 30000,
+    },
+    {
+      fn: lambdaYoloStack.yoloFunction,
+      durationWarningMs: 25000,
+      durationCriticalMs: 45000,
+    },
+  ],
+});
+monitoringStack.addDependency(appRunnerStack);
+monitoringStack.addDependency(lambdaBgStack);
+monitoringStack.addDependency(lambdaYoloStack);
+
+const alertingStack = new AlertingStack(app, `${prefix}-alerting`, {
+  env,
+  projectName: config.projectName,
+  stage: config.stage,
+  alarmTopic: monitoringStack.alarmTopic,
+  slackWebhookSecretArn: config.slackWebhookSecretArn,
+  runbookBaseUrl: config.runbookBaseUrl || undefined,
+});
+alertingStack.addDependency(monitoringStack);
+
 
 app.synth();
