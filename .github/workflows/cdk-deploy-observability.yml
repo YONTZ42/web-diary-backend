@@ -59,6 +59,7 @@ jobs:
             --app "npx ts-node bin/aws-app.ts"
 
 
+
       - name: Deploy Monitoring and Alerting stacks
         working-directory: ./aws-infra
         env:
