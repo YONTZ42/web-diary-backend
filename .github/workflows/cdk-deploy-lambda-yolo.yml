@@ -117,4 +117,5 @@ jobs:
             ${PROJECT_NAME}-${STAGE}-lambda-yolo \
             --app "npx ts-node bin/aws-app.ts" \
             --require-approval never
+
             
