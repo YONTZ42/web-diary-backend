@@ -29,6 +29,9 @@ from drf_spectacular.views import (
     SpectacularSwaggerView
 )
 
+def health_check(request):
+    return HttpResponse("ok", status=200)
+
 urlpatterns = [
     path('healthz', health_check),  # App Runner用のshallow check
     path('health', HealthView.as_view()),     # AppRunner deploy 後のdeep check(S3, DB)

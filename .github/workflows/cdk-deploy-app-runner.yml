@@ -107,5 +107,7 @@ jobs:
           npx cdk deploy \
             ${PROJECT_NAME}-${STAGE}-storage \
             ${PROJECT_NAME}-${STAGE}-apprunner \
+            ${PROJECT_NAME}-${STAGE}-monitoring \
+            ${PROJECT_NAME}-${STAGE}-alerting \
             --app "npx ts-node bin/aws-app.ts" \
             --require-approval never
