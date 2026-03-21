@@ -53,9 +53,9 @@ export const config = {
   apprunnerServiceName: required("APP_RUNNER_SERVICE_NAME", "mini-museum-api"),
   apprunnerPort: Number(process.env.APP_RUNNER_PORT ?? "8080"),
 
-  djangoImageTag: process.env.DJANGO_IMAGE_TAG ?? "initial",
-  lambdaYoloImageTag: process.env.LAMBDA_YOLO_IMAGE_TAG ?? "initial",
-  lambdaBgImageTag: process.env.LAMBDA_BG_IMAGE_TAG ?? "initial",
+  djangoImageTag: process.env.DJANGO_IMAGE_TAG ?? "latest",
+  lambdaYoloImageTag: process.env.LAMBDA_YOLO_IMAGE_TAG ?? "latest",
+  lambdaBgImageTag: process.env.LAMBDA_BG_IMAGE_TAG ?? "latest",
 
   djangoCpu: Number(process.env.APP_RUNNER_CPU ?? "1024"),
   djangoMemory: Number(process.env.APP_RUNNER_MEMORY ?? "2048"),

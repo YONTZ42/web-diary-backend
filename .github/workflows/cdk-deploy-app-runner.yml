@@ -83,6 +83,8 @@ jobs:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
 
           DJANGO_IMAGE_TAG: ${{ github.sha }}
+          LAMBDA_YOLO_IMAGE_TAG: latest
+          LAMBDA_BG_IMAGE_TAG: latest
 
           APP_ENV: ${{ env.STAGE }}
           DEBUG: ${{ github.ref_name == 'main' && 'False' || 'True' }}
