@@ -197,7 +197,7 @@ export class AppRunnerStack extends Stack {
       );
       new route53.CnameRecord(
         this,
-        "ApiCustomDomainCertificateValidationRecord",
+        "ApiCustomDomainCertificateValidationRecord0",
         {
           zone: hostedZone,
           recordName: Fn.select(0, 
@@ -213,7 +213,7 @@ export class AppRunnerStack extends Stack {
       );
       new route53.CnameRecord(
         this,
-        "ApiCustomDomainCertificateValidationRecord",
+        "ApiCustomDomainCertificateValidationRecord1",
         {
           zone: hostedZone,
           recordName: Fn.select(0, 
