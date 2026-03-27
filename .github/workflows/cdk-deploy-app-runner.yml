@@ -63,6 +63,7 @@ jobs:
         run: |
           echo "DJANGO_REPO_URI=$(jq -r 'to_entries[0].value.DjangoRepoUri' cdk-outputs.json)" >> $GITHUB_ENV
 
+
       - uses: aws-actions/amazon-ecr-login@v2
 
       - name: Build and push Django image
