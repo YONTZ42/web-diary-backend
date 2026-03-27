@@ -225,8 +225,8 @@ REST_FRAMEWORK = {
     # フロントエンドが camelCase なので、入出力で変換するライブラリを入れると便利ですが
     # 今回はモデル定義に集中するため省略します。
     "DEFAULT_THROTTLE_CLASSES": [
-        "MiniMuseum.throttles.BurstUserOrGuestThrottle",
-        "MiniMuseum.throttles.SustainedUserOrGuestThrottle",
+        "MiniatureMuseum.throttles.BurstUserOrGuestThrottle",
+        "MiniatureMuseum.throttles.SustainedUserOrGuestThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
         "burst_user_or_guest": "60/min",
