@@ -50,14 +50,12 @@ class RequestContextMiddleware:
 
         ACCESS_LOGGER.info(
             "request started",
-            event="request_started",
             component="django.access",
         )
 
         if not user_id and not guest_id:
             AUTH_LOGGER.warning(
                 "request has neither authenticated user nor X-Guest-Id",
-                event="request_subject_missing",
                 component="django.auth",
                 status_code=None,
             )
@@ -68,7 +66,6 @@ class RequestContextMiddleware:
             duration_ms = int((time.perf_counter() - started_at) * 1000)
             ACCESS_LOGGER.exception(
                 "request failed with unhandled exception",
-                event="request_failed",
                 component="django.access",
                 duration_ms=duration_ms,
                 status_code=500,
@@ -81,7 +78,6 @@ class RequestContextMiddleware:
 
         ACCESS_LOGGER.info(
             "request finished",
-            event="request_finished",
             component="django.access",
             status_code=response.status_code,
             duration_ms=duration_ms,
