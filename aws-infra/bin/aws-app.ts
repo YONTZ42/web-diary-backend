@@ -78,6 +78,7 @@ const appRunnerStack = new AppRunnerStack(app, `${prefix}-apprunner`, {
   domainName: apiDomainName,
   hostedZoneDomain: config.hostedZoneDomain || undefined,
   djangoEnv: config.djangoEnv,
+  skipDnsRegistration: config.skipDnsRegistration,
 });
 appRunnerStack.addDependency(storageStack);
 

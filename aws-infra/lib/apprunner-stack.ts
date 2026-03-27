@@ -19,6 +19,7 @@ export interface AppRunnerStackProps extends StackProps {
   domainName?: string;
   hostedZoneDomain?: string;
   djangoEnv: Record<string, string>;
+  skipDnsRegistration?: boolean;
 }
 
 export class AppRunnerStack extends Stack {
@@ -184,46 +185,48 @@ export class AppRunnerStack extends Stack {
       );
       domainDescription.node.addDependency(domainAssociation);
 
-
-      new route53.CnameRecord(this, "ApiCustomDomainDnsRecord", {
-        zone: hostedZone,
-        recordName: recordName,
-        domainName: domainDescription.getResponseField("DNSTarget"),
-        ttl: Duration.minutes(5),
-      });
-         
-      const validationRecordNameFull0 = domainDescription.getResponseField(
-        "CustomDomains.0.CertificateValidationRecords.0.Name"
-      );
-      new route53.CnameRecord(
-        this,
-        "ApiCustomDomainCertificateValidationRecord0",
-        {
+      
+      if (!props.skipDnsRegistration){
+        new route53.CnameRecord(this, "ApiCustomDomainDnsRecord", {
           zone: hostedZone,
-          recordName: Fn.select(0, 
-            Fn.split("." + props.hostedZoneDomain, validationRecordNameFull0)),
-          domainName: domainDescription.getResponseField(
-            "CustomDomains.0.CertificateValidationRecords.0.Value"
-          ),
+          recordName: recordName,
+          domainName: domainDescription.getResponseField("DNSTarget"),
           ttl: Duration.minutes(5),
-        }
-      );
-      const validationRecordNameFull1 = domainDescription.getResponseField(
-        "CustomDomains.0.CertificateValidationRecords.1.Name"
-      );
-      new route53.CnameRecord(
-        this,
-        "ApiCustomDomainCertificateValidationRecord1",
-        {
-          zone: hostedZone,
-          recordName: Fn.select(0, 
-            Fn.split("." + props.hostedZoneDomain, validationRecordNameFull1)),
-          domainName: domainDescription.getResponseField(
-            "CustomDomains.0.CertificateValidationRecords.1.Value"
-          ),
-          ttl: Duration.minutes(5),
-        }
-      );
+        });
+          
+        const validationRecordNameFull0 = domainDescription.getResponseField(
+          "CustomDomains.0.CertificateValidationRecords.0.Name"
+        );
+        new route53.CnameRecord(
+          this,
+          "ApiCustomDomainCertificateValidationRecord0",
+          {
+            zone: hostedZone,
+            recordName: Fn.select(0, 
+              Fn.split("." + props.hostedZoneDomain, validationRecordNameFull0)),
+            domainName: domainDescription.getResponseField(
+              "CustomDomains.0.CertificateValidationRecords.0.Value"
+            ),
+            ttl: Duration.minutes(5),
+          }
+        );
+        const validationRecordNameFull1 = domainDescription.getResponseField(
+          "CustomDomains.0.CertificateValidationRecords.1.Name"
+        );
+        new route53.CnameRecord(
+          this,
+          "ApiCustomDomainCertificateValidationRecord1",
+          {
+            zone: hostedZone,
+            recordName: Fn.select(0, 
+              Fn.split("." + props.hostedZoneDomain, validationRecordNameFull1)),
+            domainName: domainDescription.getResponseField(
+              "CustomDomains.0.CertificateValidationRecords.1.Value"
+            ),
+            ttl: Duration.minutes(5),
+          }
+        );
+      }
 
 
 
