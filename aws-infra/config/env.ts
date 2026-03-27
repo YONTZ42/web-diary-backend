@@ -65,6 +65,7 @@ export const config = {
   slackChannelId: process.env.SLACK_CHANNEL_ID ?? "",
 
   skipDnsRegistration: optionalBool("SKIP_DNS_REGISTRATION", false),
+
   djangoEnv: {
     APP_ENV: process.env.APP_ENV ??"staging",
     DEBUG: process.env.DEBUG ?? "True",
@@ -80,5 +81,8 @@ export const config = {
     CREATE_SUPERUSER: process.env.CREATE_SUPERUSER ?? "0",
     DJANGO_SUPERUSER_EMAIL: process.env.DJANGO_SUPERUSER_EMAIL ?? "example@example.com",
     DJANGO_SUPERUSER_PASSWORD: process.env.DJANGO_SUPERUSER_PASSWORD ?? "1111111111",
+    SENTRY_DSN: process.env.SENTRY_DSN ?? "",
+    GIT_SHA: process.env.GIT_SHA ?? ""
   }
+
 };

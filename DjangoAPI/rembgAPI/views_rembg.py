@@ -16,10 +16,13 @@ from config.logging_utils import get_logger, bind_logger, log_exception
 
 from .services.rembg_processor import process_event
 
+from MiniatureMuseum.throttles import GuestIssueThrottle, RembgBurstThrottle, RembgSustainedThrottle
+
 
 @method_decorator(csrf_exempt, name="dispatch")
 class RembgProcessView(APIView):
     permission_classes=[]
+    throttle_classes = [RembgBurstThrottle,RembgSustainedThrottle]
     """
     Lambda互換の request body を受ける View。
     POST body 例:

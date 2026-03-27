@@ -85,6 +85,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'config.request_context.RequestContextMiddleware',
+    'MiniatureMuseum.middleware.SentryContextMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -329,15 +330,50 @@ LOGGING = {
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 
-SENTRY_DSN = env("SENTRY_DSN", "")
-SENTRY_TRACES_SAMPLE_RATE=float(env("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
+SENTRY_DSN = env("SENTRY_DSN", default="")
+SENTRY_TRACES_SAMPLE_RATE=float(env("SENTRY_TRACES_SAMPLE_RATE", default="0.1"))
+GIT_SHA=env("GIT_SHA", default="")
+
+def before_send(event, hint):
+    request = event.get("request") or {}
+    # ヘッダ整理
+    headers = request.get("headers") or {}
+    if "Authorization" in headers:
+        headers["Authorization"] = "[filtered]"
+    if "Cookie" in headers:
+        headers["Cookie"] = "[filtered]"
+
+    # body整理
+    data = request.get("data")
+    if isinstance(data, dict):
+        for key in ["image", "image_data", "file", "token", "id_token", "access_token"]:
+            if key in data:
+                data[key] = "[filtered]"
+
+    return event
+
+def before_send_transaction(event, hint):
+    transaction = event.get("transaction", "")
+    if transaction in ["/healthz", "/health", "/healtz"]:
+        return None
+    return event
+
 if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[DjangoIntegration(
+            transaction_style="urL",
+            middleware_spans=True,
+            signals_spans=True,
+            cache_spans=False,
+            http_methods_to_capture=("GET", "POST", "PUT", "PATCH", "DELETE")
+        )],
         environment=APP_ENV,
         traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
         send_default_pii=False,
+        release=GIT_SHA,
+        before_send=before_send,
+        before_send_transaction=before_send_transaction,
     )
 
 
