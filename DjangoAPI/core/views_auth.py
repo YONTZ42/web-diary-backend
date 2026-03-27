@@ -32,12 +32,15 @@ class MeView(generics.RetrieveUpdateAPIView):
     def get_object(self):
         return self.request.user
 
+
+from MiniatureMuseum.throttles import GuestIssueThrottle, RembgBurstThrottle, RembgSustainedThrottle
+
 # --- Auth API ---
 class UserRegistrationView(generics.CreateAPIView):
     """ユーザー新規登録"""
     serializer_class = UserRegistrationSerializer
     permission_classes = [AllowAny] # 誰でもアクセス可能
-
+    throttle_classes = [GuestIssueThrottle]
 # --- Auth API ---
 # --- Gallery Viewer (public read by slug) ---
 # --- Auth: Guest ID Issue ---

@@ -18,8 +18,6 @@ from django.utils.text import slugify
 import uuid
 
 
-
-
 # --- Gallery Public Viewer (public read by slug) ---
 
 # --- Nested Exhibit API (recommended) ---

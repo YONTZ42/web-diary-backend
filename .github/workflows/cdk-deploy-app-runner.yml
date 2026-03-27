@@ -104,7 +104,6 @@ jobs:
           DJANGO_SUPERUSER_EMAIL: ${{ secrets.DJANGO_SUPERUSER_EMAIL }}
           DJANGO_SUPERUSER_PASSWORD: ${{ secrets.DJANGO_SUPERUSER_PASSWORD }}
 
-
         run: |
           npx cdk deploy \
             ${PROJECT_NAME}-${STAGE}-storage \

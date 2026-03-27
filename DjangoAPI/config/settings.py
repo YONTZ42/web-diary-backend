@@ -224,12 +224,16 @@ REST_FRAMEWORK = {
     # フロントエンドが camelCase なので、入出力で変換するライブラリを入れると便利ですが
     # 今回はモデル定義に集中するため省略します。
     "DEFAULT_THROTTLE_CLASSES": [
-        "rest_framework.throttling.UserRateThrottle",
-        "rest_framework.throttling.AnonRateThrottle",
+        "MiniMuseum.throttles.BurstUserOrGuestThrottle",
+        "MiniMuseum.throttles.SustainedUserOrGuestThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
-        "user": "60/min",
-        "anon": "20/min",
+        "burst_user_or_guest": "60/min",
+        "sustained_user_or_guest": "1000/day",
+        "guest_issue": "50/hour",
+        "login": "30/min",
+        "rembg_burst": "5/min",
+        "rembg_sustained": "30/hour",
     },
 }
 
@@ -321,7 +325,20 @@ LOGGING = {
         "level": LOG_LEVEL,
     },
 }
+# --- Sentry 設定　---
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
+SENTRY_DSN = env("SENTRY_DSN", "")
+SENTRY_TRACES_SAMPLE_RATE=float(env("SENTRY_TRACES_SAMPLE_RATE", "0.1"))
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        environment=APP_ENV,
+        traces_sample_rate=SENTRY_TRACES_SAMPLE_RATE,
+        send_default_pii=False,
+    )
 
 
 # --- 4. AWS S3 Settings (Boto3用) ---
