@@ -362,7 +362,7 @@ if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         integrations=[DjangoIntegration(
-            transaction_style="urL",
+            transaction_style="url",
             middleware_spans=True,
             signals_spans=True,
             cache_spans=False,
