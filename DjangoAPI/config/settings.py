@@ -34,7 +34,7 @@ if os.path.exists(BASE_DIR / ".env"):
     environ.Env.read_env(BASE_DIR / ".env")
 
 # 1) 環境の判定（ここが分岐の軸）
-APP_ENV = env.str("APP_ENV", default="staging")  # staging or production
+APP_ENV = env.str("APP_ENV", default="staging")  # ci, staging or production
 DEBUG = env.bool("DEBUG", default=(APP_ENV == "local"))
 GOOGLE_OAUTH_CLIENT_ID = env.str("GOOGLE_OAUTH_CLIENT_ID", default="")
 
@@ -53,6 +53,8 @@ SECRET_KEY = env('SECRET_KEY', default="dummy-key")
 raw_allowed_hosts = env('ALLOWED_HOSTS', default='localhost,127.0.0.1')
 ALLOWED_HOSTS = [h.strip().replace('"', '').replace("'", "") for h in raw_allowed_hosts.split(',')]
 
+if APP_ENV =="ci":
+    SECURE_SSL_REDIRECT = False
 
 # Application definition
 INSTALLED_APPS = [

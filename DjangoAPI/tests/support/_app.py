@@ -20,7 +20,7 @@ Recommended env overrides:
 
 APP_LABEL = os.getenv("MUSEUM_APP_LABEL", "MiniatureMuseum")
 APP_LABEL_CORE = os.getenv("MUSEUM_APP_LABEL_CORE", "core")
-APP_LABEL_REMBG = os.getenv("MUSEUM_APP_LABEL_REMBG", "rembg")
+APP_LABEL_REMBG = os.getenv("MUSEUM_APP_LABEL_REMBG", "rembgAPI")
 
 
 VIEWS_CORE_MODULE = os.getenv("VIEWS_CORE_MODULE", f"{APP_LABEL}.views")
