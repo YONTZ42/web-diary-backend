@@ -8,8 +8,7 @@ from tests.factories.user_factory import UserFactory
 from tests.support._app import get_model
 
 
-Gallery = get_model("Gallery")
-
+from MiniatureMuseum.models import Gallery
 
 class GalleryFactory(DjangoModelFactory):
     class Meta:

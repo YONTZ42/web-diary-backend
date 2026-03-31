@@ -3,13 +3,13 @@ from __future__ import annotations
 import factory
 from django.utils import timezone
 from factory.django import DjangoModelFactory
+from django.apps import apps
 
 from tests.factories.gallery_factory import GalleryFactory
 from tests.support._app import get_model
 
 
-Exhibit = get_model("Exhibit")
-
+from MiniatureMuseum.models import Exhibit
 
 class ExhibitFactory(DjangoModelFactory):
     class Meta:
