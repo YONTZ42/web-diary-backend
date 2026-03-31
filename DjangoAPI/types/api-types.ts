@@ -46,7 +46,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** @description ユーザー新規登録 */
-        post: operations["auth_register_create"];
+        post: operations["api_auth_register_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -60,9 +60,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["exhibits_list"];
+        get: operations["api_exhibits_list"];
         put?: never;
-        post: operations["exhibits_create"];
+        post: operations["api_exhibits_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -76,13 +76,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["exhibits_retrieve"];
-        put: operations["exhibits_update"];
+        get: operations["api_exhibits_retrieve"];
+        put: operations["api_exhibits_update"];
         post?: never;
-        delete: operations["exhibits_destroy"];
+        delete: operations["api_exhibits_destroy"];
         options?: never;
         head?: never;
-        patch: operations["exhibits_partial_update"];
+        patch: operations["api_exhibits_partial_update"];
         trace?: never;
     };
     "/api/galleries/": {
@@ -92,9 +92,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["galleries_list"];
+        get: operations["api_galleries_list"];
         put?: never;
-        post: operations["galleries_create"];
+        post: operations["api_galleries_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -111,7 +111,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** @description ネスト型: Exhibit追加（空枠に追加） */
-        post: operations["galleries_exhibits_create"];
+        post: operations["api_galleries_exhibits_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -127,10 +127,10 @@ export interface paths {
         };
         get?: never;
         /** @description ネスト型: slot_index 指定で作成 or 置換（推奨） */
-        put: operations["galleries_exhibits_update"];
+        put: operations["api_galleries_exhibits_update"];
         post?: never;
         /** @description ネスト型: slot_index 指定で作成 or 置換（推奨） */
-        delete: operations["galleries_exhibits_destroy"];
+        delete: operations["api_galleries_exhibits_destroy"];
         options?: never;
         head?: never;
         patch?: never;
@@ -143,13 +143,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["galleries_retrieve"];
-        put: operations["galleries_update"];
+        get: operations["api_galleries_retrieve"];
+        put: operations["api_galleries_update"];
         post?: never;
-        delete: operations["galleries_destroy"];
+        delete: operations["api_galleries_destroy"];
         options?: never;
         head?: never;
-        patch: operations["galleries_partial_update"];
+        patch: operations["api_galleries_partial_update"];
         trace?: never;
     };
     "/api/galleries/g/{slug}/": {
@@ -159,7 +159,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["galleries_g_retrieve"];
+        get: operations["api_galleries_g_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -183,7 +183,7 @@ export interface paths {
          *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
          *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
          */
-        get: operations["guest_gallery_retrieve"];
+        get: operations["api_guest_gallery_retrieve"];
         put?: never;
         /**
          * @description Guest 用: 1ゲスト=1ギャラリー を前提にした入口
@@ -193,7 +193,7 @@ export interface paths {
          *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
          *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
          */
-        post: operations["guest_gallery_create"];
+        post: operations["api_guest_gallery_create"];
         /**
          * @description Guest 用: 1ゲスト=1ギャラリー を前提にした入口
          *
@@ -202,7 +202,7 @@ export interface paths {
          *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
          *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
          */
-        delete: operations["guest_gallery_destroy"];
+        delete: operations["api_guest_gallery_destroy"];
         options?: never;
         head?: never;
         /**
@@ -213,7 +213,23 @@ export interface paths {
          *     - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
          *     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
          */
-        patch: operations["guest_gallery_partial_update"];
+        patch: operations["api_guest_gallery_partial_update"];
+        trace?: never;
+    };
+    "/api/image/rembg/{model_name}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["api_image_rembg_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/me/": {
@@ -224,15 +240,15 @@ export interface paths {
             cookie?: never;
         };
         /** @description 自分のプロフィール取得・更新 */
-        get: operations["me_retrieve"];
+        get: operations["api_me_retrieve"];
         /** @description 自分のプロフィール取得・更新 */
-        put: operations["me_update"];
+        put: operations["api_me_update"];
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
         /** @description 自分のプロフィール取得・更新 */
-        patch: operations["me_partial_update"];
+        patch: operations["api_me_partial_update"];
         trace?: never;
     };
     "/api/notebooks/": {
@@ -242,9 +258,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["notebooks_list"];
+        get: operations["api_notebooks_list"];
         put?: never;
-        post: operations["notebooks_create"];
+        post: operations["api_notebooks_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -258,13 +274,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["notebooks_retrieve"];
-        put: operations["notebooks_update"];
+        get: operations["api_notebooks_retrieve"];
+        put: operations["api_notebooks_update"];
         post?: never;
-        delete: operations["notebooks_destroy"];
+        delete: operations["api_notebooks_destroy"];
         options?: never;
         head?: never;
-        patch: operations["notebooks_partial_update"];
+        patch: operations["api_notebooks_partial_update"];
         trace?: never;
     };
     "/api/notebooks/{id}/pages/": {
@@ -274,7 +290,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["notebooks_pages_retrieve"];
+        get: operations["api_notebooks_pages_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -290,9 +306,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["pages_list"];
+        get: operations["api_pages_list"];
         put?: never;
-        post: operations["pages_create"];
+        post: operations["api_pages_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -306,13 +322,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["pages_retrieve"];
-        put: operations["pages_update"];
+        get: operations["api_pages_retrieve"];
+        put: operations["api_pages_update"];
         post?: never;
-        delete: operations["pages_destroy"];
+        delete: operations["api_pages_destroy"];
         options?: never;
         head?: never;
-        patch: operations["pages_partial_update"];
+        patch: operations["api_pages_partial_update"];
         trace?: never;
     };
     "/api/schedules/": {
@@ -322,9 +338,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["schedules_list"];
+        get: operations["api_schedules_list"];
         put?: never;
-        post: operations["schedules_create"];
+        post: operations["api_schedules_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -338,13 +354,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["schedules_retrieve"];
-        put: operations["schedules_update"];
+        get: operations["api_schedules_retrieve"];
+        put: operations["api_schedules_update"];
         post?: never;
-        delete: operations["schedules_destroy"];
+        delete: operations["api_schedules_destroy"];
         options?: never;
         head?: never;
-        patch: operations["schedules_partial_update"];
+        patch: operations["api_schedules_partial_update"];
         trace?: never;
     };
     "/api/stickers/": {
@@ -354,9 +370,9 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["stickers_list"];
+        get: operations["api_stickers_list"];
         put?: never;
-        post: operations["stickers_create"];
+        post: operations["api_stickers_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -370,13 +386,13 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get: operations["stickers_retrieve"];
-        put: operations["stickers_update"];
+        get: operations["api_stickers_retrieve"];
+        put: operations["api_stickers_update"];
         post?: never;
-        delete: operations["stickers_destroy"];
+        delete: operations["api_stickers_destroy"];
         options?: never;
         head?: never;
-        patch: operations["stickers_partial_update"];
+        patch: operations["api_stickers_partial_update"];
         trace?: never;
     };
     "/api/token/": {
@@ -392,7 +408,7 @@ export interface paths {
          * @description Takes a set of user credentials and returns an access and refresh JSON web
          *     token pair to prove the authentication of those credentials.
          */
-        post: operations["token_create"];
+        post: operations["api_token_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -412,7 +428,7 @@ export interface paths {
          * @description Takes a refresh type JSON web token and returns an access type JSON web
          *     token if the refresh token is valid.
          */
-        post: operations["token_refresh_create"];
+        post: operations["api_token_refresh_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -429,7 +445,28 @@ export interface paths {
         get?: never;
         put?: never;
         /** @description S3アップロード用のURL発行または完了確認を行います。 */
-        post: operations["uploads_create"];
+        post: operations["api_uploads_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Deep health check for operational monitoring.
+         *     - /healthz: shallow check (App Runner liveness) のまま維持
+         *     - /health : DB / S3 の deep check
+         */
+        get: operations["health_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -974,7 +1011,7 @@ export interface operations {
             };
         };
     };
-    auth_register_create: {
+    api_auth_register_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -999,7 +1036,7 @@ export interface operations {
             };
         };
     };
-    exhibits_list: {
+    api_exhibits_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -1018,7 +1055,7 @@ export interface operations {
             };
         };
     };
-    exhibits_create: {
+    api_exhibits_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -1043,7 +1080,7 @@ export interface operations {
             };
         };
     };
-    exhibits_retrieve: {
+    api_exhibits_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1065,7 +1102,7 @@ export interface operations {
             };
         };
     };
-    exhibits_update: {
+    api_exhibits_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1093,7 +1130,7 @@ export interface operations {
             };
         };
     };
-    exhibits_destroy: {
+    api_exhibits_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -1114,7 +1151,7 @@ export interface operations {
             };
         };
     };
-    exhibits_partial_update: {
+    api_exhibits_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1142,7 +1179,7 @@ export interface operations {
             };
         };
     };
-    galleries_list: {
+    api_galleries_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -1161,7 +1198,7 @@ export interface operations {
             };
         };
     };
-    galleries_create: {
+    api_galleries_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -1186,7 +1223,7 @@ export interface operations {
             };
         };
     };
-    galleries_exhibits_create: {
+    api_galleries_exhibits_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -1241,7 +1278,7 @@ export interface operations {
             };
         };
     };
-    galleries_exhibits_update: {
+    api_galleries_exhibits_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1298,7 +1335,7 @@ export interface operations {
             };
         };
     };
-    galleries_exhibits_destroy: {
+    api_galleries_exhibits_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -1340,7 +1377,7 @@ export interface operations {
             };
         };
     };
-    galleries_retrieve: {
+    api_galleries_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1362,7 +1399,7 @@ export interface operations {
             };
         };
     };
-    galleries_update: {
+    api_galleries_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1390,7 +1427,7 @@ export interface operations {
             };
         };
     };
-    galleries_destroy: {
+    api_galleries_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -1411,7 +1448,7 @@ export interface operations {
             };
         };
     };
-    galleries_partial_update: {
+    api_galleries_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1439,7 +1476,7 @@ export interface operations {
             };
         };
     };
-    galleries_g_retrieve: {
+    api_galleries_g_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1460,7 +1497,7 @@ export interface operations {
             };
         };
     };
-    guest_gallery_retrieve: {
+    api_guest_gallery_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1493,7 +1530,7 @@ export interface operations {
             };
         };
     };
-    guest_gallery_create: {
+    api_guest_gallery_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -1540,7 +1577,7 @@ export interface operations {
             };
         };
     };
-    guest_gallery_destroy: {
+    api_guest_gallery_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -1572,7 +1609,7 @@ export interface operations {
             };
         };
     };
-    guest_gallery_partial_update: {
+    api_guest_gallery_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1618,7 +1655,27 @@ export interface operations {
             };
         };
     };
-    me_retrieve: {
+    api_image_rembg_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                model_name: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    api_me_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1637,7 +1694,7 @@ export interface operations {
             };
         };
     };
-    me_update: {
+    api_me_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1662,7 +1719,7 @@ export interface operations {
             };
         };
     };
-    me_partial_update: {
+    api_me_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1687,7 +1744,7 @@ export interface operations {
             };
         };
     };
-    notebooks_list: {
+    api_notebooks_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -1706,7 +1763,7 @@ export interface operations {
             };
         };
     };
-    notebooks_create: {
+    api_notebooks_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -1731,7 +1788,7 @@ export interface operations {
             };
         };
     };
-    notebooks_retrieve: {
+    api_notebooks_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1753,7 +1810,7 @@ export interface operations {
             };
         };
     };
-    notebooks_update: {
+    api_notebooks_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1781,7 +1838,7 @@ export interface operations {
             };
         };
     };
-    notebooks_destroy: {
+    api_notebooks_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -1802,7 +1859,7 @@ export interface operations {
             };
         };
     };
-    notebooks_partial_update: {
+    api_notebooks_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1830,7 +1887,7 @@ export interface operations {
             };
         };
     };
-    notebooks_pages_retrieve: {
+    api_notebooks_pages_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1852,7 +1909,7 @@ export interface operations {
             };
         };
     };
-    pages_list: {
+    api_pages_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -1871,7 +1928,7 @@ export interface operations {
             };
         };
     };
-    pages_create: {
+    api_pages_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -1896,7 +1953,7 @@ export interface operations {
             };
         };
     };
-    pages_retrieve: {
+    api_pages_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -1918,7 +1975,7 @@ export interface operations {
             };
         };
     };
-    pages_update: {
+    api_pages_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1946,7 +2003,7 @@ export interface operations {
             };
         };
     };
-    pages_destroy: {
+    api_pages_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -1967,7 +2024,7 @@ export interface operations {
             };
         };
     };
-    pages_partial_update: {
+    api_pages_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -1995,7 +2052,7 @@ export interface operations {
             };
         };
     };
-    schedules_list: {
+    api_schedules_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -2014,7 +2071,7 @@ export interface operations {
             };
         };
     };
-    schedules_create: {
+    api_schedules_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -2039,7 +2096,7 @@ export interface operations {
             };
         };
     };
-    schedules_retrieve: {
+    api_schedules_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -2061,7 +2118,7 @@ export interface operations {
             };
         };
     };
-    schedules_update: {
+    api_schedules_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -2089,7 +2146,7 @@ export interface operations {
             };
         };
     };
-    schedules_destroy: {
+    api_schedules_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -2110,7 +2167,7 @@ export interface operations {
             };
         };
     };
-    schedules_partial_update: {
+    api_schedules_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -2138,7 +2195,7 @@ export interface operations {
             };
         };
     };
-    stickers_list: {
+    api_stickers_list: {
         parameters: {
             query?: never;
             header?: never;
@@ -2157,7 +2214,7 @@ export interface operations {
             };
         };
     };
-    stickers_create: {
+    api_stickers_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -2182,7 +2239,7 @@ export interface operations {
             };
         };
     };
-    stickers_retrieve: {
+    api_stickers_retrieve: {
         parameters: {
             query?: never;
             header?: never;
@@ -2204,7 +2261,7 @@ export interface operations {
             };
         };
     };
-    stickers_update: {
+    api_stickers_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -2232,7 +2289,7 @@ export interface operations {
             };
         };
     };
-    stickers_destroy: {
+    api_stickers_destroy: {
         parameters: {
             query?: never;
             header?: never;
@@ -2253,7 +2310,7 @@ export interface operations {
             };
         };
     };
-    stickers_partial_update: {
+    api_stickers_partial_update: {
         parameters: {
             query?: never;
             header?: never;
@@ -2281,7 +2338,7 @@ export interface operations {
             };
         };
     };
-    token_create: {
+    api_token_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -2306,7 +2363,7 @@ export interface operations {
             };
         };
     };
-    token_refresh_create: {
+    api_token_refresh_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -2331,7 +2388,7 @@ export interface operations {
             };
         };
     };
-    uploads_create: {
+    api_uploads_create: {
         parameters: {
             query?: never;
             header?: never;
@@ -2355,6 +2412,24 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["UploadConfirm"];
                 };
+            };
+        };
+    };
+    health_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
