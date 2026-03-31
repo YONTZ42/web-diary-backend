@@ -16,12 +16,13 @@ class GalleryFactory(DjangoModelFactory):
         model = Gallery
 
     title = factory.Sequence(lambda n: f"Gallery {n}")
-    layout = "default"
     slug = factory.Sequence(lambda n: f"gallery-{n}")
     is_public = False
+    layout_cols = 3
+    layout_rows = 4
+    cover_render_url = ""
     deleted_at = None
 
-    # v5 spec: guest/user split
     user_style = "user"
     owner = factory.SubFactory(UserFactory)
     guest_id = None

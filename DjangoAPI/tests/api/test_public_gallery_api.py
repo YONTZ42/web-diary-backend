@@ -33,7 +33,7 @@ def test_public_gallery_excludes_deleted_exhibits(api_client):
     exhibits = response.data.get("exhibits", [])
     ids = {str(item["id"]) for item in exhibits}
     assert str(active.id) in ids
-    assert all(item.get("slotIndex") != 1 and item.get("slot_index") != 1 for item in exhibits)
+    assert all(item.get("slot_index") != 1 for item in exhibits)
 
 
 def test_public_gallery_does_not_leak_owner_or_guest(api_client):
@@ -43,7 +43,6 @@ def test_public_gallery_does_not_leak_owner_or_guest(api_client):
 
     assert response.status_code == 200
     assert "owner" not in response.data
-    assert "guestId" not in response.data
     assert "guest_id" not in response.data
 
 

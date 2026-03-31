@@ -127,7 +127,6 @@ class HealthView(APIView):
         if status_code == 200:
             logger.info(
                 "deep health check passed",
-                event="health_ok",
                 component="django.health",
                 status_code=200,
                 checks=checks,
@@ -135,7 +134,6 @@ class HealthView(APIView):
         else:
             logger.warning(
                 "deep health check degraded",
-                event="health_degraded",
                 component="django.health",
                 status_code=503,
                 checks=checks,

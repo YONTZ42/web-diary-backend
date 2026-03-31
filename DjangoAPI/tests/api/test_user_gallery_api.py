@@ -18,13 +18,16 @@ def test_user_gallery_list_returns_only_owned_galleries(user_client, user, other
     response = user_client.get(LIST_ENDPOINT)
 
     assert response.status_code == 200
-    ids = {str(item["id"]) for item in response.data if isinstance(response.data, list)}
+    body = response.data["results"] if isinstance(response.data, dict) and "results" in response.data else response.data
+    ids = {str(item["id"]) for item in body}
     assert str(mine.id) in ids
 
 
 def test_user_gallery_create_succeeds(user_client):
     response = user_client.post(LIST_ENDPOINT, data={"title": "Mine"}, format="json")
     assert response.status_code == 201
+    assert response.data["title"] == "Mine"
+    assert response.data["user_style"] == "user"
 
 
 def test_user_gallery_detail_blocks_other_user(user_client, other_user):

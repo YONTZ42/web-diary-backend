@@ -2,7 +2,7 @@ name: Generate API Schema
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, develop]
     paths:
       - 'DjangoAPI/**/*.py' # Python関連が変わった時だけ実行
       - ".github/workflows/generate_schema.yml"

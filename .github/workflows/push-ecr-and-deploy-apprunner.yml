@@ -7,7 +7,7 @@ on:
       - 'DjangoAPI/**/*.py' # Python関連が変わった時だけ実行
       - 'DjangoAPI/Dockerfile'
       - ".github/workflows/generate_schema.yml"
-      - ".github/workflows/deploy/apprunner-from-ecr.yml"
+      - ".github/workflows/push-ecr-and-deploy-apprunner.yml"
 
 
 

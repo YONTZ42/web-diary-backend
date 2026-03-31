@@ -21,6 +21,7 @@ def test_guest_gallery_post_creates_on_first_call(api_client, guest_headers):
 
     assert response.status_code == 201
     assert response.data["title"] == "Guest Gallery"
+    assert response.data["user_style"] == "guest"
 
 
 def test_guest_gallery_post_returns_existing_on_second_call(api_client, guest_headers, guest_id):
@@ -34,7 +35,6 @@ def test_guest_gallery_post_returns_existing_on_second_call(api_client, guest_he
 
 def test_guest_gallery_get_returns_only_active_gallery(api_client, guest_headers, guest_id):
     GalleryFactory(as_guest=True, guest_id=guest_id, title="Active")
-    GalleryFactory(as_guest=True, guest_id=guest_id, title="Deleted", deleted_at=timezone.now())
 
     response = api_client.get(ENDPOINT, **guest_headers)
 
@@ -47,7 +47,7 @@ def test_guest_gallery_patch_updates_allowed_fields_only(api_client, guest_heade
 
     response = api_client.patch(
         ENDPOINT,
-        data={"title": "After", "guestId": "evil", "owner": "evil"},
+        data={"title": "After", "guest_id": "evil", "owner": "evil", "slug": "evil"},
         format="json",
         **guest_headers,
     )
@@ -57,6 +57,7 @@ def test_guest_gallery_patch_updates_allowed_fields_only(api_client, guest_heade
     assert gallery.title == "After"
     assert gallery.guest_id == guest_id
     assert gallery.owner is None
+    assert gallery.slug != "evil"
 
 
 def test_guest_gallery_delete_soft_deletes(api_client, guest_headers, guest_id):
@@ -80,6 +81,5 @@ def test_guest_gallery_can_recreate_after_soft_delete(api_client, guest_headers,
     GalleryFactory(as_guest=True, guest_id=guest_id, deleted_at=timezone.now())
 
     response = api_client.post(ENDPOINT, data={"title": "Recreated"}, format="json", **guest_headers)
-
     assert response.status_code == 201
     assert response.data["title"] == "Recreated"

@@ -8,10 +8,10 @@ from factory.django import DjangoModelFactory
 class UserFactory(DjangoModelFactory):
     class Meta:
         model = get_user_model()
-        django_get_or_create = ("username",)
+        django_get_or_create = ("email",)
 
-    username = factory.Sequence(lambda n: f"user{n}")
-    email = factory.LazyAttribute(lambda obj: f"{obj.username}@example.com")
+    email = factory.Sequence(lambda n: f"user{n}@example.com")
+    display_name = factory.Sequence(lambda n: f"User {n}")
     is_active = True
 
     @factory.post_generation
