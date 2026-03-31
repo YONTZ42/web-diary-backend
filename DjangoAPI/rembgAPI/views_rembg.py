@@ -74,7 +74,6 @@ class RembgProcessView(APIView):
         except json.JSONDecodeError:
             log_exception(
                 logger,
-                event="rembg_input_decode_failed",
                 message="failed to parse request json",
                 error_code="REMBG_INVALID_JSON",
                 status_code=400,
@@ -112,7 +111,6 @@ class RembgProcessView(APIView):
             duration_ms = int((time.perf_counter() - started_at) * 1000)
             log_exception(
                 logger.bind(input_source=input_source, duration_ms=duration_ms),
-                event="rembg_request_failed",
                 message="rembg request failed",
                 error_code="REMBG_REQUEST_FAILED",
                 status_code=500,
@@ -123,7 +121,6 @@ class RembgProcessView(APIView):
         if duration_ms >= 5000:
             logger.warning(
                 "rembg request is slow",
-                event="rembg_slow_request",
                 input_source=input_source,
                 duration_ms=duration_ms,
                 status_code=200,
@@ -131,7 +128,6 @@ class RembgProcessView(APIView):
 
         logger.info(
             "rembg request succeeded",
-            event="rembg_request_succeeded",
             input_source=input_source,
             duration_ms=duration_ms,
             status_code=200,

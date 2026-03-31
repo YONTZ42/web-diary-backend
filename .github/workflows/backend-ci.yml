@@ -50,7 +50,7 @@ jobs:
       PIP_DISABLE_PIP_VERSION_CHECK: '1'
       DJANGO_SETTINGS_MODULE: config.settings
       SECRET_KEY: ci-secret-key
-      DEBUG: '0'
+      DEBUG: '1'
       APP_ENV: ci
       AWS_DEFAULT_REGION: ap-northeast-1
       AWS_REGION: ap-northeast-1

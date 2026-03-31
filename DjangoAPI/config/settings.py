@@ -53,8 +53,6 @@ SECRET_KEY = env('SECRET_KEY', default="dummy-key")
 raw_allowed_hosts = env('ALLOWED_HOSTS', default='localhost,127.0.0.1')
 ALLOWED_HOSTS = [h.strip().replace('"', '').replace("'", "") for h in raw_allowed_hosts.split(',')]
 
-if APP_ENV =="ci":
-    SECURE_SSL_REDIRECT = False
 
 # Application definition
 INSTALLED_APPS = [
@@ -138,27 +136,31 @@ else:
             'PORT': '5432',
         }
     }
-    
-# 4. セキュリティ設定 (本番環境のみ有効化)
-if not DEBUG:
-    # App RunnerはALB経由でHTTPSを受け取るため
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
-    # HSTS設定
-    SECURE_HSTS_SECONDS = 31536000
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
 
-    # 5. 静的ファイルの設定 (App Runner/S3用)
-    # App Runnerでは管理画面のCSSなどが消えやすいため、WhiteNoiseの利用も検討してください
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+if APP_ENV =="ci":
+    SECURE_SSL_REDIRECT = False
 else:
-    STATIC_URL = '/static/'
-    # 2. collectstaticでファイルが集まる場所（コンテナ内のパス）
-    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # 4. セキュリティ設定 (本番環境のみ有効化)
+    if not DEBUG:
+        # App RunnerはALB経由でHTTPSを受け取るため
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+        SECURE_SSL_REDIRECT = True
+        SESSION_COOKIE_SECURE = True
+        CSRF_COOKIE_SECURE = True
+        # HSTS設定
+        SECURE_HSTS_SECONDS = 31536000
+        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+        SECURE_HSTS_PRELOAD = True
+
+        # 5. 静的ファイルの設定 (App Runner/S3用)
+        # App Runnerでは管理画面のCSSなどが消えやすいため、WhiteNoiseの利用も検討してください
+        STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+    else:
+        STATIC_URL = '/static/'
+        # 2. collectstaticでファイルが集まる場所（コンテナ内のパス）
+        STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 
