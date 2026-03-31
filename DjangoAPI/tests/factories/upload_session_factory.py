@@ -8,8 +8,7 @@ from tests.factories.user_factory import UserFactory
 from tests.support._app import get_model
 
 
-UploadSession = get_model("UploadSession")
-
+from core.models import UploadSession 
 
 class UploadSessionFactory(DjangoModelFactory):
     class Meta:
