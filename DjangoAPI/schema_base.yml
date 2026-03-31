@@ -48,10 +48,10 @@ paths:
           description: ''
   /api/auth/register/:
     post:
-      operationId: auth_register_create
+      operationId: api_auth_register_create
       description: ユーザー新規登録
       tags:
-      - auth
+      - api
       requestBody:
         content:
           application/json:
@@ -76,9 +76,9 @@ paths:
           description: ''
   /api/exhibits/:
     get:
-      operationId: exhibits_list
+      operationId: api_exhibits_list
       tags:
-      - exhibits
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -91,9 +91,9 @@ paths:
                   $ref: '#/components/schemas/Exhibit'
           description: ''
     post:
-      operationId: exhibits_create
+      operationId: api_exhibits_create
       tags:
-      - exhibits
+      - api
       requestBody:
         content:
           application/json:
@@ -117,7 +117,7 @@ paths:
           description: ''
   /api/exhibits/{id}/:
     get:
-      operationId: exhibits_retrieve
+      operationId: api_exhibits_retrieve
       parameters:
       - in: path
         name: id
@@ -127,7 +127,7 @@ paths:
         description: A UUID string identifying this exhibit.
         required: true
       tags:
-      - exhibits
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -138,7 +138,7 @@ paths:
                 $ref: '#/components/schemas/Exhibit'
           description: ''
     put:
-      operationId: exhibits_update
+      operationId: api_exhibits_update
       parameters:
       - in: path
         name: id
@@ -148,7 +148,7 @@ paths:
         description: A UUID string identifying this exhibit.
         required: true
       tags:
-      - exhibits
+      - api
       requestBody:
         content:
           application/json:
@@ -171,7 +171,7 @@ paths:
                 $ref: '#/components/schemas/Exhibit'
           description: ''
     patch:
-      operationId: exhibits_partial_update
+      operationId: api_exhibits_partial_update
       parameters:
       - in: path
         name: id
@@ -181,7 +181,7 @@ paths:
         description: A UUID string identifying this exhibit.
         required: true
       tags:
-      - exhibits
+      - api
       requestBody:
         content:
           application/json:
@@ -203,7 +203,7 @@ paths:
                 $ref: '#/components/schemas/Exhibit'
           description: ''
     delete:
-      operationId: exhibits_destroy
+      operationId: api_exhibits_destroy
       parameters:
       - in: path
         name: id
@@ -213,7 +213,7 @@ paths:
         description: A UUID string identifying this exhibit.
         required: true
       tags:
-      - exhibits
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -221,9 +221,9 @@ paths:
           description: No response body
   /api/galleries/:
     get:
-      operationId: galleries_list
+      operationId: api_galleries_list
       tags:
-      - galleries
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -236,9 +236,9 @@ paths:
                   $ref: '#/components/schemas/Gallery'
           description: ''
     post:
-      operationId: galleries_create
+      operationId: api_galleries_create
       tags:
-      - galleries
+      - api
       requestBody:
         content:
           application/json:
@@ -261,7 +261,7 @@ paths:
           description: ''
   /api/galleries/{gallery_id}/exhibits/:
     post:
-      operationId: galleries_exhibits_create
+      operationId: api_galleries_exhibits_create
       description: 'ネスト型: Exhibit追加（空枠に追加）'
       parameters:
       - in: path
@@ -271,7 +271,7 @@ paths:
           format: uuid
         required: true
       tags:
-      - galleries
+      - api
       requestBody:
         content:
           application/json:
@@ -304,7 +304,7 @@ paths:
           description: Slot already occupied
   /api/galleries/{gallery_id}/exhibits/{slot_index}/:
     put:
-      operationId: galleries_exhibits_update
+      operationId: api_galleries_exhibits_update
       description: 'ネスト型: slot_index 指定で作成 or 置換（推奨）'
       parameters:
       - in: path
@@ -319,7 +319,7 @@ paths:
           type: integer
         required: true
       tags:
-      - galleries
+      - api
       requestBody:
         content:
           application/json:
@@ -355,7 +355,7 @@ paths:
         '403':
           description: Forbidden
     delete:
-      operationId: galleries_exhibits_destroy
+      operationId: api_galleries_exhibits_destroy
       description: 'ネスト型: slot_index 指定で作成 or 置換（推奨）'
       parameters:
       - in: path
@@ -370,7 +370,7 @@ paths:
           type: integer
         required: true
       tags:
-      - galleries
+      - api
       security:
       - jwtAuth: []
       - {}
@@ -385,7 +385,7 @@ paths:
           description: Not found
   /api/galleries/{id}/:
     get:
-      operationId: galleries_retrieve
+      operationId: api_galleries_retrieve
       parameters:
       - in: path
         name: id
@@ -395,7 +395,7 @@ paths:
         description: A UUID string identifying this gallery.
         required: true
       tags:
-      - galleries
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -406,7 +406,7 @@ paths:
                 $ref: '#/components/schemas/Gallery'
           description: ''
     put:
-      operationId: galleries_update
+      operationId: api_galleries_update
       parameters:
       - in: path
         name: id
@@ -416,7 +416,7 @@ paths:
         description: A UUID string identifying this gallery.
         required: true
       tags:
-      - galleries
+      - api
       requestBody:
         content:
           application/json:
@@ -438,7 +438,7 @@ paths:
                 $ref: '#/components/schemas/Gallery'
           description: ''
     patch:
-      operationId: galleries_partial_update
+      operationId: api_galleries_partial_update
       parameters:
       - in: path
         name: id
@@ -448,7 +448,7 @@ paths:
         description: A UUID string identifying this gallery.
         required: true
       tags:
-      - galleries
+      - api
       requestBody:
         content:
           application/json:
@@ -470,7 +470,7 @@ paths:
                 $ref: '#/components/schemas/Gallery'
           description: ''
     delete:
-      operationId: galleries_destroy
+      operationId: api_galleries_destroy
       parameters:
       - in: path
         name: id
@@ -480,7 +480,7 @@ paths:
         description: A UUID string identifying this gallery.
         required: true
       tags:
-      - galleries
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -488,7 +488,7 @@ paths:
           description: No response body
   /api/galleries/g/{slug}/:
     get:
-      operationId: galleries_g_retrieve
+      operationId: api_galleries_g_retrieve
       parameters:
       - in: path
         name: slug
@@ -496,7 +496,7 @@ paths:
           type: string
         required: true
       tags:
-      - galleries
+      - api
       security:
       - jwtAuth: []
       - {}
@@ -509,7 +509,7 @@ paths:
           description: ''
   /api/guest/gallery/:
     get:
-      operationId: guest_gallery_retrieve
+      operationId: api_guest_gallery_retrieve
       description: |-
         Guest 用: 1ゲスト=1ギャラリー を前提にした入口
 
@@ -518,7 +518,7 @@ paths:
         - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
         - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
       tags:
-      - guest
+      - api
       security:
       - jwtAuth: []
       - {}
@@ -534,7 +534,7 @@ paths:
         '404':
           description: Not found
     post:
-      operationId: guest_gallery_create
+      operationId: api_guest_gallery_create
       description: |-
         Guest 用: 1ゲスト=1ギャラリー を前提にした入口
 
@@ -543,7 +543,7 @@ paths:
         - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
         - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
       tags:
-      - guest
+      - api
       requestBody:
         content:
           application/json:
@@ -576,7 +576,7 @@ paths:
         '401':
           description: Not Authenticated
     patch:
-      operationId: guest_gallery_partial_update
+      operationId: api_guest_gallery_partial_update
       description: |-
         Guest 用: 1ゲスト=1ギャラリー を前提にした入口
 
@@ -585,7 +585,7 @@ paths:
         - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
         - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
       tags:
-      - guest
+      - api
       requestBody:
         content:
           application/json:
@@ -614,7 +614,7 @@ paths:
         '404':
           description: Not found
     delete:
-      operationId: guest_gallery_destroy
+      operationId: api_guest_gallery_destroy
       description: |-
         Guest 用: 1ゲスト=1ギャラリー を前提にした入口
 
@@ -623,7 +623,7 @@ paths:
         - PATCH /api/guest/gallery/ : 自分の Gallery を更新（title/is_public/layoutなど）
         - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
       tags:
-      - guest
+      - api
       security:
       - jwtAuth: []
       - {}
@@ -634,12 +634,28 @@ paths:
           description: Not Authenticated
         '404':
           description: Not found
+  /api/image/rembg/{model_name}/:
+    post:
+      operationId: api_image_rembg_create
+      parameters:
+      - in: path
+        name: model_name
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          description: No response body
   /api/me/:
     get:
-      operationId: me_retrieve
+      operationId: api_me_retrieve
       description: 自分のプロフィール取得・更新
       tags:
-      - me
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -650,10 +666,10 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     put:
-      operationId: me_update
+      operationId: api_me_update
       description: 自分のプロフィール取得・更新
       tags:
-      - me
+      - api
       requestBody:
         content:
           application/json:
@@ -676,10 +692,10 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     patch:
-      operationId: me_partial_update
+      operationId: api_me_partial_update
       description: 自分のプロフィール取得・更新
       tags:
-      - me
+      - api
       requestBody:
         content:
           application/json:
@@ -702,9 +718,9 @@ paths:
           description: ''
   /api/notebooks/:
     get:
-      operationId: notebooks_list
+      operationId: api_notebooks_list
       tags:
-      - notebooks
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -717,9 +733,9 @@ paths:
                   $ref: '#/components/schemas/Notebook'
           description: ''
     post:
-      operationId: notebooks_create
+      operationId: api_notebooks_create
       tags:
-      - notebooks
+      - api
       requestBody:
         content:
           application/json:
@@ -743,7 +759,7 @@ paths:
           description: ''
   /api/notebooks/{id}/:
     get:
-      operationId: notebooks_retrieve
+      operationId: api_notebooks_retrieve
       parameters:
       - in: path
         name: id
@@ -753,7 +769,7 @@ paths:
         description: A UUID string identifying this notebook.
         required: true
       tags:
-      - notebooks
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -764,7 +780,7 @@ paths:
                 $ref: '#/components/schemas/Notebook'
           description: ''
     put:
-      operationId: notebooks_update
+      operationId: api_notebooks_update
       parameters:
       - in: path
         name: id
@@ -774,7 +790,7 @@ paths:
         description: A UUID string identifying this notebook.
         required: true
       tags:
-      - notebooks
+      - api
       requestBody:
         content:
           application/json:
@@ -797,7 +813,7 @@ paths:
                 $ref: '#/components/schemas/Notebook'
           description: ''
     patch:
-      operationId: notebooks_partial_update
+      operationId: api_notebooks_partial_update
       parameters:
       - in: path
         name: id
@@ -807,7 +823,7 @@ paths:
         description: A UUID string identifying this notebook.
         required: true
       tags:
-      - notebooks
+      - api
       requestBody:
         content:
           application/json:
@@ -829,7 +845,7 @@ paths:
                 $ref: '#/components/schemas/Notebook'
           description: ''
     delete:
-      operationId: notebooks_destroy
+      operationId: api_notebooks_destroy
       parameters:
       - in: path
         name: id
@@ -839,7 +855,7 @@ paths:
         description: A UUID string identifying this notebook.
         required: true
       tags:
-      - notebooks
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -847,7 +863,7 @@ paths:
           description: No response body
   /api/notebooks/{id}/pages/:
     get:
-      operationId: notebooks_pages_retrieve
+      operationId: api_notebooks_pages_retrieve
       parameters:
       - in: path
         name: id
@@ -857,7 +873,7 @@ paths:
         description: A UUID string identifying this notebook.
         required: true
       tags:
-      - notebooks
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -869,9 +885,9 @@ paths:
           description: ''
   /api/pages/:
     get:
-      operationId: pages_list
+      operationId: api_pages_list
       tags:
-      - pages
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -884,9 +900,9 @@ paths:
                   $ref: '#/components/schemas/Page'
           description: ''
     post:
-      operationId: pages_create
+      operationId: api_pages_create
       tags:
-      - pages
+      - api
       requestBody:
         content:
           application/json:
@@ -910,7 +926,7 @@ paths:
           description: ''
   /api/pages/{id}/:
     get:
-      operationId: pages_retrieve
+      operationId: api_pages_retrieve
       parameters:
       - in: path
         name: id
@@ -920,7 +936,7 @@ paths:
         description: A UUID string identifying this page.
         required: true
       tags:
-      - pages
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -931,7 +947,7 @@ paths:
                 $ref: '#/components/schemas/Page'
           description: ''
     put:
-      operationId: pages_update
+      operationId: api_pages_update
       parameters:
       - in: path
         name: id
@@ -941,7 +957,7 @@ paths:
         description: A UUID string identifying this page.
         required: true
       tags:
-      - pages
+      - api
       requestBody:
         content:
           application/json:
@@ -964,7 +980,7 @@ paths:
                 $ref: '#/components/schemas/Page'
           description: ''
     patch:
-      operationId: pages_partial_update
+      operationId: api_pages_partial_update
       parameters:
       - in: path
         name: id
@@ -974,7 +990,7 @@ paths:
         description: A UUID string identifying this page.
         required: true
       tags:
-      - pages
+      - api
       requestBody:
         content:
           application/json:
@@ -996,7 +1012,7 @@ paths:
                 $ref: '#/components/schemas/Page'
           description: ''
     delete:
-      operationId: pages_destroy
+      operationId: api_pages_destroy
       parameters:
       - in: path
         name: id
@@ -1006,7 +1022,7 @@ paths:
         description: A UUID string identifying this page.
         required: true
       tags:
-      - pages
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -1014,9 +1030,9 @@ paths:
           description: No response body
   /api/schedules/:
     get:
-      operationId: schedules_list
+      operationId: api_schedules_list
       tags:
-      - schedules
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -1029,9 +1045,9 @@ paths:
                   $ref: '#/components/schemas/Schedule'
           description: ''
     post:
-      operationId: schedules_create
+      operationId: api_schedules_create
       tags:
-      - schedules
+      - api
       requestBody:
         content:
           application/json:
@@ -1055,7 +1071,7 @@ paths:
           description: ''
   /api/schedules/{id}/:
     get:
-      operationId: schedules_retrieve
+      operationId: api_schedules_retrieve
       parameters:
       - in: path
         name: id
@@ -1065,7 +1081,7 @@ paths:
         description: A UUID string identifying this schedule.
         required: true
       tags:
-      - schedules
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -1076,7 +1092,7 @@ paths:
                 $ref: '#/components/schemas/Schedule'
           description: ''
     put:
-      operationId: schedules_update
+      operationId: api_schedules_update
       parameters:
       - in: path
         name: id
@@ -1086,7 +1102,7 @@ paths:
         description: A UUID string identifying this schedule.
         required: true
       tags:
-      - schedules
+      - api
       requestBody:
         content:
           application/json:
@@ -1109,7 +1125,7 @@ paths:
                 $ref: '#/components/schemas/Schedule'
           description: ''
     patch:
-      operationId: schedules_partial_update
+      operationId: api_schedules_partial_update
       parameters:
       - in: path
         name: id
@@ -1119,7 +1135,7 @@ paths:
         description: A UUID string identifying this schedule.
         required: true
       tags:
-      - schedules
+      - api
       requestBody:
         content:
           application/json:
@@ -1141,7 +1157,7 @@ paths:
                 $ref: '#/components/schemas/Schedule'
           description: ''
     delete:
-      operationId: schedules_destroy
+      operationId: api_schedules_destroy
       parameters:
       - in: path
         name: id
@@ -1151,7 +1167,7 @@ paths:
         description: A UUID string identifying this schedule.
         required: true
       tags:
-      - schedules
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -1159,9 +1175,9 @@ paths:
           description: No response body
   /api/stickers/:
     get:
-      operationId: stickers_list
+      operationId: api_stickers_list
       tags:
-      - stickers
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -1174,9 +1190,9 @@ paths:
                   $ref: '#/components/schemas/Sticker'
           description: ''
     post:
-      operationId: stickers_create
+      operationId: api_stickers_create
       tags:
-      - stickers
+      - api
       requestBody:
         content:
           application/json:
@@ -1200,7 +1216,7 @@ paths:
           description: ''
   /api/stickers/{id}/:
     get:
-      operationId: stickers_retrieve
+      operationId: api_stickers_retrieve
       parameters:
       - in: path
         name: id
@@ -1210,7 +1226,7 @@ paths:
         description: A UUID string identifying this sticker.
         required: true
       tags:
-      - stickers
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -1221,7 +1237,7 @@ paths:
                 $ref: '#/components/schemas/Sticker'
           description: ''
     put:
-      operationId: stickers_update
+      operationId: api_stickers_update
       parameters:
       - in: path
         name: id
@@ -1231,7 +1247,7 @@ paths:
         description: A UUID string identifying this sticker.
         required: true
       tags:
-      - stickers
+      - api
       requestBody:
         content:
           application/json:
@@ -1254,7 +1270,7 @@ paths:
                 $ref: '#/components/schemas/Sticker'
           description: ''
     patch:
-      operationId: stickers_partial_update
+      operationId: api_stickers_partial_update
       parameters:
       - in: path
         name: id
@@ -1264,7 +1280,7 @@ paths:
         description: A UUID string identifying this sticker.
         required: true
       tags:
-      - stickers
+      - api
       requestBody:
         content:
           application/json:
@@ -1286,7 +1302,7 @@ paths:
                 $ref: '#/components/schemas/Sticker'
           description: ''
     delete:
-      operationId: stickers_destroy
+      operationId: api_stickers_destroy
       parameters:
       - in: path
         name: id
@@ -1296,7 +1312,7 @@ paths:
         description: A UUID string identifying this sticker.
         required: true
       tags:
-      - stickers
+      - api
       security:
       - jwtAuth: []
       responses:
@@ -1304,12 +1320,12 @@ paths:
           description: No response body
   /api/token/:
     post:
-      operationId: token_create
+      operationId: api_token_create
       description: |-
         Takes a set of user credentials and returns an access and refresh JSON web
         token pair to prove the authentication of those credentials.
       tags:
-      - token
+      - api
       requestBody:
         content:
           application/json:
@@ -1331,12 +1347,12 @@ paths:
           description: ''
   /api/token/refresh/:
     post:
-      operationId: token_refresh_create
+      operationId: api_token_refresh_create
       description: |-
         Takes a refresh type JSON web token and returns an access type JSON web
         token if the refresh token is valid.
       tags:
-      - token
+      - api
       requestBody:
         content:
           application/json:
@@ -1358,7 +1374,7 @@ paths:
           description: ''
   /api/uploads/{action}/:
     post:
-      operationId: uploads_create
+      operationId: api_uploads_create
       description: S3アップロード用のURL発行または完了確認を行います。
       parameters:
       - in: path
@@ -1367,7 +1383,7 @@ paths:
           type: string
         required: true
       tags:
-      - uploads
+      - api
       requestBody:
         content:
           application/json:
@@ -1390,6 +1406,20 @@ paths:
               schema:
                 $ref: '#/components/schemas/UploadConfirm'
           description: ''
+  /health:
+    get:
+      operationId: health_retrieve
+      description: |-
+        Deep health check for operational monitoring.
+        - /healthz: shallow check (App Runner liveness) のまま維持
+        - /health : DB / S3 の deep check
+      tags:
+      - health
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
 components:
   schemas:
     AssetRef:
