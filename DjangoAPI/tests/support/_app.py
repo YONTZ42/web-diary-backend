@@ -18,13 +18,17 @@ Recommended env overrides:
 - REMBG_PROCESSOR_MODULE (default: <app>.services.rembg_processor)
 """
 
-APP_LABEL = os.getenv("MUSEUM_APP_LABEL", "museum")
+APP_LABEL = os.getenv("MUSEUM_APP_LABEL", "MiniatureMuseum")
+APP_LABEL_CORE = os.getenv("MUSEUM_APP_LABEL_CORE", "core")
+APP_LABEL_REMBG = os.getenv("MUSEUM_APP_LABEL_REMBG", "rembg")
+
+
 VIEWS_CORE_MODULE = os.getenv("VIEWS_CORE_MODULE", f"{APP_LABEL}.views")
-VIEWS_AUTH_MODULE = os.getenv("VIEWS_AUTH_MODULE", f"{APP_LABEL}.views_auth")
-VIEWS_UPLOAD_MODULE = os.getenv("VIEWS_UPLOAD_MODULE", f"{APP_LABEL}.views_upload")
-VIEWS_REMBG_MODULE = os.getenv("VIEWS_REMBG_MODULE", f"{APP_LABEL}.views_rembg")
+VIEWS_AUTH_MODULE = os.getenv("VIEWS_AUTH_MODULE", f"{APP_LABEL_CORE}.views_auth")
+VIEWS_UPLOAD_MODULE = os.getenv("VIEWS_UPLOAD_MODULE", f"{APP_LABEL_CORE}.views_upload")
+VIEWS_REMBG_MODULE = os.getenv("VIEWS_REMBG_MODULE", f"{APP_LABEL_REMBG}.views_rembg")
 REMBG_PROCESSOR_MODULE = os.getenv(
-    "REMBG_PROCESSOR_MODULE", f"{APP_LABEL}.services.rembg_processor"
+    "REMBG_PROCESSOR_MODULE", f"{APP_LABEL_REMBG}.services.rembg_processor"
 )
 
 
