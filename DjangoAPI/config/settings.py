@@ -233,6 +233,8 @@ REST_FRAMEWORK = {
         "MiniatureMuseum.throttles.SustainedUserOrGuestThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {
+        'anon': '100/minute',  # 認証していないユーザー用
+        'user': '100/minute', # 認証済みユーザー用
         "burst_user_or_guest": "60/min",
         "sustained_user_or_guest": "1000/day",
         "guest_issue": "50/hour",

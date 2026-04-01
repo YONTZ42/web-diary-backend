@@ -56,7 +56,6 @@ class RembgProcessView(APIView):
         except UnicodeDecodeError:
             log_exception(
                 logger,
-                event="rembg_input_decode_failed",
                 message="failed to decode request body",
                 error_code="REMBG_INVALID_UTF8_BODY",
                 status_code=400,
@@ -65,7 +64,6 @@ class RembgProcessView(APIView):
 
         logger.info(
             "rembg request started",
-            event="rembg_request_started",
             status_code=None,
         )
 
