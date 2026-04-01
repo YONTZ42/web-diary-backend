@@ -8,6 +8,8 @@ from tests.factories import GalleryFactory, UserFactory
 from tests.support._app import VIEWS_CORE_MODULE, VIEWS_UPLOAD_MODULE, import_attr
 
 
+pytestmark = pytest.mark.django_db
+
 @pytest.fixture
 def rf():
     return APIRequestFactory()
@@ -25,7 +27,6 @@ def _set_user(request, user):
     request.user = user
     return request
 
-
 def test_gallery_actor_prefers_authenticated_user_over_guest_header(rf):
     mixin = _DummyMixin()
     user = UserFactory()
@@ -35,7 +36,6 @@ def test_gallery_actor_prefers_authenticated_user_over_guest_header(rf):
 
     assert mode == "user"
     assert ident == user
-
 
 def test_gallery_actor_uses_guest_header_for_anonymous_request(rf):
     mixin = _DummyMixin()

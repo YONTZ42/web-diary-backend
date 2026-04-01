@@ -17,6 +17,7 @@ class ExhibitSerializer(serializers.ModelSerializer):
     class Meta:
         model = Exhibit
         fields = (
+            'user_style',
             'id',
             'gallery',
             'owner',
@@ -69,6 +70,7 @@ class GallerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Gallery
         fields = (
+            'user_style',
             'id',
             'slug',
             'user_style',   # "user" | "guest"（※モデル側に追加が必要）
