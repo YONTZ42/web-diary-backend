@@ -50,7 +50,7 @@ def bind_logger(logger, **fields: Any):
 def log_exception(
     logger,
     *,
-    event: str,
+    event_type: str,
     message: str,
     error_code: str,
     status_code: int | None = 500,
@@ -58,7 +58,7 @@ def log_exception(
 ) -> None:
     logger.exception(
         message,
-        event=event,
+        event_type=event_type,
         error_code=error_code,
         status_code=status_code,
         **fields,

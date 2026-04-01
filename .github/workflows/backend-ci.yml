@@ -27,6 +27,7 @@ jobs:
       matrix:
         suite: [unit, api, smoke]
 
+
     services:
       postgres:
         image: postgres:17

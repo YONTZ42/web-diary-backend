@@ -64,7 +64,7 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
     except Exception:
         log_exception(
             logger,
-            event="rembg_input_decode_failed",
+            event_type="rembg_input_decode_failed",
             message="failed to parse request body",
             error_code="REMBG_INVALID_JSON",
             status_code=400,
@@ -110,7 +110,7 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
     except Exception:
         log_exception(
             logger.bind(input_source=input_source),
-            event="rembg_image_fetch_failed",
+            event_type="rembg_image_fetch_failed",
             message="failed to load input image",
             error_code="REMBG_IMAGE_FETCH_FAILED",
             status_code=400,
@@ -136,7 +136,7 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
     except Exception:
         log_exception(
             logger.bind(input_source=input_source, source_image_size_bytes=source_image_size_bytes),
-            event="rembg_model_init_failed",
+            event_type ="rembg_model_init_failed",
             message="failed to initialize rembg session",
             error_code="REMBG_MODEL_INIT_FAILED",
             status_code=500,
@@ -160,7 +160,7 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
         traceback.print_exc()
         log_exception(
             logger.bind(input_source=input_source, source_image_size_bytes=source_image_size_bytes),
-            event="rembg_inference_failed",
+            event_type="rembg_inference_failed",
             message="rembg inference failed",
             error_code="REMBG_INFERENCE_FAILED",
             status_code=500,
@@ -186,7 +186,7 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
                 s3_bucket=DEFAULT_BUCKET,
                 s3_key=key,
             ),
-            event="rembg_s3_put_failed",
+            event_type="rembg_s3_put_failed",
             message="failed to put rembg output to S3",
             error_code="REMBG_S3_PUT_FAILED",
             status_code=500,

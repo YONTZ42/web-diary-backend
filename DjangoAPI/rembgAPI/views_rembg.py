@@ -56,7 +56,7 @@ class RembgProcessView(APIView):
         except UnicodeDecodeError:
             log_exception(
                 logger,
-                event="rembg_input_decode_failed",
+                event_type="rembg_input_decode_failed",
                 message="failed to decode request body",
                 error_code="REMBG_INVALID_UTF8_BODY",
                 status_code=400,
@@ -73,7 +73,7 @@ class RembgProcessView(APIView):
         except json.JSONDecodeError:
             log_exception(
                 logger,
-                event="rembg_input_decode_failed",
+                event_type="rembg_input_decode_failed",
                 message="failed to parse request json",
                 error_code="REMBG_INVALID_JSON",
                 status_code=400,
@@ -111,7 +111,7 @@ class RembgProcessView(APIView):
             duration_ms = int((time.perf_counter() - started_at) * 1000)
             log_exception(
                 logger.bind(input_source=input_source, duration_ms=duration_ms),
-                event="rembg_processing_failed",
+                event_type="rembg_processing_failed",
                 message="rembg request failed",
                 error_code="REMBG_REQUEST_FAILED",
                 status_code=500,
