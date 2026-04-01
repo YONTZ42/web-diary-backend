@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 
+from DjangoAPI.config import settings
 import boto3
 import pytest
 from moto import mock_aws
@@ -62,24 +63,33 @@ def guest_client(guest_headers) -> APIClient:
 
 @pytest.fixture
 def s3_env(settings):
+    region = "ap-northeast-1"
     settings.AWS_STORAGE_BUCKET_NAME = "test-bucket"
-    settings.AWS_S3_REGION_NAME = "us-east-1"
-    settings.AWS_REGION = "us-east-1"
-    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
+    settings.AWS_S3_REGION_NAME = region
+    settings.AWS_REGION = region
+
+# boto3クライアントが参照する環境変数をテスト用に固定する
+    os.environ["AWS_DEFAULT_REGION"] = region
+    os.environ["AWS_ACCESS_KEY_ID"] = "testing"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "testing"
+    os.environ["AWS_SECURITY_TOKEN"] = "testing"
+    os.environ["AWS_SESSION_TOKEN"] = "testing"
+    
     yield settings
 
-
+    
 @pytest.fixture
 def mocked_s3(s3_env):
     with mock_aws():
         region = s3_env.AWS_S3_REGION_NAME
         bucket = s3_env.AWS_STORAGE_BUCKET_NAME
         s3 = boto3.client("s3", region_name=region)
-        if region == "us-east-1":
-            s3.create_bucket(Bucket=bucket)
+
+        config = {"LocationConstraint": region} if region != "us-east-1" else {} 
+        
+        if config:
+            s3.create_bucket(Bucket=bucket, CreateBucketConfiguration=config)
         else:
-            s3.create_bucket(
-                Bucket=bucket,
-                CreateBucketConfiguration={"LocationConstraint": region},
-            )
+            s3.create_bucket(Bucket=bucket)
+            
         yield s3
