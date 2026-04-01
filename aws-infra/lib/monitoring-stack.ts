@@ -41,7 +41,7 @@ export class MonitoringStack extends Stack {
 
     const alarmAction = new cwActions.SnsAction(this.alarmTopic);
     const allAlarms: cloudwatch.IAlarm[] = [];
-    const lambdaAlarm: cloudwatch.IAlarm[] = [];
+    const lambdaAlarms: cloudwatch.IAlarm[] = [];
     const appRunnerAlarms: cloudwatch.IAlarm[] = [];
 
     this.dashboard = new cloudwatch.Dashboard(this, "ObservabilityDashboard", {
@@ -94,7 +94,7 @@ export class MonitoringStack extends Stack {
       errorAlarm.addAlarmAction(alarmAction);
       errorAlarm.addOkAction(alarmAction);
       allAlarms.push(errorAlarm);
-      lambdaAlarm.push(errorAlarm);
+      lambdaAlarms.push(errorAlarm);
 
       const durationWarningAlarm = new cloudwatch.Alarm(this, `${fn.node.id}DurationWarningAlarm`, {
         alarmName: `${props.projectName}-${props.stage}-${fn.functionName}-duration-warning`,
@@ -111,7 +111,7 @@ export class MonitoringStack extends Stack {
       durationWarningAlarm.addAlarmAction(alarmAction);
       durationWarningAlarm.addOkAction(alarmAction);
       allAlarms.push(durationWarningAlarm);
-      lambdaAlarm.push(durationWarningAlarm);
+      lambdaAlarms.push(durationWarningAlarm);
 
       const durationCriticalAlarm = new cloudwatch.Alarm(this, `${fn.node.id}DurationCriticalAlarm`, {
         alarmName: `${props.projectName}-${props.stage}-${fn.functionName}-duration-critical`,
@@ -128,6 +128,7 @@ export class MonitoringStack extends Stack {
       durationCriticalAlarm.addAlarmAction(alarmAction);
       durationCriticalAlarm.addOkAction(alarmAction);
       allAlarms.push(durationCriticalAlarm);
+      lambdaAlarms.push(durationCriticalAlarm);
 
       const throttleAlarm = new cloudwatch.Alarm(this, `${fn.node.id}ThrottlesAlarm`, {
         alarmName: `${props.projectName}-${props.stage}-${fn.functionName}-throttles`,
@@ -144,6 +145,7 @@ export class MonitoringStack extends Stack {
       throttleAlarm.addAlarmAction(alarmAction);
       throttleAlarm.addOkAction(alarmAction);
       allAlarms.push(throttleAlarm);
+      lambdaAlarms.push(throttleAlarm);
 
       lambdaDurationMetrics.push(
         fn.metricDuration({
@@ -182,8 +184,7 @@ export class MonitoringStack extends Stack {
         })
       );
     }
-
-    this.dashboard.addWidgets(
+    const lambdaWidgets: cloudwatch.IWidget[] = [
       new cloudwatch.TextWidget({
         width: 24,
         height: 1,
@@ -219,13 +220,21 @@ export class MonitoringStack extends Stack {
           min: 0,
         },
       }),
-      new cloudwatch.AlarmStatusWidget({
-        title: "Lambda Alarm Status",
-        width: 12,
-        height: 6,
-        alarms: allAlarms.filter((a) => a.alarmName.includes("-errors") || a.alarmName.includes("-duration") || a.alarmName.includes("-throttles")),
-      })
-    );
+    ];
+
+    if (lambdaAlarms.length > 0) {
+      lambdaWidgets.push(
+        new cloudwatch.AlarmStatusWidget({
+          title: "Lambda Alarm Status",
+          width: 12,
+          height: 6,
+          alarms: lambdaAlarms,
+        })
+      );
+    }
+
+    this.dashboard.addWidgets(...lambdaWidgets);
+
 
     // ----------------------------
     // App Runner alarms + widgets
@@ -327,6 +336,7 @@ export class MonitoringStack extends Stack {
       appRunner5xxAlarm.addAlarmAction(alarmAction);
       appRunner5xxAlarm.addOkAction(alarmAction);
       allAlarms.push(appRunner5xxAlarm);
+      appRunnerAlarms.push(appRunner5xxAlarm);
 
       const appRunnerLatencyWarning = new cloudwatch.Alarm(this, "AppRunnerLatencyWarningAlarm", {
         alarmName: `${props.projectName}-${props.stage}-apprunner-latency-warning`,
@@ -340,6 +350,7 @@ export class MonitoringStack extends Stack {
       appRunnerLatencyWarning.addAlarmAction(alarmAction);
       appRunnerLatencyWarning.addOkAction(alarmAction);
       allAlarms.push(appRunnerLatencyWarning);
+      appRunnerAlarms.push(appRunnerLatencyWarning);
 
       const appRunnerLatencyCritical = new cloudwatch.Alarm(this, "AppRunnerLatencyCriticalAlarm", {
         alarmName: `${props.projectName}-${props.stage}-apprunner-latency-critical`,
@@ -353,8 +364,9 @@ export class MonitoringStack extends Stack {
       appRunnerLatencyCritical.addAlarmAction(alarmAction);
       appRunnerLatencyCritical.addOkAction(alarmAction);
       allAlarms.push(appRunnerLatencyCritical);
+      appRunnerAlarms.push(appRunnerLatencyCritical);
 
-      this.dashboard.addWidgets(
+      const appRunnerWidgets: cloudwatch.IWidget[] = [
         new cloudwatch.TextWidget({
           width: 24,
           height: 1,
@@ -401,34 +413,37 @@ export class MonitoringStack extends Stack {
             min: 0,
           },
         }),
-        new cloudwatch.AlarmStatusWidget({
-          title: "App Runner Alarm Status",
+      ];
+
+      if (appRunnerAlarms.length > 0) {
+        appRunnerWidgets.push(
+          new cloudwatch.AlarmStatusWidget({
+            title: "App Runner Alarm Status",
+            width: 24,
+            height: 4,
+            alarms: appRunnerAlarms,
+          })
+        );
+      }
+
+      this.dashboard.addWidgets(...appRunnerWidgets);
+    }
+
+
+    if (allAlarms.length > 0) {
+      this.dashboard.addWidgets(
+        new cloudwatch.TextWidget({
           width: 24,
-          height: 4,
-          alarms: [
-            appRunner5xxAlarm,
-            appRunnerLatencyWarning,
-            appRunnerLatencyCritical,
-          ],
+          height: 1,
+          markdown: "## All Alarm Status",
+        }),
+        new cloudwatch.AlarmStatusWidget({
+          title: "All Alarm Status",
+          width: 24,
+          height: 8,
+          alarms: allAlarms,
         })
       );
     }
-
-    // ----------------------------
-    // All alarms summary
-    // ----------------------------
-    this.dashboard.addWidgets(
-      new cloudwatch.TextWidget({
-        width: 24,
-        height: 1,
-        markdown: "## All Alarm Status",
-      }),
-      new cloudwatch.AlarmStatusWidget({
-        title: "All Alarm Status",
-        width: 24,
-        height: 8,
-        alarms: allAlarms,
-      })
-    );
-  }
-}
+   }
+ }
