@@ -129,6 +129,7 @@ class UploadView(views.APIView):
         try:
             s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=session.s3_key)
         except:
+            print(f"S3 Check Failed: Bucket={settings.AWS_STORAGE_BUCKET_NAME}, Key={session.s3_key}") # ここで確認
             return Response({'error': 'File not found in S3'}, status=400)
 
         session.status = 'confirmed'
