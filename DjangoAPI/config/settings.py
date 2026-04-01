@@ -384,9 +384,12 @@ if SENTRY_DSN:
 
 
 # --- 4. AWS S3 Settings (Boto3用) ---
+if APP_ENV == "ci":
+    AWS_STORAGE_BUCKET_NAME = "test-bucket"  # CI環境用のバケット名
+else:
+    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default="dummy")
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID',default="dummy")
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY', default="dummy")
-AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME', default="dummy")
 AWS_S3_REGION_NAME = env('AWS_S3_REGION', default='ap-northeast-1')
 AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 CLOUDFRONT_DOMAIN = env("CLOUDFRONT_DOMAIN", default="dummy")  # 例: dxxxxxxx.cloudfront.net
@@ -397,14 +400,7 @@ raw_key = env("CLOUDFRONT_PRIVATE_KEY", default=None)
 CLOUDFRONT_PRIVATE_KEY = raw_key.replace('\\n', '\n') if raw_key else None
 CLOUDFRONT_URL_EXPIRES_SECONDS = int(env("CLOUDFRONT_URL_EXPIRES_SECONDS", default=3600))  # 署名付きURLの有効期限（秒）
 
-if APP_ENV == "ci":
-    AWS_STORAGE_BUCKET_NAME = "test-bucket"  # CI環境用のバケット名
 
-# S3のオブジェクトパラメータ設定
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400', # キャッシュ有効期限
-}
-##
 
 #DEFAULT_FILE_STORAGE = os.getenv('DEFAULT_FILE_STORAGE', 'django.core.files.storage.FileSystemStorage')
 AWS_S3_OBJECT_PARAMETERS = {

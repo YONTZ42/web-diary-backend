@@ -63,8 +63,9 @@ def guest_client(guest_headers) -> APIClient:
 @pytest.fixture
 def s3_env(settings):
     settings.AWS_STORAGE_BUCKET_NAME = "test-bucket"
-    settings.AWS_S3_REGION_NAME = os.getenv("AWS_DEFAULT_REGION", "ap-northeast-1")
-    settings.AWS_REGION = settings.AWS_S3_REGION_NAME
+    settings.AWS_S3_REGION_NAME = "us-east-1"
+    settings.AWS_REGION = "us-east-1"
+    os.environ["AWS_DEFAULT_REGION"] = "us-east-1"
     yield settings
 
 
@@ -74,8 +75,11 @@ def mocked_s3(s3_env):
         region = s3_env.AWS_S3_REGION_NAME
         bucket = s3_env.AWS_STORAGE_BUCKET_NAME
         s3 = boto3.client("s3", region_name=region)
-        s3.create_bucket(
-            Bucket=bucket,
-            CreateBucketConfiguration={"LocationConstraint": region},
-        )
+        if region == "us-east-1":
+            s3.create_bucket(Bucket=bucket)
+        else:
+            s3.create_bucket(
+                Bucket=bucket,
+                CreateBucketConfiguration={"LocationConstraint": region},
+            )
         yield s3
