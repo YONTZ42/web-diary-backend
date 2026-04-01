@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 
-from DjangoAPI.config import settings
+#from DjangoAPI.config import settings
 import boto3
 import pytest
 from moto import mock_aws
@@ -77,7 +77,7 @@ def s3_env(settings):
     
     yield settings
 
-    
+
 @pytest.fixture
 def mocked_s3(s3_env):
     with mock_aws():
