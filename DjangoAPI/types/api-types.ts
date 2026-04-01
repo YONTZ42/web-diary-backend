@@ -516,6 +516,7 @@ export interface components {
         };
         /** @description 展示物（編集/管理用）。画像はS3 URL（string）を想定。 */
         Exhibit: {
+            userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly id: string;
             /** Format: uuid */
@@ -574,10 +575,10 @@ export interface components {
         };
         /** @description ギャラリー（編集/管理用）。retrieveではexhibitsも返す。 */
         Gallery: {
+            userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly id: string;
             readonly slug: string;
-            userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly owner: string | null;
             readonly guestId: string | null;
@@ -681,6 +682,7 @@ export interface components {
         PageTypeEnum: "diary" | "schedule" | "free";
         /** @description 展示物（編集/管理用）。画像はS3 URL（string）を想定。 */
         PatchedExhibit: {
+            userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly id?: string;
             /** Format: uuid */
@@ -706,10 +708,10 @@ export interface components {
         };
         /** @description ギャラリー（編集/管理用）。retrieveではexhibitsも返す。 */
         PatchedGallery: {
+            userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly id?: string;
             readonly slug?: string;
-            userStyle?: components["schemas"]["UserStyleEnum"];
             /** Format: uuid */
             readonly owner?: string | null;
             readonly guestId?: string | null;
