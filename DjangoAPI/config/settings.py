@@ -397,6 +397,9 @@ raw_key = env("CLOUDFRONT_PRIVATE_KEY", default=None)
 CLOUDFRONT_PRIVATE_KEY = raw_key.replace('\\n', '\n') if raw_key else None
 CLOUDFRONT_URL_EXPIRES_SECONDS = int(env("CLOUDFRONT_URL_EXPIRES_SECONDS", default=3600))  # 署名付きURLの有効期限（秒）
 
+if APP_ENV == "ci":
+    AWS_STORAGE_BUCKET_NAME = "test-bucket"  # CI環境用のバケット名
+
 # S3のオブジェクトパラメータ設定
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400', # キャッシュ有効期限

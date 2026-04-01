@@ -64,7 +64,7 @@ class RembgProcessView(APIView):
             return Response({"error": "Invalid request body encoding"}, status=status.HTTP_400_BAD_REQUEST)
 
         logger.info(
-            "rembg request started",
+            event_type="rembg_request_started",
             status_code=None,
         )
 
@@ -121,14 +121,16 @@ class RembgProcessView(APIView):
         duration_ms = int((time.perf_counter() - started_at) * 1000)
         if duration_ms >= 5000:
             logger.warning(
-                "rembg request is slow",
+                event_type="rembg_request_slow",
+                message="rembg request is slow",
                 input_source=input_source,
                 duration_ms=duration_ms,
                 status_code=200,
             )
 
         logger.info(
-            "rembg request succeeded",
+            event_type="rembg_request_succeeded",
+            message="rembg request succeeded",
             input_source=input_source,
             duration_ms=duration_ms,
             status_code=200,

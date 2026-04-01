@@ -122,14 +122,14 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
     try:
         logger.info(
             "initializing rembg model session",
-            event="rembg_model_init_started",
+            event_type="rembg_model_init_started",
             input_source=input_source,
             source_image_size_bytes=source_image_size_bytes,
         )
         session = new_session(model_name)
         logger.info(
             "rembg model session initialized",
-            event="rembg_model_init_succeeded",
+            event_type="rembg_model_init_succeeded",
             input_source=input_source,
             source_image_size_bytes=source_image_size_bytes,
         )
@@ -147,7 +147,7 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
     try:
         logger.info(
             "running rembg inference",
-            event="rembg_inference_started",
+            event_type="rembg_inference_started",
             input_source=input_source,
             source_image_size_bytes=source_image_size_bytes,
         )
@@ -196,7 +196,8 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
     duration_ms = int((time.perf_counter() - started_at) * 1000)
     logger.info(
         "rembg processing completed",
-        event="rembg_processing_succeeded",
+        event_type="rembg_processing_succeeded",
+        message="rembg processing completed successfully",
         input_source=input_source,
         source_image_size_bytes=source_image_size_bytes,
         s3_bucket=DEFAULT_BUCKET,
