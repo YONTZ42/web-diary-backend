@@ -64,7 +64,7 @@ class HealthView(APIView):
 
             log_exception(
                 logger,
-                event="health_dependency_failed",
+                event_type="health_dependency_failed",
                 message="database health check failed",
                 error_code="HEALTH_DB_FAILED",
                 dependency="db",
@@ -106,7 +106,7 @@ class HealthView(APIView):
 
                 log_exception(
                     logger,
-                    event="health_dependency_failed",
+                    event_type="health_dependency_failed",
                     message="s3 health check failed",
                     error_code="HEALTH_S3_FAILED",
                     dependency="s3",
