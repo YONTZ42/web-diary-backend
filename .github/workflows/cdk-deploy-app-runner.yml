@@ -4,7 +4,9 @@ on:
   push:
     branches: [develop] #production環境でmainブランチ
     paths:
-      - "DjangoAPI/**"
+      - "DjangoAPI/core/**"
+      - "DjangoAPI/config/**"
+      - "DjangoAPI/MiniatureMuseum/**"
       - "aws-infra/bin/aws-ecr.ts"
       - "aws-infra/bin/aws-app.ts"
       - "aws-infra/lib/ecr-stack.ts"
