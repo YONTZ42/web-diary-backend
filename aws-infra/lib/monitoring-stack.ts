@@ -41,6 +41,8 @@ export class MonitoringStack extends Stack {
 
     const alarmAction = new cwActions.SnsAction(this.alarmTopic);
     const allAlarms: cloudwatch.IAlarm[] = [];
+    const lambdaAlarm: cloudwatch.IAlarm[] = [];
+    const appRunnerAlarms: cloudwatch.IAlarm[] = [];
 
     this.dashboard = new cloudwatch.Dashboard(this, "ObservabilityDashboard", {
       dashboardName: `${props.projectName}-${props.stage}-observability`,
@@ -92,6 +94,7 @@ export class MonitoringStack extends Stack {
       errorAlarm.addAlarmAction(alarmAction);
       errorAlarm.addOkAction(alarmAction);
       allAlarms.push(errorAlarm);
+      lambdaAlarm.push(errorAlarm);
 
       const durationWarningAlarm = new cloudwatch.Alarm(this, `${fn.node.id}DurationWarningAlarm`, {
         alarmName: `${props.projectName}-${props.stage}-${fn.functionName}-duration-warning`,
@@ -108,6 +111,7 @@ export class MonitoringStack extends Stack {
       durationWarningAlarm.addAlarmAction(alarmAction);
       durationWarningAlarm.addOkAction(alarmAction);
       allAlarms.push(durationWarningAlarm);
+      lambdaAlarm.push(durationWarningAlarm);
 
       const durationCriticalAlarm = new cloudwatch.Alarm(this, `${fn.node.id}DurationCriticalAlarm`, {
         alarmName: `${props.projectName}-${props.stage}-${fn.functionName}-duration-critical`,
