@@ -121,6 +121,7 @@ class ExhibitUpsertSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             # 必須/任意はここで制御（MVPなら image_original_url 必須にするのが自然）
             "image_original_url": {"required": True, "allow_null": False},
+            "image_background_url": {"required": False, "allow_null": True, "allow_blank": True}, 
             "title": {"required": False, "allow_blank": True},
             "description": {"required": False, "allow_blank": True},
         }

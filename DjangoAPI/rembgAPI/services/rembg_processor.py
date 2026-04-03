@@ -193,6 +193,16 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
         )
         raise
 
+    try:
+        presigned_url = s3.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': DEFAULT_BUCKET, 'Key': key},
+            ExpiresIn=3600  # 3600秒 = 1時間
+        )
+    except Exception as e:
+        # URL生成に失敗した場合のログなど
+        presigned_url = None
+        
     duration_ms = int((time.perf_counter() - started_at) * 1000)
     logger.info(
         "rembg processing completed",
@@ -210,4 +220,5 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
         "success": True,
         "bucket": DEFAULT_BUCKET,
         "key": key,
+        "processed_url": presigned_url,
     }
