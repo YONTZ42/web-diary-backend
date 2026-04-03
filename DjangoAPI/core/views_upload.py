@@ -73,7 +73,7 @@ class UploadView(views.APIView):
 
         # Presigned URL生成
         s3 = boto3.client('s3', 
-            config=Config(signature_version='s4'),
+            config=Config(signature_version='s3v4'),
             region_name=settings.AWS_S3_REGION_NAME
         )
         url = s3.generate_presigned_url(
@@ -123,7 +123,7 @@ class UploadView(views.APIView):
 
         # S3上の存在確認（Head Object）
         s3 = boto3.client('s3', 
-            config=Config(signature_version='s4'),
+            config=Config(signature_version='s3v4'),
             region_name=settings.AWS_S3_REGION_NAME
         )
         try:
