@@ -301,9 +301,52 @@ class GalleryViewSet(viewsets.ModelViewSet):
     serializer_class = GallerySerializer
     permission_classes = [IsAuthenticated]
 
+    def _get_gallery(self, guest_id: str):
+        return Gallery.objects.filter(
+            user_style='guest',
+            guest_id=guest_id,
+            deleted_at__isnull=True,
+        ).first()
+
+    def _generate_unique_slug(self) -> str:
+        # 16桁ランダム（衝突時リトライ）
+        for _ in range(10):
+            s = uuid.uuid4().hex[:16]
+            if not Gallery.objects.filter(slug=s).exists():
+                return s
+        # さすがに衝突し続けない想定だが保険
+        return uuid.uuid4().hex
+
     def get_queryset(self):
         return Gallery.objects.filter(owner=self.request.user, deleted_at__isnull=True).order_by('-updated_at')
+   
+    def list(self, request, *args, **kwargs):
+        """
+        一覧取得時にギャラリーが1つもなければ自動作成して返す
+        """
+        queryset = self.get_queryset()
+        
+        if not queryset.exists():
+            # request.user に紐づく初期ギャラリーを作成
+            Gallery.objects.create(
+                user_style='user',
+                owner=request.user,
+                guest_id=None,  # モデル制約に従い明示的にNone
+                title='SHELF',
+                slug=self._generate_unique_slug()
+            )
+            # 作成後にクエリセットを再評価
+            queryset = self.get_queryset()
 
+        # 以降は通常の list 処理
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
     def perform_create(self, serializer):
         serializer.save(
             user_style='user',
