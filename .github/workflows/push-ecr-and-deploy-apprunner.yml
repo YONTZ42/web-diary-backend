@@ -2,7 +2,7 @@ name: Deploy to App Runner
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop ]
     paths:
       - 'DjangoAPI/**/*.py' # Python関連が変わった時だけ実行
       - 'DjangoAPI/Dockerfile'
@@ -18,7 +18,6 @@ on:
 permissions:
   id-token: write
   contents: read
-
 
 
 jobs:
@@ -49,6 +48,6 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
 
       - name: Deploy to App Runner
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/develop' # developブランチへのpushのときだけ実行
         run: |
-          aws apprunner start-deployment --service-arn ${{ secrets.APP_RUNNER_SERVICE_ARN }}
+          aws apprunner start-deployment --service-arn ${{ secrets.APPRUNNER_SERVICE_ARN }}

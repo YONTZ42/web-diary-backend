@@ -70,7 +70,7 @@ class GuestGalleryView(views.APIView):
     - DELETE /api/guest/gallery/ : 自分の Gallery を論理削除（削除後は再作成可）
     """
     permission_classes = [AllowAny]
-
+    
     def _require_guest_id(self, request) -> str:
         guest_id = request.headers.get('X-Guest-Id')
         if not guest_id:
@@ -105,7 +105,12 @@ class GuestGalleryView(views.APIView):
         guest_id = self._require_guest_id(request)
         gallery = self._get_gallery(guest_id)
         if not gallery:
-            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+            gallery = Gallery.objects.create(
+                guest_id=guest_id,
+                user_style='guest',
+                title='SHELF',
+                slug=self._generate_unique_slug()
+            )
         return Response(GallerySerializer(gallery, context={'request': request}).data, status=status.HTTP_200_OK)
 
     @extend_schema(

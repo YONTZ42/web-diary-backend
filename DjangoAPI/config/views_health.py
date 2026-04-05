@@ -87,7 +87,7 @@ class HealthView(APIView):
 
             logger.error(
                 "s3 health check failed because bucket is not configured",
-                event="health_dependency_failed",
+                message="health_dependency_failed",
                 component="django.health",
                 dependency="s3",
                 error_code="HEALTH_S3_BUCKET_NOT_CONFIGURED",
@@ -126,14 +126,14 @@ class HealthView(APIView):
 
         if status_code == 200:
             logger.info(
-                "deep health check passed",
+                "health_deep_check_passed",
                 component="django.health",
                 status_code=200,
                 checks=checks,
             )
         else:
             logger.warning(
-                "deep health check degraded",
+                "health_deep_check_degraded",
                 component="django.health",
                 status_code=503,
                 checks=checks,

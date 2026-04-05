@@ -4,14 +4,6 @@ on:
   push:
     branches: [develop] #production環境でmainブランチ
     paths:
-      - "DjangoAPI/core/**"
-      - "DjangoAPI/config/**"
-      - "DjangoAPI/MiniatureMuseum/**"
-      - "aws-infra/bin/aws-ecr.ts"
-      - "aws-infra/bin/aws-app.ts"
-      - "aws-infra/lib/ecr-stack.ts"
-      - "aws-infra/lib/apprunner-stack.ts"
-      - "aws-infra/lib/storage-stack.ts"
       - ".github/workflows/cdk-deploy-app-runner.yml"
   workflow_dispatch:
 
@@ -19,7 +11,7 @@ permissions:
   id-token: write
   contents: read
 
-  
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
