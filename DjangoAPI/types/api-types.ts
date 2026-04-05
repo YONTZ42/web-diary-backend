@@ -92,6 +92,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description 一覧取得時にギャラリーが1つもなければ自動作成して返す */
         get: operations["api_galleries_list"];
         put?: never;
         post: operations["api_galleries_create"];
