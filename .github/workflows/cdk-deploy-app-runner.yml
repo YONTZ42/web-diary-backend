@@ -15,18 +15,10 @@ on:
       - ".github/workflows/cdk-deploy-app-runner.yml"
   workflow_dispatch:
 
-
-
-
-
-
-
 permissions:
   id-token: write
   contents: read
-
-
-
+  
 jobs:
   deploy:
     runs-on: ubuntu-latest

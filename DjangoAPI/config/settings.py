@@ -140,27 +140,25 @@ else:
 
 if APP_ENV =="ci":
     SECURE_SSL_REDIRECT = False
-else:
+elif APP_ENV == "staging" or APP_ENV == "production":
     # 4. セキュリティ設定 (本番環境のみ有効化)
-    if not DEBUG:
-        # App RunnerはALB経由でHTTPSを受け取るため
-        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-        SECURE_SSL_REDIRECT = True
-        SESSION_COOKIE_SECURE = True
-        CSRF_COOKIE_SECURE = True
-        # HSTS設定
-        SECURE_HSTS_SECONDS = 31536000
-        SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-        SECURE_HSTS_PRELOAD = True
+    # App RunnerはALB経由でHTTPSを受け取るため
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    # HSTS設定
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
-        # 5. 静的ファイルの設定 (App Runner/S3用)
-        # App Runnerでは管理画面のCSSなどが消えやすいため、WhiteNoiseの利用も検討してください
-        STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
-    else:
-        STATIC_URL = '/static/'
-        # 2. collectstaticでファイルが集まる場所（コンテナ内のパス）
-        STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    # 5. 静的ファイルの設定 (App Runner/S3用)
+    # App Runnerでは管理画面のCSSなどが消えやすいため、WhiteNoiseの利用も検討してください
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+else:
+    STATIC_URL = '/static/'
+    # 2. collectstaticでファイルが集まる場所（コンテナ内のパス）
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 
