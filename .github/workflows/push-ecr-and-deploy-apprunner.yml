@@ -47,7 +47,7 @@ jobs:
       - name: Build, tag, and push image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: web-diary/backend-django
+          ECR_REPOSITORY: ${PROJECT_NAME}-${STAGE}
           CONTEXT_DIR: DjangoAPI
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:latest $CONTEXT_DIR
