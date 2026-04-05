@@ -59,6 +59,8 @@ jobs:
       - uses: aws-actions/amazon-ecr-login@v2
 
 
+
+
       - name: Build and push Django image
         env:
           IMAGE_TAG: ${{ github.sha }}
