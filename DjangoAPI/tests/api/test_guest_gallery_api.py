@@ -16,6 +16,13 @@ def test_guest_gallery_requires_header(api_client):
     assert response.status_code in {400, 401}
 
 
+def test_guest_gallery_get_at_least_one(api_client, guest_headers):
+    response = api_client.get(ENDPOINT, **guest_headers)
+
+    assert response.status_code == 200
+    assert "title" in response.data
+    assert response.data["user_style"] == "guest"
+
 def test_guest_gallery_post_creates_on_first_call(api_client, guest_headers):
     response = api_client.post(ENDPOINT, data={"title": "Guest Gallery"}, format="json", **guest_headers)
 
@@ -71,11 +78,13 @@ def test_guest_gallery_delete_soft_deletes(api_client, guest_headers, guest_id):
 
 
 def test_guest_gallery_get_returns_404_after_delete(api_client, guest_headers, guest_id):
-    GalleryFactory(as_guest=True, guest_id=guest_id, deleted_at=timezone.now())
+    gallery = GalleryFactory(as_guest=True, guest_id=guest_id, deleted_at=timezone.now())
 
+    #response は新しく生成されたgalleryを返す仕様に変更したため、404ではなく200になる
     response = api_client.get(ENDPOINT, **guest_headers)
-    assert response.status_code == 404
-
+    #slugはGalleryで一意、削除されたgalleryと異なればok
+    assert response.data["slug"] != gallery.slug
+    
 
 def test_guest_gallery_can_recreate_after_soft_delete(api_client, guest_headers, guest_id):
     GalleryFactory(as_guest=True, guest_id=guest_id, deleted_at=timezone.now())
