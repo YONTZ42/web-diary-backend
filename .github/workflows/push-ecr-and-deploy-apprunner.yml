@@ -50,8 +50,8 @@ jobs:
           ECR_REPOSITORY: ${PROJECT_NAME}-${STAGE}
           CONTEXT_DIR: DjangoAPI
         run: |
-          docker build -t $ECR_REGISTRY/${PROJECT_NAME}-${STAGE}:latest $CONTEXT_DIR
-          docker push $ECR_REGISTRY/${PROJECT_NAME}-${STAGE}:latest
+          docker build -t $ECR_REGISTRY/${PROJECT_NAME}-api-${STAGE}:latest $CONTEXT_DIR
+          docker push $ECR_REGISTRY/${PROJECT_NAME}-api-${STAGE}:latest
 
       - name: Deploy to App Runner
         if: github.ref == 'refs/heads/develop' # developブランチへのpushのときだけ実行
