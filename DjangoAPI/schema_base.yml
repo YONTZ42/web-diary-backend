@@ -222,6 +222,7 @@ paths:
   /api/galleries/:
     get:
       operationId: api_galleries_list
+      description: 一覧取得時にギャラリーが1つもなければ自動作成して返す
       tags:
       - api
       security:
