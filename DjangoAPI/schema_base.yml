@@ -1520,8 +1520,6 @@ components:
           nullable: true
         slotIndex:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         imageOriginalUrl:
           type: string
           format: uri
@@ -1620,8 +1618,6 @@ components:
       properties:
         slotIndex:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         title:
           type: string
           maxLength: 255
@@ -1674,12 +1670,8 @@ components:
           maxLength: 255
         layoutCols:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         layoutRows:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         isPublic:
           type: boolean
         coverRenderUrl:
@@ -1799,8 +1791,6 @@ components:
           readOnly: true
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -1868,8 +1858,6 @@ components:
             format: uuid
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -1942,8 +1930,6 @@ components:
           nullable: true
         slotIndex:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         imageOriginalUrl:
           type: string
           format: uri
@@ -2001,12 +1987,8 @@ components:
           maxLength: 255
         layoutCols:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         layoutRows:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         isPublic:
           type: boolean
         coverRenderUrl:
@@ -2044,8 +2026,6 @@ components:
           readOnly: true
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -2105,8 +2085,6 @@ components:
             format: uuid
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -2157,8 +2135,6 @@ components:
           $ref: '#/components/schemas/ExcalidrawSceneData'
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -2207,8 +2183,6 @@ components:
           description: タグの配列
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -2237,12 +2211,8 @@ components:
           type: boolean
         width:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         height:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         cropSource:
           nullable: true
         owner:
@@ -2304,8 +2274,6 @@ components:
           $ref: '#/components/schemas/ExcalidrawSceneData'
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -2371,8 +2339,6 @@ components:
           description: タグの配列
         schemaVersion:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         createdAt:
           type: string
           format: date-time
@@ -2401,12 +2367,8 @@ components:
           type: boolean
         width:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         height:
           type: integer
-          maximum: 2147483647
-          minimum: 0
         cropSource:
           nullable: true
         owner:
