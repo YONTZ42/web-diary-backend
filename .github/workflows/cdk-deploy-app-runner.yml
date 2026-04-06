@@ -61,7 +61,7 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t ${DJANGO_REPO_URI}:${IMAGE_TAG} ./DjangoAPI
+          docker build --no-cache -t ${DJANGO_REPO_URI}:${IMAGE_TAG} ./DjangoAPI
           docker tag ${DJANGO_REPO_URI}:${IMAGE_TAG} ${DJANGO_REPO_URI}:latest
           docker push ${DJANGO_REPO_URI}:${IMAGE_TAG}
           docker push ${DJANGO_REPO_URI}:latest
