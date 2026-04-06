@@ -64,7 +64,7 @@ export const config = {
   slackWorkspaceId: process.env.SLACK_WORKSPACE_ID ?? "",
   slackChannelId: process.env.SLACK_CHANNEL_ID ?? "",
 
-  skipDnsRegistration: optionalBool("SKIP_DNS_REGISTRATION", false),
+  skipDnsRegistration: optionalBool("SKIP_DNS_REGISTRATION", true),
 
   djangoEnv: {
     APP_ENV: process.env.APP_ENV ??"staging",
