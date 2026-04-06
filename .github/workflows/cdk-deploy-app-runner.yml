@@ -1,4 +1,4 @@
-name: deploy-app-runner
+name: cdk-deploy-app-runner
 
 on:
   push:

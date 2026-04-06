@@ -79,8 +79,8 @@ export class AppRunnerStack extends Stack {
         },
       },
       instanceConfiguration: {
-        cpu: "1524",
-        memory: "3072",
+        cpu: "2048",
+        memory: "4096",
         instanceRoleArn: instanceRole.roleArn,
       },
       healthCheckConfiguration: {
