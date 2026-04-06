@@ -41,6 +41,7 @@ jobs:
           role-session-name: gha-apprunner
 
 
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
