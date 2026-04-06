@@ -5,9 +5,6 @@ PORT="${PORT:-8080}"
 mkdir -p /app/staticfiles
 mkdir -p "${U2NET_HOME:-/app/.u2net}"
 
-echo "[migrating] migrate..."
-python manage.py migrate --noinput
-
 
 # ---------------------------------------------------
 

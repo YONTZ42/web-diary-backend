@@ -89,6 +89,7 @@ jobs:
 
 
 
+
           GIT_SHA: ${{ github.sha }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
