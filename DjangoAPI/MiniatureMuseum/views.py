@@ -93,6 +93,8 @@ class GuestGalleryView(views.APIView):
         # さすがに衝突し続けない想定だが保険
         return uuid.uuid4().hex
 
+
+
     @extend_schema(
         request=None,
         responses={
