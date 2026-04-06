@@ -19,6 +19,8 @@ from .services.rembg_processor import process_event
 from MiniatureMuseum.throttles import GuestIssueThrottle, RembgBurstThrottle, RembgSustainedThrottle
 
 
+
+
 @method_decorator(csrf_exempt, name="dispatch")
 class RembgProcessView(APIView):
     permission_classes=[]

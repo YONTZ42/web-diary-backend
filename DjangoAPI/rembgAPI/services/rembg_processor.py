@@ -50,6 +50,35 @@ ALLOWED_MODELS = {
         "birefnet-general-lite": "birefnet-general-lite"
     }
 
+from  threading import Lock
+from collections import OrderedDict
+_SESSION_CACHE: "OrderedDict[str, object]" = OrderedDict()
+_SESSION_LOCK = Lock()
+MAX_CACHED_MODELS = int(os.environ.get("MAX_CACHED_MODELS", "2"))
+_SESSION = None
+def get_session(model_name: str):
+    if model_name not in ALLOWED_MODELS:
+        raise ValueError(f"unsupported model: {model_name}")
+
+    with _SESSION_LOCK:
+        cached = _SESSION_CACHE.get(model_name)
+        if cached is not None:
+            _SESSION_CACHE.move_to_end(model_name)
+            return cached
+
+        session = new_session(
+            model_name=ALLOWED_MODELS[model_name],
+            providers=["CPUExecutionProvider"],
+        )
+        _SESSION_CACHE[model_name] = session
+        _SESSION_CACHE.move_to_end(model_name)
+
+        while len(_SESSION_CACHE) > MAX_CACHED_MODELS:
+            old_model, _old_session = _SESSION_CACHE.popitem(last=False)
+            # 明示的な close API がないなら参照を外すだけ
+        return session
+
+
 
 def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
     logger = logger or get_logger("django.rembg").bind(component="django.rembg")
@@ -77,8 +106,8 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
         or MODEL_NAME
     )
 
-
     request_context = event.get("requestContext", {}) or {}
+    
     logger = logger.bind(
         model_name=model_name,
         request_id=request_context.get("request_id"),
@@ -88,7 +117,6 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
 
     image_bytes = None
     input_source = "unknown"
-
     try:
         if params.get("image_data"):
             input_source = "image_data"
@@ -126,7 +154,7 @@ def process_event(event: dict[str, Any], *, logger=None) -> dict[str, Any]:
             input_source=input_source,
             source_image_size_bytes=source_image_size_bytes,
         )
-        session = new_session(model_name)
+        session = get_session(model_name)
         logger.info(
             "rembg model session initialized",
             event_type="rembg_model_init_succeeded",
