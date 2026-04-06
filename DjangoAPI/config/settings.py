@@ -77,6 +77,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'config.middleware.ExcludeHealthcheckFromSSLRedirectMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # ★これを追加
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -112,31 +113,19 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 database_url=env("DATABASE_URL" , default="")
-if APP_ENV =="local":
+if APP_ENV == "local":
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
         }
     }
 else:
-    if database_url:
-    # 3. データベース設定 (Neon対応)
-    # env.db() は DATABASE_URL = postgres://user:pass@host/db を自動解析します
-        DATABASES = {
-            'default': env.db('DATABASE_URL') 
-        }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'postgres',
-                'USER': 'postgres',
-                'PASSWORD': 'postgres',
-                'HOST': 'db',  # docker-compose.ymlのサービス名「db」を指定
-                'PORT': '5432',
-            }
-        }
+    if not database_url:
+        raise RuntimeError("DATABASE_URL is required in non-local environments")
+    DATABASES = {
+        "default": env.db("DATABASE_URL")
+    }
 
 
 if APP_ENV =="ci":

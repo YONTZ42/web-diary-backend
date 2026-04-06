@@ -15,6 +15,8 @@ AUTH_LOGGER = get_logger("django.auth")
 
 
 class RequestContextMiddleware:
+
+
     """
     - X-Request-Id を採用。無ければ生成
     - request_id / guest_id / user_id / path / method を structlog contextvars に bind
