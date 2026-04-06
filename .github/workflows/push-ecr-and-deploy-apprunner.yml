@@ -4,9 +4,6 @@ on:
   push:
     branches: [ develop ]
     paths:
-      - 'DjangoAPI/**/*.py' # Python関連が変わった時だけ実行
-      - 'DjangoAPI/Dockerfile'
-      - ".github/workflows/generate_schema.yml"
       - ".github/workflows/push-ecr-and-deploy-apprunner.yml"
 
 
