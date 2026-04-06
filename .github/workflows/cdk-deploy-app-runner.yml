@@ -70,7 +70,6 @@ jobs:
           docker push ${DJANGO_REPO_URI}:${IMAGE_TAG}
           docker push ${DJANGO_REPO_URI}:latest
 
-
       - name: Deploy AppRunner stack
         working-directory: ./aws-infra
         env:
