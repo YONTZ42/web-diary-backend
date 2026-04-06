@@ -105,6 +105,8 @@ jobs:
           SLACK_WORKSPACE_ID: ${{ secrets.SLACK_WORKSPACE_ID }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
 
+          SKIP_DNS_REGISTRATION: ${{ vars.SKIP_DNS_REGISTRATION }}
+          
         run: |
           npx cdk deploy \
             ${PROJECT_NAME}-${STAGE}-storage \
