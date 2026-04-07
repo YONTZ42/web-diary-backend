@@ -84,7 +84,7 @@ export class AppRunnerStack extends Stack {
         instanceRoleArn: instanceRole.roleArn,
       },
       healthCheckConfiguration: {
-        protocol: "TCP",
+        protocol: "HTTP",
         path: "/healthz",
         interval: 10,
         timeout: 5,
