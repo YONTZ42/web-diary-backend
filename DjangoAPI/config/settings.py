@@ -77,7 +77,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-    'config.middleware.ExcludeHealthcheckFromSSLRedirectMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware', # ★これを追加
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
