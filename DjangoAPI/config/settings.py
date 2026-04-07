@@ -141,6 +141,8 @@ elif APP_ENV == "staging" or APP_ENV == "production":
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
 
+    SECURE_REDIRECT_EXEMPT = [r"^healthz$"]
+
     # 5. 静的ファイルの設定 (App Runner/S3用)
     # App Runnerでは管理画面のCSSなどが消えやすいため、WhiteNoiseの利用も検討してください
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

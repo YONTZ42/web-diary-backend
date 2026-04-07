@@ -5,6 +5,7 @@ on:
     branches: [develop] #production環境でmainブランチ
     paths:
       - ".github/workflows/cdk-deploy-app-runner.yml"
+      - "./DjangoAPI/*"
   workflow_dispatch:
 
 
