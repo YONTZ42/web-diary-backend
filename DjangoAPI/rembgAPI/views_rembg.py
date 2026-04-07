@@ -14,7 +14,6 @@ from rest_framework import status
 
 from config.logging_utils import get_logger, bind_logger, log_exception
 
-from .services.rembg_processor import process_event
 
 from MiniatureMuseum.throttles import GuestIssueThrottle, RembgBurstThrottle, RembgSustainedThrottle
 
@@ -40,6 +39,8 @@ class RembgProcessView(APIView):
 
 
     def post(self, request: HttpRequest,model_name:str, *args, **kwargs) -> HttpResponse:
+        from .services.rembg_processor import process_event
+
         started_at = time.perf_counter()
         base_logger = get_logger("django.rembg")
         logger = bind_logger(
