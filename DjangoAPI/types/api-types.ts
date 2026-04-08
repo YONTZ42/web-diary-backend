@@ -445,7 +445,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description S3アップロード用のURL発行または完了確認を行います。 */
+        /**
+         * @description POST /api/uploads/issue/   -> URL発行
+         *     POST /api/uploads/confirm/ -> 完了確認
+         */
         post: operations["api_uploads_create"];
         delete?: never;
         options?: never;
@@ -841,13 +844,6 @@ export interface components {
             readonly subscriptionStatus?: string;
             plan?: string;
         };
-        /**
-         * @description * `sticker_png` - sticker_png
-         *     * `page_asset` - page_asset
-         *     * `exhibit_image` - exhibit_image
-         * @enum {string}
-         */
-        PurposeEnum: "sticker_png" | "page_asset" | "exhibit_image";
         Schedule: {
             /** Format: uuid */
             readonly id: string;
@@ -919,17 +915,6 @@ export interface components {
         TokenRefresh: {
             readonly access: string;
             refresh: string;
-        };
-        /** @description アップロード完了報告（クライアント→サーバー） */
-        UploadConfirm: {
-            /** Format: uuid */
-            uploadSessionId: string;
-        };
-        /** @description アップロード開始要求（クライアント→サーバー） */
-        UploadIssue: {
-            filename: string;
-            mimeType: string;
-            purpose: components["schemas"]["PurposeEnum"];
         };
         User: {
             /** Format: uuid */
@@ -2400,21 +2385,14 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["UploadIssue"];
-                "application/x-www-form-urlencoded": components["schemas"]["UploadIssue"];
-                "multipart/form-data": components["schemas"]["UploadIssue"];
-            };
-        };
+        requestBody?: never;
         responses: {
+            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["UploadConfirm"];
-                };
+                content?: never;
             };
         };
     };
