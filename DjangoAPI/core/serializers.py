@@ -83,17 +83,32 @@ class UploadIssueSerializer(serializers.Serializer):
     """アップロード開始要求（クライアント→サーバー）"""
     filename = serializers.CharField()
     mime_type = serializers.CharField()
-    purpose = serializers.CharField() # sticker, page_asset 等
     purpose = serializers.ChoiceField(choices=[
         "sticker_png",
         "page_asset",
         "exhibit_image",
     ])
 
+
 class UploadConfirmSerializer(serializers.Serializer):
     """アップロード完了報告（クライアント→サーバー）"""
     upload_session_id = serializers.UUIDField()
 
+
+class UploadIssueResponseSerializer(serializers.Serializer):
+    """アップロード開始レスポンス（サーバー→クライアント）"""
+    uploadUrl = serializers.URLField()
+    s3Key = serializers.CharField()
+    uploadSessionId = serializers.UUIDField()
+
+
+class UploadConfirmResponseSerializer(serializers.Serializer):
+    """アップロード完了確認レスポンス（サーバー→クライアント）"""
+    status = serializers.CharField()
+    uploadSessionId = serializers.UUIDField()
+    s3Key = serializers.CharField()
+    publicUrl = serializers.URLField()
+    
 # --- Sticker ---
 class StickerStyleSerializer(serializers.Serializer):
     outline = serializers.DictField()

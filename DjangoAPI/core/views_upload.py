@@ -11,14 +11,16 @@ from .models import UploadSession
 from .serializers import (
     UploadIssueSerializer,
     UploadConfirmSerializer,
+    UploadIssueResponseSerializer,
+    UploadConfirmResponseSerializer,
 )
-
 import boto3
 import uuid
 import os
 from urllib.parse import quote
 from botocore.config import Config
 
+from drf_spectacular.utils import extend_schema
 
 class UploadView(views.APIView):
     permission_classes = [AllowAny]
@@ -63,7 +65,14 @@ class UploadView(views.APIView):
             config=Config(signature_version="s3v4"),
             region_name=settings.AWS_S3_REGION_NAME,
         )
-
+    
+    @extend_schema(
+        request=UploadIssueSerializer,
+        responses={
+            200: UploadIssueResponseSerializer,
+        },
+        description="S3アップロード用のURL発行を行います。/api/uploads/issue/ に対して使用します。"
+    )
     def post(self, request, action=None, **kwargs):
         """
         POST /api/uploads/issue/   -> URL発行
@@ -117,11 +126,13 @@ class UploadView(views.APIView):
 
         # ここで返す uploadUrl は「アップロード専用」
         return Response(
-            {
-                "uploadUrl": presigned_upload_url,
-                "s3Key": key,
-                "uploadSessionId": str(session.id),
-            }
+            UploadIssueResponseSerializer(
+                {
+                    "uploadUrl": presigned_upload_url,
+                    "s3Key": key,
+                    "uploadSessionId": session.id,
+                }
+            ).data
         )
 
     def confirm_upload(self, request):
@@ -153,12 +164,13 @@ class UploadView(views.APIView):
 
         public_url = self._build_public_url(session.s3_key)
 
-        # ここで返す uploadUrl は「表示・保存に使う完全URL」
         return Response(
-            {
-                "status": "confirmed",
-                "uploadSessionId": str(session.id),
-                "s3Key": session.s3_key,
-                "uploadUrl": public_url,
-            }
+            UploadConfirmResponseSerializer(
+                {
+                    "status": "confirmed",
+                    "uploadSessionId": session.id,
+                    "s3Key": session.s3_key,
+                    "publicUrl": public_url,
+                }
+            ).data
         )

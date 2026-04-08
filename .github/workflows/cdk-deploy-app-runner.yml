@@ -5,7 +5,7 @@ on:
     branches: [develop] #production環境でmainブランチ
     paths:
       - ".github/workflows/cdk-deploy-app-runner.yml"
-      - "./DjangoAPI/*"
+      - 'DjangoAPI/**/*.py' # Python関連が変わった時だけ実行
   workflow_dispatch:
 
 
