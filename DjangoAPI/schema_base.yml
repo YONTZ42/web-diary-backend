@@ -1376,9 +1376,7 @@ paths:
   /api/uploads/{action}/:
     post:
       operationId: api_uploads_create
-      description: |-
-        POST /api/uploads/issue/   -> URL発行
-        POST /api/uploads/confirm/ -> 完了確認
+      description: S3アップロード用のURL発行を行います。/api/uploads/issue/ に対して使用します。
       parameters:
       - in: path
         name: action
@@ -1387,12 +1385,28 @@ paths:
         required: true
       tags:
       - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadIssue'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadIssue'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadIssue'
+        required: true
       security:
       - jwtAuth: []
       - {}
       responses:
         '200':
-          description: No response body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UploadIssueResponse'
+          description: ''
   /health:
     get:
       operationId: health_retrieve
@@ -2231,6 +2245,16 @@ components:
         plan:
           type: string
           maxLength: 50
+    PurposeEnum:
+      enum:
+      - sticker_png
+      - page_asset
+      - exhibit_image
+      type: string
+      description: |-
+        * `sticker_png` - sticker_png
+        * `page_asset` - page_asset
+        * `exhibit_image` - exhibit_image
     Schedule:
       type: object
       properties:
@@ -2402,6 +2426,36 @@ components:
       required:
       - access
       - refresh
+    UploadIssue:
+      type: object
+      description: アップロード開始要求（クライアント→サーバー）
+      properties:
+        filename:
+          type: string
+        mimeType:
+          type: string
+        purpose:
+          $ref: '#/components/schemas/PurposeEnum'
+      required:
+      - filename
+      - mimeType
+      - purpose
+    UploadIssueResponse:
+      type: object
+      description: アップロード開始レスポンス（サーバー→クライアント）
+      properties:
+        uploadUrl:
+          type: string
+          format: uri
+        s3Key:
+          type: string
+        uploadSessionId:
+          type: string
+          format: uuid
+      required:
+      - s3Key
+      - uploadSessionId
+      - uploadUrl
     User:
       type: object
       properties:

@@ -445,10 +445,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /**
-         * @description POST /api/uploads/issue/   -> URL発行
-         *     POST /api/uploads/confirm/ -> 完了確認
-         */
+        /** @description S3アップロード用のURL発行を行います。/api/uploads/issue/ に対して使用します。 */
         post: operations["api_uploads_create"];
         delete?: never;
         options?: never;
@@ -844,6 +841,13 @@ export interface components {
             readonly subscriptionStatus?: string;
             plan?: string;
         };
+        /**
+         * @description * `sticker_png` - sticker_png
+         *     * `page_asset` - page_asset
+         *     * `exhibit_image` - exhibit_image
+         * @enum {string}
+         */
+        PurposeEnum: "sticker_png" | "page_asset" | "exhibit_image";
         Schedule: {
             /** Format: uuid */
             readonly id: string;
@@ -915,6 +919,20 @@ export interface components {
         TokenRefresh: {
             readonly access: string;
             refresh: string;
+        };
+        /** @description アップロード開始要求（クライアント→サーバー） */
+        UploadIssue: {
+            filename: string;
+            mimeType: string;
+            purpose: components["schemas"]["PurposeEnum"];
+        };
+        /** @description アップロード開始レスポンス（サーバー→クライアント） */
+        UploadIssueResponse: {
+            /** Format: uri */
+            uploadUrl: string;
+            s3Key: string;
+            /** Format: uuid */
+            uploadSessionId: string;
         };
         User: {
             /** Format: uuid */
@@ -2385,14 +2403,21 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadIssue"];
+                "application/x-www-form-urlencoded": components["schemas"]["UploadIssue"];
+                "multipart/form-data": components["schemas"]["UploadIssue"];
+            };
+        };
         responses: {
-            /** @description No response body */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["UploadIssueResponse"];
+                };
             };
         };
     };
