@@ -1376,7 +1376,9 @@ paths:
   /api/uploads/{action}/:
     post:
       operationId: api_uploads_create
-      description: S3アップロード用のURL発行または完了確認を行います。
+      description: |-
+        POST /api/uploads/issue/   -> URL発行
+        POST /api/uploads/confirm/ -> 完了確認
       parameters:
       - in: path
         name: action
@@ -1385,28 +1387,12 @@ paths:
         required: true
       tags:
       - api
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UploadIssue'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/UploadIssue'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/UploadIssue'
-        required: true
       security:
       - jwtAuth: []
       - {}
       responses:
         '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UploadConfirm'
-          description: ''
+          description: No response body
   /health:
     get:
       operationId: health_retrieve
@@ -2245,16 +2231,6 @@ components:
         plan:
           type: string
           maxLength: 50
-    PurposeEnum:
-      enum:
-      - sticker_png
-      - page_asset
-      - exhibit_image
-      type: string
-      description: |-
-        * `sticker_png` - sticker_png
-        * `page_asset` - page_asset
-        * `exhibit_image` - exhibit_image
     Schedule:
       type: object
       properties:
@@ -2426,29 +2402,6 @@ components:
       required:
       - access
       - refresh
-    UploadConfirm:
-      type: object
-      description: アップロード完了報告（クライアント→サーバー）
-      properties:
-        uploadSessionId:
-          type: string
-          format: uuid
-      required:
-      - uploadSessionId
-    UploadIssue:
-      type: object
-      description: アップロード開始要求（クライアント→サーバー）
-      properties:
-        filename:
-          type: string
-        mimeType:
-          type: string
-        purpose:
-          $ref: '#/components/schemas/PurposeEnum'
-      required:
-      - filename
-      - mimeType
-      - purpose
     User:
       type: object
       properties:
