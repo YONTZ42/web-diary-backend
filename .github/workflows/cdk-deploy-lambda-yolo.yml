@@ -27,6 +27,7 @@ jobs:
       STAGE: ${{ vars.STAGE }}
       AWS_REGION: ${{ vars.AWS_REGION}}
       PROJECT_NAME: ${{ vars.PROJECT_NAME }}
+   
       
     steps:
       - uses: actions/checkout@v4
